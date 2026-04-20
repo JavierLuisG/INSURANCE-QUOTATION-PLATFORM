@@ -4223,8 +4223,6 @@ Para facilitar la auditoría, mantenimiento y comprensión de la lógica del sis
 **Estado**: Backlog
 
 ---
-## FT-010: Configuración y Gestión de Parámetros de Cálculo
-
 ### HU-155: Consumir Tarifas de Incendio
 **Descripción**:
 Como sistema,

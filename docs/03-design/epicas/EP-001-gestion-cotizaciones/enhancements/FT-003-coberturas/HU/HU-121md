@@ -1,0 +1,24 @@
+### HU-121: Configurar Parámetros Específicos de Cobertura
+**Descripción**:
+Como usuario,
+Quiero configurar parámetros específicos para cada cobertura seleccionada (e.g., sumas aseguradas, deducibles),
+Para ajustar con precisión el alcance y las condiciones de la protección.
+
+**Criterios de Aceptación**:
+- Dado que selecciono una cobertura que requiere parámetros, cuando la activo, entonces se habilitan los campos para configurar sus valores (e.g., suma asegurada, deducible).
+- Dado que ingreso valores en los parámetros de cobertura y guardo, entonces estos valores se persisten junto con la cobertura y la ubicación.
+- Dado que los parámetros tienen rangos de validación, cuando ingreso un valor fuera de rango, entonces el sistema me lo notifica con un mensaje de error.
+
+**Prioridad**: Media
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-120 (Seleccionar y Deseleccionar Coberturas), HU-148 (Validar Rangos de Sumas Aseguradas)
+
+**Componentes Técnicos**: Frontend (Campos de Entrada de Parámetros), Backend (API de Cotizaciones para persistencia de parámetros).
+
+**Notas de Implementación**: La interfaz debe mostrar claramente qué parámetros son configurables para cada cobertura.
+
+**Estado**: Backlog
+
+---

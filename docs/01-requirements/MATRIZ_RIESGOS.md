@@ -1,6 +1,4 @@
-
-
-## Matriz de Riesgos
+# Matriz de Riesgos
 
 | Descripción del Riesgo | Categoría | Probabilidad (1-5) | Impacto (1-5) | Nivel de Riesgo (P×I) | Plan de Mitigación / Contingencia |
 |---|---|---:|---:|---|---|

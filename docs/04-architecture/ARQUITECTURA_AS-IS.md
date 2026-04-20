@@ -1,4 +1,4 @@
-Aquí se presenta el análisis de componentes AS-IS a nivel C1 (Contexto) para el cotizador de seguros de daños, basado en la información proporcionada.
+# Arquitectura AS-IS
 
 ### [1]. Diagrama de Contexto AS-IS (C1)
 

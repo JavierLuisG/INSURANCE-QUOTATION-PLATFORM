@@ -1864,6 +1864,7 @@ Se debe considerar cómo el frontend gestiona los cambios no guardados del usuar
 
 **Estado**: Backlog
 
+---
 ## FT-015: Conectividad y Consumo de Catálogos Básicos (Suscriptores, Agentes, Giros)
 
 ### HU-068: Conectar a Servicio de Catálogos Básicos
@@ -2952,7 +2953,9 @@ Para asegurar que cubren los casos de negocio y las expectativas de calidad del 
 **Notas de Implementación**:
 Este es un paso de definición que impacta la implementación técnica.
 
-**Estado**: Backlog---
+**Estado**: Backlog
+
+---
 ## FT-022: Gestión de Caché y Estrategia de Actualización de Datos Maestros
 
 ### HU-104: Almacenar Datos Maestros en Caché
@@ -3097,6 +3100,8 @@ Para asegurar que cumple con los SLAs de tiempo de respuesta y optimizar su conf
 Las métricas deben ser accesibles y claras para identificar problemas rápidamente.
 
 **Estado**: Backlog
+
+---
 
 ## FT-001: Creación y Edición de Datos Generales de la Cotización
 

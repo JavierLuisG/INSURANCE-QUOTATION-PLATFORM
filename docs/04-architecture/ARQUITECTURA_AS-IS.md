@@ -1,348 +1,476 @@
-# Arquitectura AS-IS
+# Arquitectura Evolucionada (TO-BE) — Cotizador de Seguros de Daños
 
-### [1]. Diagrama de Contexto AS-IS (C1)
+---
+
+## [C1] Diagrama de Contexto Evolucionado
 
 **Descripción**:
-El sistema actual es un "Cotizador de Seguros de Daños", una aplicación integral diseñada para gestionar el ciclo de vida completo de las cotizaciones de seguros de daños. Su propósito principal es permitir a los usuarios, tanto finales como agentes de seguros, capturar información de cotizaciones, detallar ubicaciones de riesgo, configurar coberturas y calcular primas netas y comerciales de manera eficiente. La solución se compone de una interfaz web (SPA) y un backend principal.
+Este diagrama presenta la arquitectura objetivo del Cotizador de Seguros de Daños, mostrando cómo el sistema evoluciona para abordar los desafíos de negocio y técnicos identificados. Se conservan los roles de usuario principales y el sistema externo `Plataforma Core OHS`, pero la forma en que el sistema interactúa con ellos evoluciona significativamente.
 
-Los elementos principales de este contexto incluyen a dos actores clave: el "Usuario Final/Asegurado", que interactúa directamente con la interfaz web para generar y consultar sus cotizaciones, y el "Agente de Seguros", quien utiliza el sistema para gestionar las cotizaciones de sus clientes. El sistema se apoya en un único sistema externo crítico, "Plataforma-core-ohs", para la obtención de datos maestros y funcionalidades esenciales para el cálculo de primas.
+El `Cotizador Web (Frontend SPA)` y el `Backend de Cotizaciones` son los componentes clave que se refactorizan y mejoran. Se introduce un `API Gateway de Integración` para centralizar y robustecer la comunicación con `Plataforma Core OHS` tanto en producción (servicio real) como en desarrollo/pruebas (simulador). Un `Servicio de Caché` y un `Sistema de Observabilidad` completan la arquitectura.
 
-Un hallazgo clave en esta arquitectura AS-IS es la alta dependencia del sistema central en "Plataforma-core-ohs". Este servicio externo es la fuente de verdad para catálogos, tarifas y la generación de folios, lo que lo convierte en un punto crítico de fallo. Cualquier inestabilidad o latencia en "Plataforma-core-ohs" puede impactar severamente el rendimiento y la disponibilidad de funcionalidades esenciales del cotizador, como la creación de folios, la validación de códigos postales y el cálculo de primas, como se identifica en la matriz de riesgos.
+> **Nota sobre el diagrama**: La sintaxis `C4Context` requiere la librería C4-PlantUML o el soporte C4 de Mermaid. Si el entorno no la soporta, los diagramas pueden renderizarse como flowcharts equivalentes.
 
 ```mermaid
 C4Context
-    title Cotizador de Seguros de Daños - Contexto AS-IS
+    title Cotizador de Seguros de Daños — Arquitectura Objetivo (C1)
 
-    Person(usuarioFinal, "Usuario Final/Asegurado", "Cliente que interactúa con la SPA para crear y consultar cotizaciones.")
-    Person(agenteSeguros, "Agente de Seguros", "Profesional que usa el sistema para gestionar cotizaciones de clientes.")
+    Person(usuario, "Usuario Final / Agente de Seguros", "Gestiona cotizaciones de daños a través de la interfaz web.")
+    Person(adminParams, "Administrador de Parámetros", "Gestiona catálogos y tarifas de referencia del sistema.")
 
-    System(cotizadorSeguros, "Cotizador de Seguros de Daños", "Sistema integral para la captura, cálculo y gestión de cotizaciones de seguros de daños, compuesto por una SPA y un backend.")
+    System(frontend, "Cotizador Web (Frontend SPA)", "Interfaz de usuario para la creación y gestión de cotizaciones (React 18). Rutas: /cotizador, /quotes/{folio}/general-info, /quotes/{folio}/locations, /quotes/{folio}/technical-info, /quotes/{folio}/terms-and-conditions.")
+    System(backend, "Backend de Cotizaciones", "Servicio principal de lógica de negocio y persistencia (Java 17 Spring Boot). Incluye motor de cálculo de primas (14 componentes), versionado optimista y gestión del ciclo de vida.")
+    System(dbCotizaciones, "Base de Datos de Cotizaciones", "Almacena cotizaciones como agregado principal, ubicaciones, resultados de cálculo y snapshots de trazabilidad (MongoDB). Cifrado AES-256 en reposo.")
 
-    System_Ext(plataformaCoreOHS, "Plataforma-core-ohs", "Servicio externo (o simulado) que provee catálogos, tarifas y generación de folios.")
+    System_Ext(coreOhs, "Plataforma Core OHS (Externo)", "Servicio externo de catálogos, tarifas y generación de folios. Endpoints: GET /v1/subscribers, /v1/agents, /v1/business-lines, /v1/zip-codes/{zipCode}, POST /v1/zip-codes/validate, GET /v1/folios, /v1/catalogs/risk-classification, /v1/catalogs/guarantees, GET|PUT /v1/tariffs/...")
 
-    Rel(usuarioFinal, cotizadorSeguros, "Interactúa con", "HTTPS/443")
-    Rel(agenteSeguros, cotizadorSeguros, "Gestiona cotizaciones", "HTTPS/443")
-    Rel(cotizadorSeguros, plataformaCoreOHS, "Consulta datos de referencia", "REST/HTTPS")
+    System(apiGateway, "API Gateway de Integración", "Centraliza el enrutamiento, caching y resiliencia (Circuit Breaker + Retry) para servicios externos. Redirige a Plataforma Core OHS (producción) o al Simulador (dev/test).")
+    System(cache, "Servicio de Caché", "Caché de alto rendimiento para datos maestros y tarifas. TTL configurable: catálogos 12-24h, tarifas 1-6h.")
+    System(mockCoreOhs, "Simulador de Plataforma Core OHS", "Mock server para desarrollo y pruebas (Node.js/Express + MongoDB + Flyway). Soporta respuestas dinámicas y escenarios de error controlados.")
+    System(monitoring, "Sistema de Observabilidad", "Recopila logs, métricas y trazas para monitoreo y diagnóstico (ELK Stack / Prometheus+Grafana).")
+
+    Rel(usuario, frontend, "Usa", "HTTPS/443")
+    Rel(adminParams, frontend, "Gestiona parámetros y configuración", "HTTPS/443")
+
+    Rel(frontend, backend, "Consume API REST", "HTTPS/JSON")
+
+    Rel(backend, dbCotizaciones, "Persiste y consulta datos de cotización", "TCP/27017")
+    Rel(backend, apiGateway, "Consulta catálogos, tarifas y folios", "HTTPS/JSON")
+    Rel(backend, monitoring, "Envía logs y métricas", "TCP/5044")
+
+    Rel(apiGateway, cache, "Lee y escribe datos maestros en caché", "Redis Protocol")
+    Rel(apiGateway, coreOhs, "Consume API REST (producción)", "HTTPS/JSON")
+    Rel(apiGateway, mockCoreOhs, "Consume API REST (dev/test)", "HTTPS/JSON")
+
+    Rel(mockCoreOhs, dbCotizaciones, "Persiste datos de prueba (instancia separada)", "TCP/27017")
 ```
 
-**Análisis de Componentes**:
-
-*   **Cotizador de Seguros de Daños**:
-    *   **Descripción técnica**: Es el sistema principal del proyecto, una aplicación monolítica que encapsula tanto una interfaz de usuario web (SPA) para la interacción directa del usuario, como un backend robusto que contiene la lógica de negocio central, la gestión del ciclo de vida de las cotizaciones, el motor de cálculo de primas y la capa de persistencia. La persistencia se gestiona internamente, utilizando colecciones de datos como `cotizaciones_danos`, `parametros_calculo`, `tarifas_incendio`, `tarifas_cat`, `tarifa_fhm`, `factores_equipo_electronico`, `catalogo_cp_zonas`, entre otras, preferentemente en MongoDB.
-    *   **Propósito**: Su objetivo es proporcionar una plataforma integral y eficiente para la creación, edición, cálculo y visualización de cotizaciones de seguros de daños, automatizando gran parte del proceso y asegurando la consistencia de los datos.
-    *   **Observaciones**: El sistema es responsable de aplicar reglas de negocio complejas para el cálculo de primas y validaciones, así como de implementar mecanismos de versionado optimista y gestión de concurrencia. La calidad de la experiencia de usuario (RNF-001, RNF-009) y el rendimiento de las operaciones CRUD y de cálculo (RNF-002, RNF-003) son requerimientos no funcionales críticos para este componente.
-
-*   **Plataforma-core-ohs**:
-    *   **Descripción técnica**: Es un servicio externo que se expone a través de una API REST. Actúa como el proveedor central de datos maestros y funcionalidades esenciales para el "Cotizador de Seguros de Daños". Provee catálogos de suscriptores, agentes, giros, información de códigos postales y zonas de riesgo, catálogos de clasificación de riesgo y garantías, así como todas las tarifas y factores técnicos necesarios para el cálculo de primas (incendio, CAT, FHM, equipo electrónico). También es responsable de la generación de folios alfanuméricos únicos.
-    *   **Propósito**: Suministrar información de referencia actualizada y consistente, así como servicios de apoyo para el funcionamiento del cotizador, evitando la duplicación de datos y lógica en el sistema principal.
-    *   **Observaciones**: La dependencia de este servicio es "Crítica" (P=4, I=5) debido a su rol fundamental en la mayoría de las funcionalidades del cotizador. El sistema contempla la necesidad de un "mock server" robusto y versionado (FT-020) para el desarrollo y pruebas, lo que subraya la importancia de definir y gestionar su contrato de API. La resiliencia ante fallos de este servicio es un RNF clave (RNF-017).
-
-**Análisis de Relaciones clave**:
-
-*   **`Usuario Final/Asegurado` y `Agente de Seguros` con `Cotizador de Seguros de Daños`**:
-    *   **Flujo**: Ambos actores interactúan directamente con la interfaz web del `Cotizador de Seguros de Daños` para crear, consultar, editar y calcular cotizaciones. El `Usuario Final` busca obtener su propia cotización, mientras que el `Agente de Seguros` gestiona múltiples cotizaciones para sus clientes.
-    *   **Protocolo**: La comunicación se realiza a través del protocolo `HTTPS/443`, garantizando la seguridad en el tránsito de datos sensibles (RNF-005).
-    *   **Riesgos**: Los riesgos asociados a esta relación se centran en la experiencia de usuario y el rendimiento. El RNF-001 (Tiempo de Respuesta de Interfaz de Usuario) y RNF-009 (Facilidad de Uso) son cruciales para la adopción y satisfacción. Un rendimiento deficiente o una interfaz compleja pueden llevar a la frustración y al abandono del sistema. La seguridad (RNF-007, Autenticación y Autorización) es vital para proteger el acceso a los datos de cotización y asegurados.
-
-*   **`Cotizador de Seguros de Daños` con `Plataforma-core-ohs`**:
-    *   **Flujo**: El `Cotizador de Seguros de Daños` realiza llamadas al servicio `Plataforma-core-ohs` para obtener datos de catálogos (suscriptores, agentes, giros, códigos postales, riesgos, garantías), tarifas y factores técnicos necesarios para el cálculo de primas, y para generar nuevos folios de cotización.
-    *   **Protocolo**: La integración se realiza mediante una `API REST` sobre `HTTPS`, asegurando la comunicación cifrada (RNF-005).
-    *   **Riesgos**: Esta relación es la principal fuente de riesgo externo. El "Fallo o inestabilidad en la integración con el servicio `Plataforma-core-ohs`" (Matriz de Riesgos - Crítico) es una preocupación mayor. Si este servicio no está disponible o es inestable, el cotizador no podrá generar nuevos folios, validar códigos postales o realizar cálculos de primas, lo que afectaría directamente la operatividad del sistema. El RNF-017 (Resiliencia ante Fallos del Servicio de Referencia) aborda esto, requiriendo mecanismos como reintentos y circuit breakers para mitigar el impacto. Además, la "Inconsistencia o errores en los datos de catálogos y tarifas" (Matriz de Riesgos - Medio) podría llevar a cálculos incorrectos si no se implementan validaciones robustas en la capa de integración.
+**Análisis de Evolución de Componentes (C1):**
 
 ---
 
-Aquí se presenta el análisis de componentes AS-IS a nivel C2 (Contenedores) para el cotizador de seguros de daños, basado en la información proporcionada.
+### Usuario Final / Agente de Seguros
+- **Estrategia**: ✅ Keep
+- **AS-IS**: Usuario que interactúa con el sistema para cotizar manualmente.
+- **Cambio TO-BE**: Mismo rol, pero con una experiencia mejorada: interfaz más intuitiva, cálculo en <3s, alertas de ubicaciones incompletas sin bloquear el proceso completo (RFR-008), y gestión visual del ciclo de vida de la cotización.
+- **Justificación**: Actor principal del negocio, su eficiencia impacta directamente los KPIs de EP-001 (cotización < 10 min, SUS > 80).
+- **Impacto**: Mayor satisfacción, reducción del tiempo de cotización, menor tasa de error en captura de datos (<5%).
 
-### [1]. Diagrama de Contenedores AS-IS (C2)
+---
+
+### Administrador de Parámetros
+- **Estrategia**: ✅ Keep
+- **AS-IS**: Gestión manual de catálogos y tarifas (carga de archivos o ingreso directo).
+- **Cambio TO-BE**: Interactúa con el frontend (SPA) y el backend para gestionar catálogos y tarifas, que se integran con `Plataforma Core OHS` a través del API Gateway y se sirven desde caché.
+- **Justificación**: Rol clave para la configuración del negocio (EP-003: reducir esfuerzo manual en gestión de datos maestros).
+- **Impacto**: Eliminación de procesos manuales, datos más frescos y consistentes, menor esfuerzo operativo.
+
+---
+
+### Cotizador Web (Frontend SPA) — `cotizador-danos-web`
+- **Estrategia**: 🔄 Evolve
+- **AS-IS**: Interfaz React básica para captura de cotizaciones.
+- **Cambio TO-BE**: Refactorizado a React 18 con:
+  - Gestión dinámica de hasta 10 ubicaciones con campos completos del dominio (RFR-002, HU-006, HU-007 del bloque 1; HU-115, HU-116, HU-118 del bloque 2).
+  - Layout de ubicaciones configurable (`configuracionLayout`) — nueva ruta `/quotes/{folio}/locations` (RFR-009, HU-114).
+  - Cálculo con alerta por ubicaciones incompletas sin bloqueo total (RFR-008, HU-015 bloque 1; HU-125 bloque 2).
+  - Vista de desglose técnico por los 14 componentes — ruta `/quotes/{folio}/technical-info` (HU-057 bloque 1; HU-134 bloque 2).
+  - Pantalla de términos y condiciones — ruta `/quotes/{folio}/terms-and-conditions` (HU-143 bloque 2).
+  - Gestión visual del ciclo de vida: estados Borrador → Calculada → Aprobada/Rechazada → Emitida (HU-028 bloque 1; HU-142 bloque 2).
+  - Manejo de conflictos de concurrencia con notificación y recarga (QAS-006).
+- **Justificación**: Mejorar Capacidad de Interacción (QA-006) y Rendimiento UI (RNF-001).
+- **Impacto**: Interfaz más intuitiva y rápida, reducción de errores en captura, flujo de cotización completo en < 10 min.
+
+---
+
+### Backend de Cotizaciones — `plataformas-danos-back`
+- **Estrategia**: 🔄 Evolve
+- **AS-IS**: Backend Java Spring Boot identificado como "God Component" con toda la lógica centralizada.
+- **Cambio TO-BE**: Refactorizado en Java 17 Spring Boot con responsabilidades claramente separadas en módulos internos (o microservicios en una evolución futura):
+  - Motor de cálculo modular para los 14 componentes técnicos (RFR-003, CON-001, HU-041 bloque 1; HU-175 bloque 2).
+  - Versionado optimista con campo `version` incremental (RFR-006, CON-003, HU-035, HU-062, HU-064 bloque 1; HU-149, HU-180, HU-182 bloque 2).
+  - Gestión del ciclo de vida con máquina de estados (RFR-007, HU-024 a HU-028 bloque 1; HU-135 a HU-142 bloque 2).
+  - Exclusión selectiva de ubicaciones incompletas sin bloqueo total del cálculo (RFR-008, HU-169 bloque 2).
+  - Snapshot de trazabilidad del cálculo embebido en el documento de cotización (RFR-010, HU-063 bloque 1; HU-179 bloque 2).
+  - Cifrado AES-256 en datos sensibles, JWT + RBAC para autenticación y autorización (RNF-005, RNF-006, RNF-007).
+  - Envío de logs y métricas al Sistema de Observabilidad (CON-006).
+- **Justificación**: Resolver el anti-patrón "God Component", mejorar Mantenibilidad (QA-004), Rendimiento (RNF-002, RNF-003) y Fiabilidad (QA-003).
+- **Impacto**: Mayor estabilidad, escalabilidad, cálculos precisos para los 14 componentes, gestión robusta de concurrencia y trazabilidad completa.
+
+---
+
+### Base de Datos de Cotizaciones — `MongoDB`
+- **Estrategia**: 🔄 Evolve
+- **AS-IS**: MongoDB para persistencia básica de cotizaciones.
+- **Cambio TO-BE**:
+  - Esquema de agregado principal con ubicaciones embebidas (CON-004) que incluyen todos los campos del dominio: `estadoValidacion` (COMPLETA / INCOMPLETA / INACTIVA), `alertasBloqueantes`, `zonaCatastrofica`, `giro.claveIncendio`, `garantías[]`, etc.
+  - Campo `version` incremental para versionado optimista (CON-003).
+  - Snapshot de trazabilidad embebido con parámetros de entrada, identificadores de tarifas y valores por componente (RFR-010).
+  - Cifrado AES-256 en reposo para datos sensibles de asegurados y ubicaciones (CON-005, RNF-006).
+  - Las ubicaciones **nunca se eliminan físicamente**; se marcan con `estadoValidacion: INACTIVA` (RFR-002, CON-007).
+- **Justificación**: Cumplir restricción MongoDB (RT-001), mejorar Fiabilidad (QAS-006) y Seguridad (QAS-004).
+- **Impacto**: Integridad y trazabilidad garantizadas, historial preservado, datos sensibles protegidos.
+
+---
+
+### Plataforma Core OHS (Externo)
+- **Estrategia**: ✅ Keep (el sistema externo no cambia; cambia la capa de integración)
+- **AS-IS**: Dependencia crítica directa para catálogos, tarifas y folios.
+- **Cambio TO-BE**: La interacción se realiza a través del API Gateway de Integración, que añade resiliencia (Circuit Breaker, Retry con backoff exponencial), caching con TTL y orquestación. Esto elimina los anti-patrones "Chatty Communication" y "Temporal Coupling".
+- **Justificación**: Dependencia externa fuera de nuestro control. La evolución se centra en la capa de integración propia.
+- **Impacto**: El fallo o latencia de `Plataforma Core OHS` ya no paraliza el cotizador; el sistema degrada funcionalmente con datos en caché y mensajes amigables.
+
+---
+
+### API Gateway de Integración
+- **Estrategia**: 🆕 New
+- **AS-IS**: No existía — el backend llamaba directamente al servicio externo.
+- **Cambio TO-BE**: Spring Cloud Gateway que centraliza: enrutamiento inteligente (producción → Core OHS real; dev/test → Simulador), Circuit Breaker (Resilience4j), Retry con backoff, lectura/escritura en caché Redis, y envío de métricas al sistema de observabilidad (OPT-004, CON-002).
+- **Justificación**: Resolver anti-patrón "God Component" en el backend y problemas de latencia/resiliencia (PAC-002, OPT-004, IMP-002).
+- **Impacto**: Mayor resiliencia, mejor rendimiento en integración, backend más limpio y mantenible.
+
+---
+
+### Servicio de Caché
+- **Estrategia**: 🆕 New
+- **AS-IS**: Sin caché centralizada para datos externos.
+- **Cambio TO-BE**: Caffeine (caché local en memoria) en primera versión, preparada para escalar a Redis Cluster si se requiere distribución. TTL diferenciado: catálogos estáticos 12-24h, tarifas/factores 1-6h. Desalojo LRU con tamaño limitado. Sin invalidación por eventos en primera versión (OPT-001, CON-002, PAC-006, BC-006).
+- **Justificación**: Reducir latencia y carga sobre `Plataforma Core OHS` (anti-patrón "Chatty Communication").
+- **Impacto**: Reducción de latencia en consulta de datos maestros en 50-90%, mayor throughput, mayor disponibilidad ante fallos del servicio externo.
+
+---
+
+### Simulador de Plataforma Core OHS
+- **Estrategia**: 🆕 New
+- **AS-IS**: Simulación ad-hoc o ausente.
+- **Cambio TO-BE**: Servicio Node.js/Express dedicado y robusto que:
+  - Replica fielmente los contratos REST de `Plataforma Core OHS` (todos los endpoints del reto).
+  - Usa MongoDB poblada con migraciones Flyway (RT-009, RT-010, RT-011).
+  - Soporta respuestas dinámicas y escenarios de error controlados para pruebas (BC-003, OOS-002).
+  - El API Gateway lo consume automáticamente en entornos dev/test.
+- **Justificación**: Acelerar el desarrollo y garantizar pruebas consistentes e independientes del servicio real (EP-003, BC-003).
+- **Impacto**: Mayor agilidad en desarrollo, pruebas fiables, cero dependencia del servicio externo real en entornos no productivos.
+
+---
+
+### Sistema de Observabilidad
+- **Estrategia**: 🆕 New
+- **AS-IS**: Sin monitoreo centralizado.
+- **Cambio TO-BE**: ELK Stack (Elasticsearch, Logstash, Kibana) o Prometheus + Grafana para logs estructurados, métricas de rendimiento y trazas correlacionadas con IDs de correlación por solicitud (CON-006).
+- **Justificación**: Mejorar Mantenibilidad (QA-004) y facilitar diagnóstico en producción. Soportar la trazabilidad del cálculo exigida por el reto (PAC-007, RFR-010).
+- **Impacto**: Detección temprana de problemas, diagnóstico eficiente, visibilidad del rendimiento, soporte para auditorías.
+
+---
+
+**Brechas del AS-IS cerradas por esta arquitectura:**
+
+| Brecha | Solución TO-BE |
+|---|---|
+| Gestión manual de datos maestros (catálogos, tarifas) | API Gateway + Caché con TTL + Simulador robusto |
+| Inconsistencias y errores en cálculos de primas | Motor de cálculo modular con 14 componentes, >90% cobertura unitaria |
+| Cotizaciones lentas (>10 min, cálculo >3s) | Caché de tarifas, motor optimizado, React 18 optimizado |
+| Pérdida de datos en ediciones concurrentes | Versionado optimista con campo `version`, detección de conflicto y recarga |
+| Falta de trazabilidad y auditabilidad | Snapshot de trazabilidad embebido + Sistema de Observabilidad |
+| Fallo del sistema Core bloquea todo el cotizador | Circuit Breaker + Retry + Caché de fallback + funcionalidad degradada |
+| "God Component" en el backend | Módulos especializados: motor de cálculo, generación de folios, gestión de estados |
+| Sin comportamiento definido para ubicaciones incompletas | RFR-008: exclusión individual sin bloqueo del cálculo total |
+
+---
+
+## [C2] Diagrama de Contenedores Evolucionados
 
 **Descripción**:
-El diagrama de Contenedores AS-IS descompone el "Cotizador de Seguros de Daños" en sus principales componentes internos: una aplicación web (Frontend), un servicio de backend (Backend API), y una base de datos central. Además, se incluye un "Mock Server" con su propia base de datos, vital para el desarrollo y las pruebas, dada la dependencia del sistema de un servicio externo (`Plataforma-core-ohs`).
+Este diagrama detalla la arquitectura TO-BE descomponiendo los sistemas en sus contenedores individuales con tecnologías específicas. El `plataformas-danos-back` evoluciona hacia módulos especializados dentro de una arquitectura de backend con responsabilidades bien delimitadas.
 
-El "Web Cotizador" sirve como la interfaz de usuario principal, permitiendo a los usuarios interactuar con el sistema para gestionar cotizaciones. El "Backend Cotizador" centraliza la lógica de negocio, el motor de cálculo de primas, las validaciones y la persistencia de datos en la "Base de Datos de Cotizaciones". La interconexión con el servicio externo `Plataforma-core-ohs` es manejada por el backend, el cual, en entornos de desarrollo y pruebas, se comunica con el "Mock Plataforma-core-ohs" para simular las respuestas y dependencias externas.
-
-Las limitaciones clave radican en la complejidad del motor de cálculo y la gestión de la consistencia de datos con versionado optimista, así como la resiliencia ante la posible inestabilidad del servicio externo `Plataforma-core-ohs`. La existencia de un mock server con su propia base de datos subraya la necesidad de aislar y controlar la dependencia externa durante el ciclo de desarrollo.
+> **Decisión de implementación**: Para el alcance del reto técnico, los módulos de backend (Auth, Cotización, Folio, Motor de Cálculo) pueden implementarse como **módulos dentro de un único servicio Spring Boot** (monolito modular) o como microservicios independientes. La arquitectura está diseñada para soportar ambos enfoques.
 
 ```mermaid
 C4Container
-    title Cotizador de Seguros de Daños - Contenedores AS-IS
+    title Cotizador de Seguros de Daños — Contenedores Evolucionados (C2)
 
-    Person(usuarioFinal, "Usuario Final/Asegurado", "Cliente que interactúa con la SPA para crear y consultar cotizaciones.")
-    Person(agenteSeguros, "Agente de Seguros", "Profesional que usa el sistema para gestionar cotizaciones de clientes.")
+    Person(usuario, "Usuario Final / Agente de Seguros", "Gestiona cotizaciones de daños.")
+    Person(adminParams, "Administrador de Parámetros", "Gestiona catálogos y tarifas.")
 
-    System_Ext(plataformaCoreOHS, "Plataforma-core-ohs", "Servicio externo que provee catálogos, tarifas y generación de folios.")
+    System_Ext(coreOhs, "Plataforma Core OHS", "Servicio externo de catálogos, tarifas y folios.")
 
-    System_Boundary(sistemaCotizador, "Sistema Cotizador de Daños") {
-        Container(webCotizador, "Web Cotizador", "React 18", "Frontend SPA para la interacción del usuario (captura, visualización, cálculo).")
-        Container(backendCotizador, "Backend Cotizador", "Java 17 Spring Boot", "Lógica de negocio, validaciones, motor de cálculo de primas y gestión de persistencia.")
-        ContainerDb(dbCotizaciones, "Base de Datos de Cotizaciones", "MongoDB", "Almacena datos transaccionales de cotizaciones, ubicaciones, coberturas y resultados de cálculo.")
-        Container(mockPlataformaCoreOHS, "Mock Plataforma-core-ohs", "Node.js/Express", "Simula el servicio Plataforma-core-ohs para desarrollo y pruebas (catálogos, tarifas, folios).")
-        ContainerDb(dbMockOHS, "Base de Datos del Mock OHS", "MongoDB", "Almacena datos de prueba consistentes y versionados para el Mock Plataforma-core-ohs.")
+    System_Boundary(cotizadorSystem, "Sistema Cotizador de Seguros de Daños — TO-BE") {
+        Container(spa, "Cotizador Web SPA", "React 18", "Interfaz de usuario. Rutas: /cotizador, /quotes/{folio}/general-info, /quotes/{folio}/locations, /quotes/{folio}/technical-info, /quotes/{folio}/terms-and-conditions.")
+
+        System_Boundary(backendServices, "plataformas-danos-back (Módulos de Backend)") {
+            Container(authSvc, "Módulo de Autenticación", "Java 17 Spring Boot", "Gestiona usuarios internos, autenticación (usuario/contraseña) y autorización RBAC (JWT). Roles: Agente, Asegurado.")
+            Container(cotizacionSvc, "Módulo de Cotización", "Java 17 Spring Boot", "Gestiona ciclo de vida, datos generales, layout de ubicaciones, coberturas y estados. Implementa versionado optimista. Endpoints principales del reto.")
+            Container(folioSvc, "Módulo de Folios", "Java 17 Spring Boot", "Genera folios alfanuméricos únicos e idempotentes (COT-AAAA-NNNNNN). Implementa reintentos con backoff y manejo de concurrencia.")
+            Container(calcEngineSvc, "Motor de Cálculo de Primas", "Java 17 Spring Boot", "Calcula prima neta/comercial aplicando los 14 componentes técnicos activos por cada ubicación calculable. Excluye ubicaciones incompletas con alertas sin bloquear el total. Persiste snapshot de trazabilidad.")
+        }
+
+        ContainerDb(cotizacionDb, "Base de Datos de Cotizaciones", "MongoDB", "Cotizaciones como agregado principal con ubicaciones embebidas (estadoValidacion, alertasBloqueantes, zonaCatastrofica), resultados financieros, snapshots de trazabilidad y datos de autenticación. Cifrado AES-256.")
+
+        System_Boundary(integrationLayer, "Capa de Integración y Caché") {
+            Container(apiGateway, "API Gateway de Integración", "Spring Cloud Gateway", "Enrutamiento, Circuit Breaker (Resilience4j), Retry con backoff exponencial, lectura/escritura en caché. Redirige a Core OHS real (producción) o Simulador (dev/test).")
+            Container(cacheSvc, "Servicio de Caché", "Caffeine / Redis", "Caché de datos maestros con TTL configurable. Catálogos: 12-24h. Tarifas/factores: 1-6h. Desalojo LRU.")
+        }
+
+        Container(elkStack, "Sistema de Observabilidad", "ELK Stack / Prometheus+Grafana", "Logs estructurados, métricas de rendimiento y trazas correlacionadas de todos los módulos.")
     }
 
-    Rel(usuarioFinal, webCotizador, "Usa la interfaz", "HTTPS/443")
-    Rel(agenteSeguros, webCotizador, "Gestiona cotizaciones mediante", "HTTPS/443")
-    Rel(webCotizador, backendCotizador, "Llama a la API REST", "REST/HTTPS")
-    Rel(backendCotizador, dbCotizaciones, "Persiste y consulta datos", "NoSQL/TCP")
-    Rel(backendCotizador, plataformaCoreOHS, "Consulta catálogos y tarifas (Producción)", "REST/HTTPS")
-    Rel(backendCotizador, mockPlataformaCoreOHS, "Consulta catálogos y tarifas (Desarrollo/Test)", "REST/HTTP")
-    Rel(mockPlataformaCoreOHS, dbMockOHS, "Almacena y consulta datos de prueba", "NoSQL/TCP")
+    System_Boundary(devTestEnv, "Entorno de Desarrollo y Pruebas") {
+        Container(mockCoreOhs, "Simulador de Plataforma Core OHS", "Node.js Express", "Mock server robusto. Replica todos los endpoints del servicio externo. Soporta escenarios de error controlados.")
+        ContainerDb(mockDb, "Base de Datos del Simulador", "MongoDB + Flyway", "Datos de referencia versionados para el Simulador (catálogos, tarifas, CPs, garantías).")
+    }
+
+    Rel(usuario, spa, "Usa", "HTTPS/443")
+    Rel(adminParams, spa, "Gestiona parámetros via UI", "HTTPS/443")
+
+    Rel(spa, authSvc, "Autentica y obtiene JWT", "HTTPS/443")
+    Rel(spa, cotizacionSvc, "CRUD cotizaciones, ubicaciones, coberturas, estados, layout", "HTTPS/443")
+
+    Rel(authSvc, cotizacionDb, "R/W usuarios y roles", "MongoDB/27017")
+    Rel(authSvc, elkStack, "Envía logs/métricas", "TCP/5044")
+
+    Rel(cotizacionSvc, cotizacionDb, "R/W cotizaciones y ubicaciones (agregado principal)", "MongoDB/27017")
+    Rel(cotizacionSvc, folioSvc, "Solicita generación de folio idempotente", "HTTP interno")
+    Rel(cotizacionSvc, calcEngineSvc, "Invoca cálculo de prima (POST /calculate)", "HTTP interno")
+    Rel(cotizacionSvc, apiGateway, "Consulta catálogos y validación de CP", "HTTPS/443")
+    Rel(cotizacionSvc, elkStack, "Envía logs/métricas", "TCP/5044")
+
+    Rel(folioSvc, cotizacionDb, "R/W secuencia de folios (control de concurrencia)", "MongoDB/27017")
+    Rel(folioSvc, elkStack, "Envía logs/métricas", "TCP/5044")
+
+    Rel(calcEngineSvc, cotizacionDb, "Lee cotización, persiste resultados y snapshot atómicamente", "MongoDB/27017")
+    Rel(calcEngineSvc, apiGateway, "Consulta tarifas y factores técnicos (14 componentes)", "HTTPS/443")
+    Rel(calcEngineSvc, elkStack, "Envía logs/métricas", "TCP/5044")
+
+    Rel(apiGateway, cacheSvc, "Lee/escribe catálogos y tarifas con TTL", "Caffeine/Redis")
+    Rel(apiGateway, coreOhs, "Consume API REST (producción)", "HTTPS/443")
+    Rel(apiGateway, mockCoreOhs, "Consume API REST (dev/test)", "HTTPS/443")
+    Rel(apiGateway, elkStack, "Envía logs/métricas", "TCP/5044")
+
+    Rel(mockCoreOhs, mockDb, "R/W datos de prueba versionados con Flyway", "MongoDB/27017")
 ```
 
-**Análisis de Componentes**:
-
-*   **Web Cotizador**:
-    *   **Descripción técnica**: Es una Single Page Application (SPA) implementada con React 18. Se encarga de la presentación de la interfaz de usuario, la captura de datos de cotizaciones, la visualización de ubicaciones de riesgo, la configuración de coberturas y la presentación de los resultados del cálculo de primas.
-    *   **Propósito**: Proporcionar una experiencia de usuario fluida y eficiente para la creación y gestión de cotizaciones de daños, cumpliendo con los RNF-001 (Tiempo de Respuesta de Interfaz de Usuario) y RNF-009 (Facilidad de Uso).
-    *   **Observaciones**: Actúa como el punto de entrada para los usuarios (`Usuario Final/Asegurado` y `Agente de Seguros`). Debe manejar validaciones de entrada básicas y mostrar alertas por datos incompletos o inválidos de forma interactiva (HU-118). La compatibilidad con navegadores (RNF-013) es un requisito clave.
-
-*   **Backend Cotizador**:
-    *   **Descripción técnica**: Un servicio de backend desarrollado con Java 17 y Spring Boot. Expone una API REST para ser consumida por el `Web Cotizador`. Contiene la lógica de negocio central, incluyendo la gestión del ciclo de vida de las cotizaciones, el motor de cálculo de primas, el motor de validación de reglas de negocio, y la capa de persistencia con control de concurrencia optimista.
-    *   **Propósito**: Orquestar el proceso de cotización, aplicar reglas de negocio complejas, realizar cálculos financieros precisos (RNF-015), gestionar la persistencia de datos (RNF-002) y garantizar la integridad de la información (RNF-014). También es responsable de la integración con `Plataforma-core-ohs` (RNF-017).
-    *   **Observaciones**: Este componente es el corazón del sistema, donde se implementan la mayoría de las funcionalidades críticas. La complejidad y la precisión de la lógica de cálculo (RNF-003, RNF-015) son riesgos clave. Se requiere una alta cobertura de pruebas (RNF-010, RNF-011) y monitoreo de errores (RNF-018).
-
-*   **Base de Datos de Cotizaciones**:
-    *   **Descripción técnica**: Una base de datos MongoDB. Almacena todas las cotizaciones de daños, incluyendo sus datos generales, múltiples ubicaciones de riesgo, configuraciones de coberturas, resultados financieros (prima neta, comercial, desglose por ubicación) y metadatos como la versión y la fecha de última actualización. También guarda parámetros de cálculo y tarifas internas si el backend las cachea o persiste.
-    *   **Propósito**: Proporcionar persistencia robusta y escalable para los datos transaccionales del cotizador, soportando el versionado optimista (HU-147) y la atomicidad en la persistencia del cálculo (HU-171).
-    *   **Observaciones**: La integridad de los datos (RNF-014) y el cifrado de datos sensibles en reposo (RNF-006) son requisitos de seguridad críticos. El esquema de datos debe ser diseñado para soportar la gestión de hasta 10 ubicaciones por cotización y la trazabilidad de los resultados del cálculo (HU-173).
-
-*   **Mock Plataforma-core-ohs**:
-    *   **Descripción técnica**: Un mock server, posiblemente implementado con Node.js/Express o un framework similar, que simula el comportamiento de `Plataforma-core-ohs`. Replicará los contratos de la API REST para catálogos (suscriptores, agentes, giros, CP, riesgo, garantías), tarifas y generación de folios.
-    *   **Propósito**: Facilitar el desarrollo y las pruebas del `Backend Cotizador` sin depender de la disponibilidad o estabilidad del servicio externo real. Permite la configuración de respuestas dinámicas y escenarios de error controlados (HU-197) para probar la resiliencia del sistema.
-    *   **Observaciones**: Es un componente crítico para mitigar el riesgo de dependencia del servicio externo (Matriz de Riesgos - Crítico). Su propia base de datos (`Base de Datos del Mock OHS`) debe ser poblada con datos de prueba consistentes y versionados (HU-198).
-
-*   **Base de Datos del Mock OHS**:
-    *   **Descripción técnica**: Una base de datos MongoDB utilizada por el `Mock Plataforma-core-ohs`. Contiene los datos de prueba necesarios para simular los catálogos y tarifas que `Plataforma-core-ohs` proporcionaría. Se gestiona mediante migraciones (ej. Flyway para NoSQL) para mantener la consistencia y el versionado de los datos de prueba (HU-198).
-    *   **Propósito**: Proporcionar al `Mock Plataforma-core-ohs` los datos necesarios para simular respuestas realistas y variadas, permitiendo pruebas exhaustivas del `Backend Cotizador` en diferentes escenarios de datos.
-    *   **Observaciones**: La consistencia de estos datos es crucial para la fiabilidad de las pruebas. La capacidad de poblar y actualizar esta base de datos de forma controlada es fundamental para el ciclo de desarrollo.
-
-**Análisis de Relaciones clave**:
-
-*   **`Web Cotizador` con `Backend Cotizador`**:
-    *   **Flujo**: El `Web Cotizador` realiza llamadas a la API REST del `Backend Cotizador` para todas las operaciones de negocio: crear/cargar/editar cotizaciones, agregar/editar/eliminar ubicaciones, configurar coberturas, iniciar cálculos de prima y consultar resultados.
-    *   **Protocolo**: `REST/HTTPS`. El uso de HTTPS (RNF-005) asegura el cifrado de datos sensibles en tránsito.
-    *   **Riesgos**: La latencia en las llamadas a la API afecta directamente el RNF-001 (Tiempo de Respuesta de Interfaz de Usuario) y RNF-002 (Tiempo de Respuesta de Operaciones CRUD). Los errores en la comunicación o en la lógica de negocio del backend deben ser manejados con mensajes claros para el usuario (HU-153).
-
-*   **`Backend Cotizador` con `Base de Datos de Cotizaciones`**:
-    *   **Flujo**: El `Backend Cotizador` realiza operaciones de persistencia (guardar, actualizar, eliminar) y consulta sobre las colecciones de MongoDB para gestionar las cotizaciones y sus datos asociados.
-    *   **Protocolo**: `NoSQL/TCP`.
-    *   **Riesgos**: La eficiencia de las consultas y actualizaciones es clave para el rendimiento general del sistema (RNF-002). La implementación del versionado optimista (HU-147) y la persistencia atómica (HU-171) son fundamentales para la integridad de datos (RNF-014), evitando conflictos de concurrencia y pérdida de información.
-
-*   **`Backend Cotizador` con `Plataforma-core-ohs` (Producción)**:
-    *   **Flujo**: En el entorno de producción, el `Backend Cotizador` consulta `Plataforma-core-ohs` para obtener catálogos dinámicos (suscriptores, agentes, giros, CP, riesgo, garantías), tarifas y factores técnicos esenciales para el cálculo de primas.
-    *   **Protocolo**: `REST/HTTPS`.
-    *   **Riesgos**: Esta es la principal dependencia externa. El "Fallo o inestabilidad en la integración con el servicio `Plataforma-core-ohs`" (Matriz de Riesgos - Crítico) es el riesgo más alto. La resiliencia (RNF-017) es crucial, requiriendo mecanismos de reintento, circuit breaker y posiblemente caché (HU-204) para mitigar el impacto de latencias o fallos del servicio externo. Las inconsistencias en los datos recibidos (Matriz de Riesgos - Medio) también representan un riesgo para la precisión del cálculo (RNF-015).
-
-*   **`Backend Cotizador` con `Mock Plataforma-core-ohs` (Desarrollo/Test)**:
-    *   **Flujo**: Durante el desarrollo y las pruebas, el `Backend Cotizador` se configura para comunicarse con el `Mock Plataforma-core-ohs` en lugar del servicio real. Esto permite la simulación de todas las interacciones con el servicio externo.
-    *   **Protocolo**: `REST/HTTP` (asumiendo un entorno local o de desarrollo donde HTTPS podría ser opcional para el mock).
-    *   **Riesgos**: Aunque diseñado para mitigar riesgos, la calidad del mock server es vital. Si el `Mock Plataforma-core-ohs` no simula fielmente el comportamiento del servicio real (HU-196) o es inestable bajo carga de prueba (HU-199), podría llevar a pruebas ineficaces y la introducción de errores en producción.
-
-*   **`Mock Plataforma-core-ohs` con `Base de Datos del Mock OHS`**:
-    *   **Flujo**: El `Mock Plataforma-core-ohs` consulta su `Base de Datos del Mock OHS` para obtener los datos predefinidos de catálogos y tarifas que utiliza para responder a las solicitudes del `Backend Cotizador`.
-    *   **Protocolo**: `NoSQL/TCP`.
-    *   **Riesgos**: La consistencia y la representatividad de los datos en la `Base de Datos del Mock OHS` son importantes. Datos de prueba incorrectos o desactualizados podrían llevar a que las pruebas no detecten problemas reales en la lógica del `Backend Cotizador`. La gestión de migraciones (HU-198) es clave para mantener la calidad de estos datos.
+**Análisis de Evolución de Contenedores (C2):**
 
 ---
 
-Aquí se presenta el análisis de componentes AS-IS a nivel de Capacidades de Negocio para el cotizador de seguros de daños, basado en la información proporcionada y los análisis C1 y C2 previos.
+### Cotizador Web SPA — `cotizador-danos-web`
+- **Estrategia**: 🔄 Evolve
+- **Cambio**: React 18, rutas definidas para todas las pantallas del reto, gestión dinámica de ubicaciones con todos los campos del dominio, alertas de ubicaciones incompletas, desglose técnico por los 14 componentes, pantalla de términos y condiciones, manejo de conflictos de concurrencia.
+- **HUs clave (bloque 1)**: HU-006, HU-007, HU-010, HU-015, HU-020, HU-021, HU-028.
+- **HUs clave (bloque 2)**: HU-114 (layout), HU-115, HU-116, HU-117, HU-125, HU-130, HU-131, HU-134 (technical-info), HU-142, HU-143 (terms), HU-183, HU-184.
+- **Impacto**: Experiencia de usuario completa y alineada con el escenario de aceptación del reto.
 
-### [1]. Mapa de Capacidades AS-IS
+---
+
+### Módulo de Autenticación
+- **Estrategia**: 🆕 New
+- **Cambio**: Extraído del "God Component". Gestiona usuarios propios (sin SSO), autenticación con usuario/contraseña, emisión y validación de JWT, y control de acceso por roles (Agente, Asegurado) conforme a BC-007 y RT-014.
+- **HUs clave**: RF-009 (Autenticación), RF-011 (Roles) del RF corregido.
+- **Impacto**: Seguridad explícita y modular. Base para futura integración SSO (OOS-005).
+
+---
+
+### Módulo de Cotización — núcleo de `plataformas-danos-back`
+- **Estrategia**: 🔄 Evolve
+- **Cambio**: Gestiona el ciclo de vida completo de la cotización. Implementa todos los endpoints mínimos del reto: `PUT /v1/quotes/{folio}/general-info`, `GET/PUT /v1/quotes/{folio}/locations/layout`, `GET/PUT /v1/quotes/{folio}/locations`, `PATCH /v1/quotes/{folio}/locations/{índice}`, `GET /v1/quotes/{folio}/locations/summary`, `GET /v1/quotes/{folio}/state`, `GET/PUT /v1/quotes/{folio}/coverage-options`. Incluye la regla de no-eliminación de ubicaciones (solo `estadoValidacion: INACTIVA`) y el versionado optimista.
+- **HUs clave (bloque 1)**: HU-001, HU-002, HU-003, HU-004, HU-005, HU-006, HU-007, HU-008, HU-024 a HU-028, HU-035, HU-036, HU-037, HU-038.
+- **HUs clave (bloque 2)**: HU-109 a HU-143, HU-149 a HU-153.
+- **Impacto**: Backend que cubre el 100% del alcance funcional obligatorio del reto.
+
+---
+
+### Módulo de Folios
+- **Estrategia**: 🆕 New (extraído como módulo especializado)
+- **Cambio**: Responsabilidad única: generar folios alfanuméricos únicos (patrón `COT-AAAA-NNNNNN`), con idempotencia, reintentos automáticos configurables y manejo de concurrencia para evitar duplicados bajo carga.
+- **HUs clave (bloque 1)**: HU-086, HU-087, HU-088, HU-089, HU-090, HU-091.
+- **Impacto**: Unicidad e integridad del identificador de cotización garantizadas bajo cualquier condición de carga.
+
+---
+
+### Motor de Cálculo de Primas
+- **Estrategia**: 🔄 Evolve (extraído como módulo especializado)
+- **Cambio**: Implementa el endpoint `POST /v1/quotes/{folio}/calculate`. Lógica modular para los 14 componentes técnicos (Incendio edificios, Incendio contenidos, Extensión de cobertura, CAT TEV, CAT FHM, Remoción de escombros, Gastos extraordinarios, Pérdida de rentas, BI, Equipo electrónico, Robo, Dinero y valores, Vidrios, Anuncios luminosos). Solo aplica componentes activos según `opcionesCobertura` y `garantías[]`. **Excluye individualmente las ubicaciones con `estadoValidacion: INCOMPLETA` sin bloquear el cálculo total** (RFR-008). Persiste `primaNeta`, `primaComercial` y `primasPorUbicacion[]` de forma atómica con snapshot de trazabilidad. Cobertura unitaria objetivo: >90%.
+- **HUs clave (bloque 1)**: HU-015, HU-016, HU-017, HU-018, HU-019, HU-041, HU-049 a HU-063.
+- **HUs clave (bloque 2)**: HU-125 a HU-129, HU-169, HU-170, HU-171, HU-172, HU-173, HU-174, HU-175, HU-176 a HU-179.
+- **Impacto**: 100% de precisión en cálculos, trazabilidad completa, cumplimiento de P98 < 3s para 10 ubicaciones.
+
+---
+
+### Base de Datos de Cotizaciones — MongoDB
+- **Estrategia**: 🔄 Evolve
+- **Cambio**: Esquema evolucionado con: (1) cotización como agregado principal con ubicaciones embebidas incluyendo todos los campos del dominio mínimo, (2) campo `version` para versionado optimista, (3) `estadoValidacion` con valores COMPLETA/INCOMPLETA/INACTIVA, (4) `alertasBloqueantes` como lista de campos problemáticos, (5) snapshot de trazabilidad del cálculo embebido, (6) cifrado AES-256 para campos sensibles.
+- **HUs clave (bloque 1)**: HU-037, HU-060, HU-061, HU-062, HU-063, HU-064.
+- **HUs clave (bloque 2)**: HU-153, HU-176, HU-177, HU-178, HU-179.
+- **Impacto**: Consistencia transaccional a nivel de documento, auditoría completa, protección de datos sensibles.
+
+---
+
+### API Gateway de Integración
+- **Estrategia**: 🆕 New
+- **Cambio**: Spring Cloud Gateway con Circuit Breaker (Resilience4j), Retry con backoff exponencial, enrutamiento condicional (producción vs. dev/test) y integración con la capa de caché. El backend no llama directamente a `Plataforma Core OHS`.
+- **HUs clave (bloque 1)**: HU-029, HU-030, HU-031, HU-032, HU-033.
+- **Impacto**: Backend desacoplado de la lógica de resiliencia, mayor mantenibilidad y rendimiento de la integración.
+
+---
+
+### Servicio de Caché (Caffeine / Redis)
+- **Estrategia**: 🆕 New
+- **Cambio**: Caffeine en primera versión (caché local en memoria del proceso del API Gateway). Redis disponible para cuando se requiera distribución. TTL diferenciado por tipo de dato. Sin invalidación por eventos (BC-006, PAC-006).
+- **HUs clave (bloque 1)**: HU-104, HU-105, HU-106, HU-107, HU-108.
+- **Impacto**: Latencia de consulta de datos maestros < 500ms (RNF de EP-003). Reducción drástica de llamadas a `Plataforma Core OHS`.
+
+---
+
+### Sistema de Observabilidad
+- **Estrategia**: 🆕 New
+- **Cambio**: Todos los módulos del backend envían logs estructurados (JSON) con ID de correlación por solicitud. Métricas de rendimiento (latencia P95/P98, tasa de error, hit/miss de caché). Trazas para el flujo completo de cálculo.
+- **Impacto**: Diagnóstico eficiente, soporte a auditorías, visibilidad del cumplimiento de RNFs de rendimiento.
+
+---
+
+### Simulador de Plataforma Core OHS
+- **Estrategia**: 🆕 New
+- **Cambio**: Node.js/Express con MongoDB + Flyway para migraciones de datos de prueba. Replica todos los endpoints del reto. Configuración de escenarios de error (HTTP 500, timeout, datos inconsistentes). El API Gateway lo consume automáticamente en dev/test.
+- **HUs clave (bloque 1)**: HU-034, HU-092, HU-093, HU-094, HU-095, HU-096, HU-097, HU-098, HU-099.
+- **Impacto**: Desarrollo completamente aislado del servicio externo real. Pruebas deterministas y reproducibles.
+
+---
+
+## [C3] Mapa de Capacidades Evolucionadas
 
 **Descripción**:
-El mapa de capacidades AS-IS del Cotizador de Seguros de Daños ilustra las funcionalidades principales que el sistema está diseñado para soportar, aquellas que presentan limitaciones y las que están ausentes en el alcance actual. El propósito de este mapa es proporcionar una visión clara de las capacidades funcionales y no funcionales del sistema, identificando fortalezas y áreas de mejora.
-
-Las capacidades principales se centran en la **Gestión Integral de Cotizaciones**, abarcando desde la creación y edición de datos generales y ubicaciones de riesgo, hasta la configuración de coberturas y la gestión de su ciclo de vida con un robusto control de concurrencia. El **Cálculo de Primas** es otra capacidad central, que incluye la ejecución, el motor de cálculo de primas netas y comerciales, y la visualización detallada de resultados, aunque con la limitación explícita de basarse en fórmulas simplificadas y no actuariales reales. La **Integración y Gestión de Datos Maestros** es fundamental, destacando la capacidad de consumir diversos catálogos y tarifas de un servicio externo (o su simulación), junto con una capa de validación y gestión de caché.
-
-Los hallazgos clave incluyen una sólida base en la gestión transaccional y la resiliencia ante fallos externos mediante la simulación de servicios. Sin embargo, se identifican gaps en funcionalidades avanzadas de seguridad (como la autenticación multifactor) y en la exhaustividad del historial de cambios de las cotizaciones. La precisión del cálculo, aunque robusta para las fórmulas definidas, no alcanza un nivel actuarial real, lo que representa una limitación consciente del proyecto. La gestión de caché, aunque implementada, carece de invalidación por eventos en la primera versión.
+Este mapa visualiza las capacidades habilitadas por la arquitectura TO-BE, diferenciando entre capacidades mantenidas (✅), evolucionadas (🔄) y nuevas (🆕).
 
 ```mermaid
 mindmap
-  root((🏢 Cotizador de Seguros de Daños<br/>Capacidades AS-IS))
-    📋 Gestión de Cotizaciones
-      ✅ Creación y Edición General
-        Iniciar nueva cotización con folio automático
-        Cargar y editar cotización existente por folio
-        Capturar y validar datos del asegurado (nombre, RFC)
-        Seleccionar tipo de seguro, moneda y canal de venta de catálogos
-        Establecer y validar vigencia
-      ✅ Gestión de Ubicaciones de Riesgo
-        Agregar nuevas ubicaciones (hasta 10)
-        Editar detalles específicos de ubicación (dirección, uso, características)
-        Eliminar ubicaciones
-        Visualizar múltiples ubicaciones
-        Consultar y validar código postal de ubicación
-        Visualizar alertas por datos incompletos en ubicaciones
-      ✅ Configuración de Coberturas
-        Visualizar catálogo de coberturas por tipo de seguro y ubicación
-        Seleccionar y deseleccionar coberturas por ubicación
-        Configurar parámetros específicos de cobertura (sumas aseguradas, deducibles)
-        Visualizar resumen de coberturas activas por ubicación
-      ✅ Ciclo de Vida y Estados
-        Iniciar en estado "Borrador"
-        Actualizar a "Calculada" tras cálculo exitoso
-        Cambiar manualmente a "Aprobada" o "Rechazada"
-        Establecer estado "Emitida"
-        Visualizar estado actual de la cotización
-        Restricción - No calcular sin validaciones previas
-        Restricción - No aprobar sin cálculo previo
-        Restricción - Cualquier modificación invalida cálculo
-      ✅ Control de Concurrencia y Versionado
-        Campo de versión incremental
-        Actualización de fecha de última modificación
-        Detección de conflictos de concurrencia
-        Notificación de conflicto al usuario
-        Permitir recargar última versión de cotización
-        Actualización parcial de campos
-    📊 Cálculo de Primas
-      ✅ Ejecución del Cálculo
-        Iniciar proceso de cálculo
-        Calcular prima neta y comercial total
-        Calcular y mostrar prima por cada ubicación
-        Aplicar factores técnicos y reglas de negocio
-      ✅ Motor Central de Cálculo
-        Cálculo de Prima Neta por Ubicación
-        Aplicación de Factores CAT y FHM
-        Cálculo de Prima Comercial Total
-        Generación de desglose de primas por ubicación
-        Cálculo de Prima de Incendio
-        Cálculo de Prima de Equipo Electrónico
-      ⚠️ Precisión de Cálculo
-        Basado en fórmulas simplificadas y documentadas
-        NO incluye lógica actuarial real compleja
-      ✅ Visualización de Resultados
-        Visualizar resumen de prima neta y comercial total
-        Visualizar desglose de prima por ubicación
-        Visualizar componentes adicionales (impuestos, recargos básicos)
-        Sincronizar resultados financieros con el último cálculo
-      ✅ Persistencia y Trazabilidad de Resultados
-        Persistencia de resultados en cotización
-        Atomicidad en la persistencia del cálculo
-        Actualización de metadatos de cotización (fecha, versión)
-        Registro de parámetros para trazabilidad del cálculo
-    ⚙️ Gestión de Reglas y Validaciones
-      ✅ Motor de Validación de Reglas de Negocio
-        Validación de Rangos de Suma Asegurada
-        Validación de Código Postal y Zona
-        Verificación de Datos Mínimos por Ubicación
-      ✅ Provisión de Mensajes de Error
-        Generación de Mensajes de Error Claros
-        Bloqueo de Cálculo por Errores de Validación
-      ✅ Trazabilidad de Reglas de Negocio
-        Documentar y trazar las reglas de negocio
-    🔗 Integración y Datos Maestros
-      ✅ Generación y Gestión de Folios
-        Generar folio alfanumérico único (PREFIJO-AAAA-NNNNNN)
-        Persistir secuencia de folios de forma segura
-        Implementar reintentos en generación de folio
-        Notificar fallo persistente de generación de folio
-        Asegurar idempotencia en generación de folios
-        Manejar concurrencia en generación de folios
-      ✅ Conectividad y Consumo de Catálogos Básicos
-        Conectar a servicio de catálogos básicos
-        Recuperar catálogo de Suscriptores, Agentes y Giros
-        Mapear y transformar datos de catálogos básicos
-        Manejar errores y reintentos de conectividad
-      ✅ Integración de Catálogo de Códigos Postales y Zonas
-        Consultar información de Código Postal y Zona
-        Validar Código Postal
-        Mapear información de zonas de código postal
-      ✅ Integración de Catálogos de Riesgo y Garantías
-        Recuperar catálogo de Clasificación de Riesgo
-        Recuperar catálogo de Garantías
-        Mapear datos de clasificación de riesgo y garantías
-        Reflejar cambios de catálogos en cotizador
-      ✅ Conectividad y Consumo de Tarifas y Factores Técnicos
-        Consultar Tarifas de Incendio, CAT, FHM y Factores de Equipo Electrónico
-        Mapear tarifas y factores técnicos
-        Manejar errores y ausencia de datos en tarifas
-      ✅ Capa de Validación de Datos Maestros
-        Implementar reglas de validación de datos maestros
-        Registrar inconsistencias detectadas
-        Aplicar corrección automática de inconsistencias
-        Notificar inconsistencias que requieren intervención
-        Definir reglas de validación con analistas funcionales
-      ✅ Gestión de Caché y Estrategia de Actualización
-        Almacenar datos maestros en caché
-        Asegurar acceso más rápido a datos en caché
-        Implementar mecanismo de invalidación/actualización de caché (TTL)
-        Mantener consistencia de datos en caché
-        Monitorear rendimiento y consistencia del caché
-      ⚠️ Invalidación de Caché por Eventos
-        No implementada en primera versión, solo TTL
-      ✅ Simulación de Servicio Externo (Plataforma-core-ohs)
-        Configurar Mock Server Base
-        Simular Endpoints de Catálogos Básicos
-        Simular Endpoints de Códigos Postales y Zonas
-        Simular Endpoints de Clasificación de Riesgo y Garantías
-        Simular Endpoints de Tarifas y Factores Técnicos
-        Poblar Base de Datos del Mock con Migraciones
-        Configurar respuestas dinámicas y errores en el mock
-        Validar estabilidad del mock server con pruebas de carga
-    🔐 Seguridad
-      ✅ Autenticación y Autorización Básica
-        Autenticación interna con usuario y contraseña
-        Autorización basada en roles
-      ❌ Multi-Factor Avanzado
-        SMS OTP
-        Biométrico
-        Tokens Hardware
-      ✅ Cifrado de Datos
-        Cifrado de datos sensibles en tránsito (TLS 1.2+)
-        Cifrado de datos sensibles en reposo (AES-256)
-    📈 Rendimiento y Escalabilidad
-      ✅ Tiempos de Respuesta
-        Interfaz de Usuario (< 500ms, carga inicial < 2s)
-        Operaciones CRUD Backend (< 1.5s)
-        Cálculo de Prima (< 3s para 10 ubicaciones)
-      ✅ Escalabilidad
-        Soporte de 500 usuarios concurrentes
-      ✅ Resiliencia ante Fallos Externos
-        Manejo de interrupciones o latencias de Plataforma-core-ohs
-        Mecanismos de reintento con backoff y circuit breaker
-        Funcionalidad degradada con mensaje amigable
-    📋 Calidad y Mantenibilidad
-      ✅ Cobertura de Pruebas
-        Unitarias (Backend y Frontend > 80%)
-        Automatizadas de flujos críticos (mínimo 3 flujos)
-      ✅ Documentación Técnica
-        Especificaciones ASSD
-        Diagramas de arquitectura (C4 Model)
-        Modelo de datos
-        Descripción lógica de cálculo
-      ✅ Monitoreo y Trazabilidad de Errores
-        Registro de errores con detalles y contexto
-        Identificador de correlación para transacciones
-        Sistema de logging centralizado
-      ⚠️ Historial de Cambios Detallado
-        Registro de versión y fecha de última actualización
-        Consideración de historial para campos críticos (no totalmente implementado)
-    🖥️ Usabilidad y Compatibilidad
-      ✅ Facilidad de Uso
-        Interfaz intuitiva y eficiente
-        Proceso de creación de cotización en < 5 minutos (primera interacción)
-      ✅ Compatibilidad con Navegadores
-        Dos últimas versiones estables de Chrome, Firefox, Edge, Safari
-
+  root((🏢 Sistema Cotizador Evolucionado<br/>Capacidades Habilitadas))
+    Gestión de Cotizaciones
+      🆕 Creación con folio automático e idempotente
+      🔄 Edición y consulta con versionado optimista
+      🔄 Layout de ubicaciones configurable
+      🔄 Ubicaciones con campos completos del dominio
+      🔄 Marcado de ubicaciones como inactivas
+      🔄 Control de ciclo de vida con máquina de estados
+      🔄 Historial y trazabilidad de versiones
+    Cálculo de Primas
+      🔄 Cálculo con 14 componentes técnicos por ubicación
+      🔄 Exclusión individual de ubicaciones incompletas sin bloqueo total
+      ✅ Precisión 100% según fórmulas simplificadas
+      🔄 Aplicación modular de reglas de negocio
+      🔄 Snapshot de trazabilidad del cálculo
+    Integración y Datos Maestros
+      🔄 Consulta de catálogos resiliente con caché
+      🔄 Consulta de tarifas de alto rendimiento
+      🆕 Generación de folios idempotente y concurrente
+      🆕 Simulador robusto con datos versionados
+    Seguridad y Acceso
+      🆕 Autenticación interna propia con JWT
+      🆕 Autorización por roles RBAC
+      ✅ Cifrado en tránsito TLS 1.2+
+      ✅ Cifrado en reposo AES-256
+    Operabilidad y Resiliencia
+      🆕 Observabilidad centralizada con logs y métricas
+      🔄 Manejo de concurrencia con versionado optimista
+      🔄 Circuit Breaker y Retry para integraciones externas
+      🆕 API Gateway de integración centralizado
+      🆕 Caché con TTL diferenciado por tipo de dato
+    Experiencia de Usuario
+      🔄 Interfaz con todas las rutas del reto
+      🔄 Alertas de ubicaciones incompletas sin bloquear el cálculo
+      🔄 Vista de desglose técnico por componente
+      🆕 Pantalla de términos y condiciones
+      ✅ Rendimiento UI P95 < 500ms
 ```
 
-**Análisis de Capacidades**:
+**Análisis de Evolución por Capacidad:**
 
-*   **Precisión de Cálculo**: **⚠️ Limitada**
-    *   **Descripción**: El sistema es capaz de calcular la prima neta y comercial total, así como el desglose por ubicación, aplicando factores técnicos y reglas de negocio.
-    *   **Limitaciones**: La precisión del cálculo está garantizada al 100% *según las fórmulas simplificadas y documentadas*, pero no incorpora una lógica actuarial real compleja. Esto significa que, si bien es exacto para el modelo definido, no replica la complejidad completa de un cálculo actuarial de seguros.
-    *   **Impacto**: Potencialmente, los resultados podrían no ser tan sofisticados como los de un sistema actuarial completo, lo que podría requerir ajustes manuales o complementos externos para escenarios de alta complejidad.
+---
 
-*   **Invalidación de Caché por Eventos**: **⚠️ Limitada**
-    *   **Descripción**: El sistema implementa una gestión de caché para los datos maestros con una política de invalidación basada en Tiempo de Vida (TTL).
-    *   **Limitaciones**: La primera versión del sistema no incluye un mecanismo de invalidación de caché bajo demanda o por eventos de actualización desde `Plataforma-core-ohs`. Esto implica que los datos se refrescarán solo al expirar su TTL o mediante una actualización programada.
-    *   **Impacto**: Podría haber una ventana de tiempo en la que el cotizador opere con datos maestros ligeramente desactualizados si los cambios en la fuente externa ocurren entre los intervalos de TTL o las actualizaciones programadas. Para cambios críticos y urgentes, se requeriría una intervención manual para forzar la invalidación.
+**Creación con folio automático e idempotente** — `🆕 New`
+- Servicio/módulo dedicado para generación de folios `COT-AAAA-NNNNNN` con reintentos y control de concurrencia.
+- **HUs**: HU-001, HU-086, HU-087, HU-088, HU-089, HU-090, HU-091 (bloque 1).
+- **Brecha cerrada**: Riesgo de folios duplicados o perdidos (RFR-001).
 
-*   **Multi-Factor Avanzado (MFA)**: **❌ Ausente**
-    *   **Descripción**: El sistema implementa autenticación interna con gestión de usuarios propia basada en credenciales (usuario/contraseña) y autorización basada en roles.
-    *   **Limitaciones**: No se menciona la implementación de métodos de autenticación multifactor avanzados como SMS OTP, biometría o tokens de hardware.
-    *   **Impacto**: La ausencia de MFA reduce el nivel de seguridad de la autenticación, dejando el sistema más vulnerable a ataques de phishing o robo de credenciales. Podría no cumplir con futuras normativas de seguridad más estrictas o con las expectativas de seguridad de los usuarios para aplicaciones que manejan datos sensibles.
+**Edición y consulta con versionado optimista** — `🔄 Evolved`
+- Campo `version` incremental, `fechaUltimaActualizacion`, detección de conflicto y notificación al usuario con opción de recarga.
+- **HUs**: HU-035, HU-036, HU-037, HU-062, HU-064, HU-065, HU-066, HU-067 (bloque 1); HU-149, HU-150, HU-151, HU-180, HU-181, HU-182, HU-183, HU-184 (bloque 2).
+- **Brecha cerrada**: Pérdida de datos por ediciones concurrentes (PAC-003, QAS-006).
 
-*   **Historial de Cambios Detallado de Cotización**: **⚠️ Limitada**
-    *   **Descripción**: El sistema registra un número de versión incremental y la fecha de última actualización para cada cotización. Se considera el registro de parámetros clave para la trazabilidad de los cálculos.
-    *   **Limitaciones**: Si bien hay un control de versión básico y trazabilidad para el cálculo, no se especifica un historial de cambios detallado que permita ver *qué* campos específicos fueron modificados en cada versión de la cotización, más allá de los metadatos de actualización. RNF-019 menciona "se considerará la implementación de un historial de cambios para campos críticos", lo que sugiere que no es una capacidad totalmente implementada en el estado actual.
-    *   **Impacto**: Dificultad para auditar de manera granular los cambios realizados en una cotización a lo largo del tiempo, lo que podría complicar la resolución de disputas, la depuración de errores o la comprensión de la evolución de una cotización específica por parte de los analistas o auditores.
+**Layout de ubicaciones configurable** — `🔄 Evolved` (nuevo en funcionalidad)
+- `GET/PUT /v1/quotes/{folio}/locations/layout` para gestionar `configuracionLayout` que define dinámicamente los campos del formulario de ubicaciones.
+- **HUs**: HU-114 (bloque 2).
+- **Brecha cerrada**: Dominio mínimo del reto técnico (RFR-009).
+
+**Ubicaciones con campos completos del dominio** — `🔄 Evolved`
+- Formulario con todos los campos: `nombreUbicacion`, `direccion`, `codigoPostal`, `estado`, `municipio`, `colonia`, `ciudad`, `tipoConstructivo`, `nivel`, `anioConstruccion`, `giro` (con `giro.claveIncendio`), `garantías[]`, `zonaCatastrofica`, `estadoValidacion`, `alertasBloqueantes`.
+- **HUs**: HU-006, HU-007 (bloque 1); HU-115, HU-116 (bloque 2).
+- **Brecha cerrada**: Dominio mínimo de ubicación del reto técnico (RFR-002).
+
+**Marcado de ubicaciones como inactivas** — `🔄 Evolved`
+- Las ubicaciones **nunca se eliminan físicamente** (requisito explícito del reto). Solo se marcan con `estadoValidacion: INACTIVA` vía PATCH. Se excluyen automáticamente del cálculo.
+- **HUs**: HU-008 (bloque 1, ahora "marcar inactiva"); HU-117 (bloque 2).
+- **Brecha cerrada**: Integridad del historial (CON-007, RFR-002).
+
+**Control de ciclo de vida con máquina de estados** — `🔄 Evolved`
+- Transiciones: Borrador → Pendiente de Cálculo → Calculada → Aprobada/Rechazada → Emitida. Validaciones estrictas en cada transición. Cualquier edición en estado Calculada o superior invalida el cálculo.
+- **HUs**: HU-024 a HU-028 (bloque 1); HU-135 a HU-142 (bloque 2).
+- **Brecha cerrada**: Falta de control explícito del flujo de negocio (RFR-007).
+
+**Cálculo con 14 componentes técnicos** — `🔄 Evolved`
+- Motor modular que aplica los componentes activos según `opcionesCobertura` y `garantías[]`: Incendio edificios, Incendio contenidos, Extensión de cobertura, CAT TEV, CAT FHM, Remoción de escombros, Gastos extraordinarios, Pérdida de rentas, BI, Equipo electrónico, Robo, Dinero y valores, Vidrios, Anuncios luminosos.
+- **HUs**: HU-016, HU-017, HU-018, HU-019, HU-041, HU-054 a HU-063 (bloque 1); HU-170, HU-171, HU-172, HU-173, HU-174, HU-175 (bloque 2).
+- **Brecha cerrada**: Cálculo incompleto o impreciso (RFR-003, PAC-001).
+
+**Exclusión de ubicaciones incompletas sin bloqueo total** — `🔄 Evolved` (nuevo comportamiento)
+- Una ubicación es calculable solo si tiene `codigoPostal` válido + `giro.claveIncendio` + garantías tarifables. Las incompletas se marcan con `alertasBloqueantes`, se excluyen individualmente y el cálculo continúa con las válidas. Solo se bloquea si **ninguna** ubicación es calculable.
+- **HUs**: HU-015 (bloque 1, criterio corregido); HU-125, HU-167, HU-169 (bloque 2).
+- **Brecha cerrada**: Requisito explícito del reto técnico (RFR-008, escenario de aceptación paso 5-9).
+
+**Snapshot de trazabilidad del cálculo** — `🔄 Evolved`
+- Embebido en el documento de cotización: parámetros de entrada clave, identificadores y versión/timestamp de tarifas/factores utilizados, valores numéricos por componente activo, metadatos de ejecución.
+- **HUs**: HU-063 (bloque 1); HU-179 (bloque 2).
+- **Brecha cerrada**: Auditabilidad y trazabilidad del proceso de cotización (PAC-007, RFR-010).
+
+**Vista de desglose técnico por componente** — `🔄 Evolved`
+- Ruta `/quotes/{folio}/technical-info` muestra el desglose por cada uno de los 14 componentes activos por ubicación calculable, y las alertas de las ubicaciones excluidas.
+- **HUs**: HU-057 (bloque 1); HU-134 (bloque 2).
+- **Brecha cerrada**: Transparencia financiera (OOS-006 no aplica — esta vista sí está en alcance).
+
+**Pantalla de términos y condiciones** — `🆕 New`
+- Ruta `/quotes/{folio}/terms-and-conditions` como paso previo a la aprobación. Muestra resumen de condiciones y permite la aceptación formal.
+- **HUs**: HU-143 (bloque 2).
+- **Brecha cerrada**: Flujo completo de aprobación del reto técnico.
+
+**Observabilidad centralizada** — `🆕 New`
+- Logs estructurados con ID de correlación, métricas de latencia (P95, P98), tasa de error, hit/miss de caché. Visibilidad del cumplimiento de todos los RNFs de rendimiento en tiempo real.
+- **Brecha cerrada**: Falta de visibilidad del comportamiento del sistema en producción (CON-006, PAC-007).
+
+**Circuit Breaker y Retry** — `🔄 Evolved`
+- Resilience4j con Circuit Breaker (estados: Closed → Open → Half-Open) y Retry con backoff exponencial. Degradación funcional con caché como fallback. Mensaje amigable en <5s sin bloquear la UI (QAS-005).
+- **HUs**: HU-033 (bloque 1); HU-148 (bloque 2).
+- **Brecha cerrada**: Dependencia crítica de `Plataforma Core OHS` paraliza el cotizador (PAC-002, IMP-002).
+
+**Caché con TTL diferenciado** — `🆕 New`
+- Caffeine (primera versión, preparada para Redis). Catálogos estáticos: 12-24h. Tarifas/factores: 1-6h. Sin invalidación por eventos (BC-006). Desalojo LRU.
+- **HUs**: HU-104, HU-105, HU-106, HU-107, HU-108 (bloque 1).
+- **Brecha cerrada**: Anti-patrón "Chatty Communication", latencia excesiva en consultas repetidas (PAC-006, OPT-001).
+
+**Autenticación y autorización RBAC** — `🆕 New`
+- JWT para sesiones, RBAC para control de acceso por rol (Agente, Asegurado). Sin SSO en esta fase (BC-007, RT-014, OOS-005).
+- **Brecha cerrada**: Acceso no controlado al sistema (PAC-005, RNF-007).
+
+---
+
+**Resumen de Brechas del AS-IS cerradas:**
+
+| Brecha (AS-IS) | Capacidad TO-BE que la cierra |
+|---|---|
+| Esfuerzo manual en gestión de datos maestros | Caché con TTL + API Gateway + Simulador robusto |
+| Inconsistencias en cálculos de primas | Motor modular 14 componentes, >90% cobertura unitaria |
+| Cotizaciones lentas | React 18 optimizado, caché de tarifas, motor de cálculo eficiente |
+| Pérdida de datos por ediciones concurrentes | Versionado optimista + detección de conflicto + recarga |
+| Sin comportamiento definido para ubicaciones incompletas | RFR-008: exclusión individual con alerta, cálculo continúa |
+| Falta de trazabilidad y auditabilidad | Snapshot de trazabilidad embebido + Observabilidad centralizada |
+| Fallo del sistema Core bloquea todo | Circuit Breaker + Retry + Caché fallback + degradación controlada |
+| "God Component" en el backend | Módulos especializados: Cotización, Motor de Cálculo, Folios, Auth |
+| Campos incompletos del dominio de Ubicación | Todos los campos del dominio mínimo del reto implementados |
+| Sin rutas frontend para todas las funcionalidades | 5 rutas definidas cubriendo el flujo completo del escenario de aceptación |

@@ -1,98 +1,157 @@
 ## FT-005: Visualización Detallada de Resultados Financieros
 
-### HU-128: Visualizar Resumen de Prima Neta y Comercial
-**Descripción**:
-Como usuario,
-Quiero ver un resumen claro de la prima neta y comercial total de mi cotización,
-Para tener una comprensión rápida del costo global.
+### 1. Descripción
 
-**Criterios de Aceptación**:
-- Dado que una cotización ha sido calculada, cuando la visualizo, entonces se muestra la prima neta total y la prima comercial total en un área destacada.
-- Dado que los valores de la prima son numéricos, cuando se muestran, entonces están formateados correctamente (e.g., moneda, decimales).
-- Dado que la cotización no ha sido calculada, cuando la visualizo, entonces los campos de prima total están vacíos o indican "Pendiente de Cálculo".
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-126 (Persistir Resultados del Cálculo de Prima)
-
-**Componentes Técnicos**: Frontend (Interfaz de Resultados Financieros).
-
-**Notas de Implementación**: La información debe ser fácil de encontrar y leer.
-
-**Estado**: Backlog
+Esta feature habilita la visualización estructurada, clara y consistente de los resultados financieros derivados del cálculo de primas, incluyendo el resumen global, el desglose por ubicación, los componentes adicionales (impuestos/recargos) y una vista técnica detallada basada en la trazabilidad del cálculo.
 
 ---
-### HU-129: Visualizar Desglose de Prima por Ubicación
-**Descripción**:
-Como usuario,
-Quiero ver el desglose de la prima calculada para cada ubicación de riesgo,
-Para entender cómo se distribuye el costo total del seguro.
 
-**Criterios de Aceptación**:
-- Dado que una cotización ha sido calculada, cuando visualizo los resultados, entonces se muestra la prima asignada a cada ubicación de riesgo.
-- Dado que selecciono una ubicación específica, cuando la visualizo, entonces puedo ver su prima individual en detalle.
-- Dado que los valores de la prima por ubicación son numéricos, cuando se muestran, entonces están formateados correctamente.
+### 2. Objetivo de Negocio
 
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-126 (Persistir Resultados del Cálculo de Prima)
-
-**Componentes Técnicos**: Frontend (Interfaz de Resultados Financieros, Sección de Ubicaciones).
-
-**Notas de Implementación**: La tabla o lista de ubicaciones debe incluir su prima correspondiente.
-
-**Estado**: Backlog
+Proveer al usuario visibilidad completa y confiable del resultado económico de la cotización, permitiendo tanto una comprensión rápida del costo total como un análisis detallado de cómo se compone la prima, facilitando la toma de decisiones y la auditoría del cálculo.
 
 ---
-### HU-130: Visualizar Componentes Adicionales de la Prima
-**Descripción**:
-Como usuario,
-Quiero ver los componentes adicionales de la prima, como impuestos y recargos básicos,
-Para entender la composición completa del precio final del seguro.
 
-**Criterios de Aceptación**:
-- Dado que una cotización ha sido calculada, cuando visualizo los resultados, entonces se muestran los impuestos y recargos básicos aplicados.
-- Dado que los componentes adicionales son numéricos, cuando se muestran, entonces están formateados correctamente.
-- Dado que no hay impuestos o recargos aplicables, cuando visualizo los resultados, entonces estos campos no se muestran o indican "N/A".
+### 3. Alcance Funcional
 
-**Prioridad**: Media
+Incluye:
 
-**Estimación**: 2 puntos de historia
+* Visualización del resumen de prima neta y comercial
+* Desglose de primas por ubicación
+* Visualización de componentes adicionales (impuestos, recargos)
+* Sincronización de resultados con el último cálculo ejecutado
+* Vista técnica detallada del cálculo (por componente y ubicación)
 
-**Dependencias**: HU-126 (Persistir Resultados del Cálculo de Prima)
+No incluye:
 
-**Componentes Técnicos**: Frontend (Interfaz de Resultados Financieros, Sección de Desglose).
-
-**Notas de Implementación**: Solo se mostrarán los impuestos y recargos básicos definidos en el cálculo.
-
-**Estado**: Backlog
+* Ejecución del cálculo (FT-004)
+* Definición de reglas de negocio o validaciones (FT-011)
 
 ---
-### HU-131: Sincronizar Visualización de Resultados Financieros
-**Descripción**:
-Como usuario,
-Quiero que los resultados financieros mostrados estén siempre sincronizados con el último cálculo realizado,
-Para asegurar que la información es actual y precisa.
 
-**Criterios de Aceptación**:
-- Dado que se ha realizado un nuevo cálculo de prima, cuando accedo a la sección de resultados, entonces se muestran los resultados del cálculo más reciente.
-- Dado que se han realizado modificaciones a la cotización (ubicaciones, coberturas) después de un cálculo, cuando visualizo los resultados, entonces se muestra una advertencia de que el cálculo puede estar desactualizado o se invalida el cálculo anterior.
-- Dado que un cálculo falla, cuando accedo a los resultados, entonces se muestra un mensaje de error y no se muestran resultados desactualizados.
+### 4. Historias de Usuario
 
-**Prioridad**: Alta
+| HU     | Nombre                      | Descripción corta                         |
+| ------ | --------------------------- | ----------------------------------------- |
+| HU-130 | Ver resumen de primas       | Muestra prima neta y comercial total      |
+| HU-131 | Ver prima por ubicación     | Muestra desglose por ubicación            |
+| HU-132 | Ver componentes adicionales | Muestra impuestos y recargos              |
+| HU-133 | Sincronizar resultados      | Garantiza consistencia con último cálculo |
+| HU-134 | Vista técnica del cálculo   | Muestra desglose técnico detallado        |
 
-**Estimación**: 2 puntos de historia
+---
 
-**Dependencias**: HU-126 (Persistir Resultados del Cálculo de Prima), HU-137 (Cualquier Modificación Invalida Cálculo)
+### 5. Flujo Funcional
 
-**Componentes Técnicos**: Frontend (Lógica de Actualización de UI), Backend (API de Consulta de Cotizaciones).
+1. Usuario accede a la cotización calculada
+2. Sistema consulta el documento persistido de la cotización (incluye resultados y snapshot)
+3. Sistema valida estado del cálculo:
 
-**Notas de Implementación**: El sistema debe tener un mecanismo para invalidar o marcar como desactualizado un cálculo si los datos de la cotización cambian.
+   * Si está calculada → muestra resultados
+   * Si no → muestra estado “Pendiente de cálculo”
+4. UI renderiza resumen financiero (HU-130):
 
-**Estado**: Backlog
+   * Prima neta total
+   * Prima comercial total
+5. UI renderiza desglose por ubicación (HU-131):
+
+   * Lista/tablas con prima individual
+   * Indicador de ubicaciones excluidas
+6. UI renderiza componentes adicionales (HU-132):
+
+   * Impuestos
+   * Recargos
+7. Sistema verifica vigencia del cálculo (HU-133):
+
+   * Si hay cambios posteriores → muestra advertencia de desactualización
+8. Usuario puede navegar a vista técnica `/quotes/{folio}/technical-info` (HU-134)
+9. Sistema carga snapshot de trazabilidad
+10. UI muestra desglose técnico:
+
+* Por ubicación
+* Por componente (Incendio, CAT, FHM, etc.)
+
+11. Si una ubicación fue excluida:
+
+* Se muestra con `alertasBloqueantes` y motivo
+
+---
+
+### 6. Dependencias Técnicas
+
+* API de consulta de cotizaciones (read model)
+* Persistencia de resultados de cálculo (FT-013)
+* Snapshot de trazabilidad de parámetros
+* Mecanismo de invalidación de cálculo (post-modificación)
+* Frontend:
+
+  * Vista de resultados financieros
+  * Ruta técnica `/quotes/{folio}/technical-info`
+* Sistema de formateo de moneda
+
+---
+
+### 7. Consideraciones Técnicas
+
+* Separar claramente:
+
+  * **Modelo de escritura (write model)** → cálculo
+  * **Modelo de lectura (read model)** → visualización optimizada
+* Los datos mostrados deben provenir de un **snapshot inmutable del cálculo**:
+
+  * Evitar recalcular en frontend
+* Formateo:
+
+  * Centralizado (ej. utility de currency formatting)
+  * Consistente en toda la UI
+* Manejo de estados:
+
+  * `PENDIENTE`
+  * `CALCULADA`
+  * `DESACTUALIZADA`
+* Estrategia de invalidación:
+
+  * Cualquier cambio en:
+
+    * ubicaciones
+    * coberturas
+    * parámetros
+      → marca el cálculo como stale
+* Vista técnica (HU-134):
+
+  * Basada en trazabilidad (no reconstrucción del cálculo)
+  * Estructura recomendada:
+
+    ```json
+    {
+      "ubicacionId": 1,
+      "componentes": [
+        { "tipo": "INCENDIO", "valor": 1000 },
+        { "tipo": "CAT", "valor": 200 },
+        { "tipo": "FHM", "valor": 150 }
+      ]
+    }
+    ```
+* UI debe soportar:
+
+  * Estados vacíos
+  * Datos parciales
+  * Ubicaciones excluidas
+* Performance:
+
+  * Evitar payloads excesivos → paginar o lazy load en vista técnica si crece
+* Trazabilidad:
+
+  * Clave para auditoría → no opcional en vista técnica
+* Consistencia:
+
+  * La suma del desglose debe coincidir exactamente con los totales
+* UX:
+
+  * Diferenciar claramente:
+
+    * datos válidos
+    * datos excluidos
+    * datos desactualizados
 
 ---

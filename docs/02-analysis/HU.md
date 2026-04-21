@@ -3191,7 +3191,6 @@ Para mantener la información de la cotización actualizada y precisa.
 **Estado**: Backlog
 
 ---
-## FT-001: Creación y Edición de Datos Generales de la Cotización
 
 ### HU-113: Seleccionar Opciones de Catálogos Básicos
 **Descripción**:

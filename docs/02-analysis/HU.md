@@ -3191,6 +3191,8 @@ Para mantener la información de la cotización actualizada y precisa.
 **Estado**: Backlog
 
 ---
+## FT-001: Creación y Edición de Datos Generales de la Cotización
+
 ### HU-113: Seleccionar Opciones de Catálogos Básicos
 **Descripción**:
 Como usuario,
@@ -3206,7 +3208,7 @@ Para asegurar la consistencia de los datos y agilizar la entrada de información
 
 **Estimación**: 2 puntos de historia
 
-**Dependencias**: HU-141 (Consumir Catálogos de Suscriptores, Agentes y Giros)
+**Dependencias**: HU-144 (Consumir Catálogos de Suscriptores, Agentes y Giros)
 
 **Componentes Técnicos**: Frontend (Componentes de selección de catálogos), Backend (API de Consulta de Catálogos).
 
@@ -3215,1661 +3217,8 @@ Para asegurar la consistencia de los datos y agilizar la entrada de información
 **Estado**: Backlog
 
 ---
-## FT-002: Gestión Dinámica de Ubicaciones de Riesgo
 
-### HU-114: Agregar Nueva Ubicación de Riesgo
-
-**Descripción**:
-Como usuario,
-Quiero añadir una nueva ubicación de riesgo a mi cotización,
-Para especificar múltiples lugares de interés para el seguro con todos sus datos del dominio.
-
-**Criterios de Aceptación**:
-- Dado que tengo una cotización abierta, cuando hago clic en "Agregar Ubicación", entonces se presenta un formulario para capturar los datos del dominio de la ubicación: `nombreUbicacion`, `direccion`, `codigoPostal`, `estado`, `municipio`, `colonia`, `ciudad`, `tipoConstructivo`, `nivel`, `anioConstruccion`, `giro` (con `giro.claveIncendio`), `garantías[]`.
-- Dado que he alcanzado el límite configurable de ubicaciones, cuando intento agregar una nueva, entonces el sistema me notifica que no puedo añadir más.
-- Dado que agrego una ubicación, cuando guardo la cotización, entonces la nueva ubicación se persiste como parte de la cotización con un `índice` asignado y `estadoValidacion` calculado.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-112 (Editar Datos Generales de la Cotización), HU-152 (Validar Datos Específicos de Ubicación de Riesgo)
-
-**Componentes Técnicos**: Frontend (Botón "Agregar Ubicación", Formulario de Ubicación con campos del dominio), Backend (API de Cotizaciones para agregar ubicaciones).
-
-**Notas de Implementación**:
-- El límite de ubicaciones debe ser configurable a nivel de sistema.
-- Al guardar, el backend calcula automáticamente `estadoValidacion` y `alertasBloqueantes`.
-- El campo `zonaCatastrofica` se obtiene automáticamente del catálogo CP al validar el código postal.
-
-**Estado**: Backlog
-
----
-### HU-115: Editar Detalles de Ubicación de Riesgo
-
-**Descripción**:
-Como usuario,
-Quiero modificar los datos específicos de una ubicación de riesgo existente con todos sus campos del dominio,
-Para asegurar la precisión de la evaluación del riesgo.
-
-**Criterios de Aceptación**:
-- Dado que tengo una cotización con ubicaciones, cuando selecciono una ubicación para editar, entonces sus datos se cargan en el formulario con todos los campos del dominio: `nombreUbicacion`, `direccion`, `codigoPostal`, `estado`, `municipio`, `colonia`, `ciudad`, `tipoConstructivo`, `nivel`, `anioConstruccion`, `giro` (con `giro.claveIncendio`), `garantías[]`, `zonaCatastrofica`.
-- Dado que modifico los datos de una ubicación y guardo, entonces los cambios se persisten a través de `PATCH /v1/quotes/{folio}/locations/{índice}` y el `estadoValidacion` se recalcula.
-- Dado que ingreso un código postal válido, cuando el sistema lo valida, entonces `zonaCatastrofica` se actualiza automáticamente con los datos de la zona CAT y nivel técnico.
-- Dado que intento guardar datos inválidos (e.g., código postal incorrecto o sin garantías), cuando confirmo la edición, entonces el sistema actualiza `alertasBloqueantes` con los campos problemáticos.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-114 (Agregar Nueva Ubicación de Riesgo), HU-152 (Validar Datos Específicos de Ubicación de Riesgo)
-
-**Componentes Técnicos**: Frontend (Formulario de Edición de Ubicación con todos los campos del dominio), Backend (PATCH de ubicaciones).
-
-**Notas de Implementación**:
-- Los campos `alertasBloqueantes` y `estadoValidacion` se recalculan automáticamente en el backend tras cada edición.
-- El formulario debe mostrar visualmente cuáles campos son los `alertasBloqueantes` activos de esa ubicación.
-
-**Estado**: Backlog
-
----
-
-### HU-116: Marcar Ubicación de Riesgo como Inactiva
-
-**Descripción**:
-Como usuario,
-Quiero marcar una ubicación de riesgo como inactiva en mi cotización,
-Para excluirla del flujo activo y del cálculo sin eliminarla del histórico.
-
-**Criterios de Aceptación**:
-- Dado que tengo una cotización con ubicaciones, cuando selecciono una ubicación y confirmo marcarla como inactiva, entonces su `estadoValidacion` cambia a `INACTIVA`.
-- Dado que una ubicación está marcada como `INACTIVA`, cuando se ejecuta el cálculo, entonces esa ubicación no se procesa ni se incluye en el resultado financiero.
-- Dado que marco una ubicación como inactiva, cuando guardo, entonces el número de versión de la cotización se incrementa.
-
-**Prioridad**: Media
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-115 (Editar Detalles de Ubicación)
-
-**Componentes Técnicos**: Frontend (Opción "Marcar como Inactiva"), Backend (PATCH de ubicación con cambio de `estadoValidacion`).
-
-**Notas de Implementación**:
-- Las ubicaciones **no se eliminan físicamente** del documento en MongoDB, conforme al requisito del reto técnico.
-- Se debe solicitar confirmación al usuario antes de marcar una ubicación como inactiva.
-
-**Estado**: Backlog
-
----
-### HU-117: Visualizar Múltiples Ubicaciones de Riesgo
-**Descripción**:
-Como usuario,
-Quiero ver un resumen de todas las ubicaciones de riesgo en mi cotización,
-Para tener una visión general de los riesgos asegurados y navegar entre ellas fácilmente.
-
-**Criterios de Aceptación**:
-- Dado que una cotización tiene múltiples ubicaciones, cuando la abro, entonces la interfaz muestra una lista o pestañas con cada ubicación.
-- Dado que hago clic en una ubicación en la lista o pestaña, cuando navego, entonces se muestran los detalles completos de esa ubicación para edición.
-- Dado que hay un límite de ubicaciones, cuando se alcanza, entonces la interfaz lo indica claramente.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-114 (Agregar Nueva Ubicación)
-
-**Componentes Técnicos**: Frontend (Interfaz de Maestro-Detalle/Pestañas para Ubicaciones).
-
-**Notas de Implementación**: Implementar un patrón de interfaz híbrido basado en maestro-detalle con navegación tipo pestañas.
-
-**Estado**: Backlog
-
----
-### HU-118: Validar Código Postal de Ubicación
-**Descripción**:
-Como usuario,
-Quiero que el sistema valide el código postal de cada ubicación de riesgo,
-Para asegurar que la dirección es válida y obtener la zonificación de riesgo correcta.
-
-**Criterios de Aceptación**:
-- Dado que ingreso un código postal en una ubicación, cuando el campo pierde el foco o se guarda, entonces el sistema valida el CP contra el `catalogo_cp_zonas`.
-- Dado que ingreso un código postal válido, cuando se valida, entonces se muestran los datos de zona (CAT, nivel técnico) asociados a ese CP.
-- Dado que ingreso un código postal inválido o no encontrado, cuando se valida, entonces el sistema muestra un mensaje de error claro y no permite guardar la ubicación con un CP erróneo.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-142 (Consumir Datos de Códigos Postales y Zonas de Riesgo), HU-163 (Validar Códigos Postales Contra Catálogo)
-
-**Componentes Técnicos**: Frontend (Campo de Código Postal), Backend (Servicio de Validación de CP).
-
-**Notas de Implementación**: La validación puede ser asíncrona y en tiempo real.
-
-**Estado**: Backlog
-
----
-### HU-119: Recibir Alertas por Datos Incompletos de Ubicación
-**Descripción**:
-Como usuario,
-Quiero recibir alertas visuales si una ubicación de riesgo tiene datos incompletos o inválidos,
-Para saber qué información necesito completar antes de calcular la prima.
-
-**Criterios de Aceptación**:
-- Dado que una ubicación tiene campos obligatorios vacíos, cuando la visualizo, entonces se muestra una alerta visual (e.g., icono, color) indicando datos incompletos.
-- Dado que una ubicación tiene datos inválidos (e.g., CP incorrecto), cuando la visualizo, entonces se muestra una alerta indicando la inconsistencia.
-- Dado que completo o corrijo los datos de una ubicación, cuando guardo, entonces la alerta visual desaparece.
-
-**Prioridad**: Media
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-115 (Editar Detalles de Ubicación de Riesgo), HU-152 (Validar Datos Específicos de Ubicación de Riesgo)
-
-**Componentes Técnicos**: Frontend (Elementos de Alerta Visual en la Interfaz de Ubicaciones).
-
-**Notas de Implementación**: Las alertas deben ser claras y no obstructivas, guiando al usuario a la acción.
-
-**Estado**: Backlog
-
----
-## FT-003: Configuración y Selección de Coberturas por Ubicación
-
-### HU-120: Visualizar Catálogo de Coberturas por Ubicación
-**Descripción**:
-Como usuario,
-Quiero ver el catálogo de coberturas disponibles para cada ubicación de riesgo y tipo de seguro,
-Para seleccionar las protecciones adecuadas para mis clientes.
-
-**Criterios de Aceptación**:
-- Dado que estoy en la sección de coberturas de una ubicación, cuando accedo, entonces se muestra una lista de coberturas relevantes para el tipo de seguro de la cotización.
-- Dado que el catálogo de coberturas tiene descripciones, cuando lo consulto, entonces puedo ver la información detallada de cada cobertura.
-- Dado que no hay coberturas disponibles para el tipo de seguro, cuando accedo, entonces se muestra un mensaje informativo.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-115 (Editar Detalles de Ubicación de Riesgo), HU-143 (Consumir Catálogos de Clasificación de Riesgo y Garantías)
-
-**Componentes Técnicos**: Frontend (Interfaz de Selección de Coberturas), Backend (API de Consulta de Coberturas).
-
-**Notas de Implementación**: El catálogo de coberturas debe ser configurable y estar asociado a tipos de seguro.
-
-**Estado**: Backlog
-
----
-### HU-121: Seleccionar y Deseleccionar Coberturas por Ubicación
-**Descripción**:
-Como usuario,
-Quiero poder seleccionar o deseleccionar coberturas específicas para cada ubicación de riesgo,
-Para personalizar la protección ofrecida según las necesidades del cliente.
-
-**Criterios de Aceptación**:
-- Dado que visualizo el catálogo de coberturas, cuando selecciono una o varias, entonces se marcan como activas para la ubicación.
-- Dado que una cobertura está seleccionada, cuando la deselecciono, entonces deja de estar activa para la ubicación.
-- Dado que guardo la cotización, cuando se persisten los cambios, entonces las coberturas seleccionadas se asocian correctamente a la ubicación.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-120 (Visualizar Catálogo de Coberturas), HU-115 (Editar Detalles de Ubicación)
-**Componentes Técnicos**: Frontend (Controles de Selección de Coberturas), Backend (API de Cotizaciones para gestión de coberturas).
-
-**Notas de Implementación**: La selección de coberturas debe ser intuitiva (e.g., checkboxes, toggles).
-
-**Estado**: Backlog
-
----
-### HU-122: Configurar Parámetros Específicos de Cobertura
-**Descripción**:
-Como usuario,
-Quiero configurar parámetros específicos para cada cobertura seleccionada (e.g., sumas aseguradas, deducibles),
-Para ajustar con precisión el alcance y las condiciones de la protección.
-
-**Criterios de Aceptación**:
-- Dado que selecciono una cobertura que requiere parámetros, cuando la activo, entonces se habilitan los campos para configurar sus valores (e.g., suma asegurada, deducible).
-- Dado que ingreso valores en los parámetros de cobertura y guardo, entonces estos valores se persisten junto con la cobertura y la ubicación.
-- Dado que los parámetros tienen rangos de validación, cuando ingreso un valor fuera de rango, entonces el sistema me lo notifica con un mensaje de error.
-
-**Prioridad**: Media
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-121 (Seleccionar y Deseleccionar Coberturas por Ubicación), HU-162 (Validar Rangos de Sumas Aseguradas)
-
-**Componentes Técnicos**: Frontend (Campos de Entrada de Parámetros), Backend (API de Cotizaciones para persistencia de parámetros).
-
-**Notas de Implementación**: La interfaz debe mostrar claramente qué parámetros son configurables para cada cobertura.
-
-**Estado**: Backlog
-
----
-### HU-123: Visualizar Coberturas Activas por Ubicación
-**Descripción**:
-Como usuario,
-Quiero ver claramente qué coberturas están activas para cada ubicación de riesgo,
-Para tener un resumen rápido de la protección configurada.
-
-**Criterios de Aceptación**:
-- Dado que he seleccionado coberturas para una ubicación, cuando la visualizo, entonces se muestra una indicación clara de las coberturas activas.
-- Dado que una cobertura tiene parámetros configurados, cuando la visualizo, entonces se muestran también sus valores (e.g., suma asegurada, deducible).
-- Dado que no hay coberturas activas para una ubicación, cuando la visualizo, entonces se muestra un mensaje indicando la ausencia de coberturas.
-
-**Prioridad**: Media
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-121 (Seleccionar y Deseleccionar Coberturas)
-
-**Componentes Técnicos**: Frontend (Elementos de Visualización de Coberturas Activas).
-
-**Notas de Implementación**: La presentación debe ser concisa y fácil de entender.
-
-**Estado**: Backlog
-
----
-## FT-004: Ejecución y Persistencia del Cálculo de Primas
-
-### HU-124: Iniciar Proceso de Cálculo de Prima
-
-**Descripción**:
-Como usuario,
-Quiero solicitar el cálculo de la prima de mi cotización,
-Para obtener los resultados financieros de las ubicaciones válidas.
-
-**Criterios de Aceptación**:
-- Dado que tengo al menos una ubicación con `estadoValidacion: COMPLETA`, cuando hago clic en el botón "Calcular Prima", entonces el sistema inicia el proceso de cálculo para las ubicaciones calculables.
-- Dado que algunas ubicaciones tienen `estadoValidacion: INCOMPLETA`, cuando inicio el cálculo, entonces el sistema **continúa calculando las ubicaciones válidas** y muestra las alertas de las excluidas sin detener el proceso.
-- Dado que **todas** las ubicaciones tienen `estadoValidacion: INCOMPLETA` o `INACTIVA` y no existe ninguna calculable, cuando intento calcular, entonces el sistema notifica que no hay ubicaciones válidas y no procede con el cálculo.
-- Dado que el cálculo se inicia, cuando está en progreso, entonces la interfaz muestra un indicador de carga.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-166 (Prevenir Ejecución de Cálculo cuando no hay ubicaciones válidas), HU-165 (Proporcionar Mensajes de Error Específicos de Validación)
-
-**Componentes Técnicos**: Frontend (Botón "Calcular Prima"), Backend (Endpoint `POST /v1/quotes/{folio}/calculate`).
-
-**Notas de Implementación**:
-- El botón solo se deshabilita completamente cuando no existe ninguna ubicación calculable.
-- Las ubicaciones incompletas se excluyen del cálculo individualmente, no bloquean el proceso general.
-
-**Estado**: Backlog
-
----
-### HU-125: Calcular Prima Neta y Comercial Total
-**Descripción**:
-Como usuario,
-Quiero que el sistema calcule la prima neta y comercial total de la cotización,
-Para conocer el costo global del seguro.
-
-**Criterios de Aceptación**:
-- Dado que se ha iniciado el cálculo, cuando finaliza exitosamente, entonces el sistema calcula la prima neta total sumando las primas netas de las ubicaciones.
-- Dado que se ha iniciado el cálculo, cuando finaliza exitosamente, entonces el sistema calcula la prima comercial total aplicando factores comerciales y otros recargos a la prima neta total.
-- Dado que los cálculos se realizan, cuando se completan, entonces los resultados están disponibles para persistencia y visualización.
-
-**Prioridad**: Alta
-
-**Estimación**: 4 puntos de historia
-
-**Dependencias**: HU-126 (Calcular Prima por Ubicación de Riesgo), HU-169 (Calcular Prima Comercial Total)
-
-**Componentes Técnicos**: Backend (Motor Central de Cálculo de Primas).
-
-**Notas de Implementación**: Las fórmulas de cálculo deben ser las simplificadas y documentadas.
-
-**Estado**: Backlog
-
----
-### HU-126: Calcular Prima por Ubicación de Riesgo
-**Descripción**:
-Como usuario,
-Quiero que el sistema calcule la prima para cada ubicación de riesgo individualmente,
-Para entender el desglose del costo por cada lugar asegurado.
-
-**Criterios de Aceptación**:
-- Dado que se ha iniciado el cálculo, cuando finaliza exitosamente, entonces el sistema calcula la prima neta para cada ubicación de riesgo.
-- Dado que la ubicación tiene coberturas y parámetros, cuando se calcula su prima, entonces se aplican las tarifas y factores técnicos correspondientes.
-- Dado que se calcula la prima por ubicación, cuando se completa, entonces el resultado está disponible para persistencia y visualización.
-
-**Prioridad**: Alta
-
-**Estimación**: 4 puntos de historia
-
-**Dependencias**: HU-122 (Configurar Parámetros Específicos de Cobertura), HU-167 (Calcular Prima Neta por Ubicación)
-
-**Componentes Técnicos**: Backend (Motor Central de Cálculo de Primas).
-
-**Notas de Implementación**: Los factores técnicos (incendio, CAT, FHM, equipo electrónico) deben ser aplicados por ubicación.
-
-**Estado**: Backlog
-
----
-### HU-127: Persistir Resultados del Cálculo de Prima
-**Descripción**:
-Como usuario,
-Quiero que los resultados del cálculo (prima neta, comercial, por ubicación) se guarden con la cotización,
-Para que estén disponibles para consulta futura y no se pierdan.
-
-**Criterios de Aceptación**:
-- Dado que el cálculo de la prima ha finalizado exitosamente, cuando se guardan los resultados, entonces la prima neta total, comercial total y el desglose por ubicación se persisten en la cotización.
-- Dado que los resultados se persisten, cuando se guarda la cotización, entonces la operación es atómica y consistente.
-- Dado que los resultados se persisten, cuando se guarda la cotización, entonces el estado de la cotización cambia a "Calculada".
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-125 (Calcular Prima Neta y Comercial Total), HU-126 (Calcular Prima por Ubicación de Riesgo), HU-172 (Persistir Prima Neta y Comercial en Cotización)
-
-**Componentes Técnicos**: Backend (API de Persistencia de Cotizaciones), Base de Datos (MongoDB).
-
-**Notas de Implementación**: La persistencia debe incluir el versionado optimista.
-
-**Estado**: Backlog
-
----
-### HU-128: Aplicar Reglas de Negocio y Factores Técnicos en Cálculo
-**Descripción**:
-Como usuario,
-Quiero que el cálculo de la prima considere las reglas de negocio y los factores técnicos definidos,
-Para asegurar que la prima refleje correctamente el riesgo y las políticas de la compañía.
-
-**Criterios de Aceptación**:
-- Dado que se realiza un cálculo, cuando se aplican las reglas de negocio, entonces los recargos o descuentos se consideran en la prima final.
-- Dado que se realiza un cálculo, cuando se aplican los factores técnicos (e.g., CAT, FHM), entonces el costo de la prima por ubicación se ajusta según estos factores.
-- Dado que los factores técnicos son obtenidos de catálogos, cuando se aplican, entonces se utilizan los valores correctos y actualizados.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-**Dependencias**: HU-168 (Aplicar Factores de Catástrofe (CAT) y FHM), HU-164 (Verificar Datos Mínimos Requeridos por Ubicación)
-
-**Componentes Técnicos**: Backend (Motor Central de Cálculo de Primas, Módulo de Reglas de Negocio).
-
-**Notas de Implementación**: La lógica de aplicación de reglas y factores debe ser modular y testeable.
-
-**Estado**: Backlog
-
----
-## FT-005: Visualización Detallada de Resultados Financieros
-
-### HU-129: Visualizar Resumen de Prima Neta y Comercial
-**Descripción**:
-Como usuario,
-Quiero ver un resumen claro de la prima neta y comercial total de mi cotización,
-Para tener una comprensión rápida del costo global.
-
-**Criterios de Aceptación**:
-- Dado que una cotización ha sido calculada, cuando la visualizo, entonces se muestra la prima neta total y la prima comercial total en un área destacada.
-- Dado que los valores de la prima son numéricos, cuando se muestran, entonces están formateados correctamente (e.g., moneda, decimales).
-- Dado que la cotización no ha sido calculada, cuando la visualizo, entonces los campos de prima total están vacíos o indican "Pendiente de Cálculo".
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-127 (Persistir Resultados del Cálculo de Prima)
-
-**Componentes Técnicos**: Frontend (Interfaz de Resultados Financieros).
-
-**Notas de Implementación**: La información debe ser fácil de encontrar y leer.
-
-**Estado**: Backlog
-
----
-### HU-130: Visualizar Desglose de Prima por Ubicación
-**Descripción**:
-Como usuario,
-Quiero ver el desglose de la prima calculada para cada ubicación de riesgo,
-Para entender cómo se distribuye el costo total del seguro.
-
-**Criterios de Aceptación**:
-- Dado que una cotización ha sido calculada, cuando visualizo los resultados, entonces se muestra la prima asignada a cada ubicación de riesgo.
-- Dado que selecciono una ubicación específica, cuando la visualizo, entonces puedo ver su prima individual en detalle.
-- Dado que los valores de la prima por ubicación son numéricos, cuando se muestran, entonces están formateados correctamente.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-127 (Persistir Resultados del Cálculo de Prima)
-
-**Componentes Técnicos**: Frontend (Interfaz de Resultados Financieros, Sección de Ubicaciones).
-
-**Notas de Implementación**: La tabla o lista de ubicaciones debe incluir su prima correspondiente.
-
-**Estado**: Backlog
-
----
-### HU-131: Visualizar Componentes Adicionales de la Prima
-**Descripción**:
-Como usuario,
-Quiero ver los componentes adicionales de la prima, como impuestos y recargos básicos,
-Para entender la composición completa del precio final del seguro.
-
-**Criterios de Aceptación**:
-- Dado que una cotización ha sido calculada, cuando visualizo los resultados, entonces se muestran los impuestos y recargos básicos aplicados.
-- Dado que los componentes adicionales son numéricos, cuando se muestran, entonces están formateados correctamente.
-- Dado que no hay impuestos o recargos aplicables, cuando visualizo los resultados, entonces estos campos no se muestran o indican "N/A".
-
-**Prioridad**: Media
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-127 (Persistir Resultados del Cálculo de Prima)
-
-**Componentes Técnicos**: Frontend (Interfaz de Resultados Financieros, Sección de Desglose).
-
-**Notas de Implementación**: Solo se mostrarán los impuestos y recargos básicos definidos en el cálculo.
-
-**Estado**: Backlog
-
----
-### HU-132: Sincronizar Visualización de Resultados Financieros
-**Descripción**:
-Como usuario,
-Quiero que los resultados financieros mostrados estén siempre sincronizados con el último cálculo realizado,
-Para asegurar que la información es actual y precisa.
-
-**Criterios de Aceptación**:
-- Dado que se ha realizado un nuevo cálculo de prima, cuando accedo a la sección de resultados, entonces se muestran los resultados del cálculo más reciente.
-- Dado que se han realizado modificaciones a la cotización (ubicaciones, coberturas) después de un cálculo, cuando visualizo los resultados, entonces se muestra una advertencia de que el cálculo puede estar desactualizado o se invalida el cálculo anterior.
-- Dado que un cálculo falla, cuando accedo a los resultados, entonces se muestra un mensaje de error y no se muestran resultados desactualizados.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-127 (Persistir Resultados del Cálculo de Prima), HU-138 (Cualquier Modificación Invalida Cálculo)
-
-**Componentes Técnicos**: Frontend (Lógica de Actualización de UI), Backend (API de Consulta de Cotizaciones).
-
-**Notas de Implementación**: El sistema debe tener un mecanismo para invalidar o marcar como desactualizado un cálculo si los datos de la cotización cambian.
-
-**Estado**: Backlog
-
----
-## FT-006: Gestión del Ciclo de Vida y Estados de la Cotización
-
-### HU-133: Cotización Inicia en Estado "Borrador"
-**Descripción**:
-Como usuario,
-Quiero que cada nueva cotización comience automáticamente en el estado "Borrador",
-Para indicar que aún está en proceso de creación y edición.
-
-**Criterios de Aceptación**:
-- Dado que creo una nueva cotización, cuando se guarda por primera vez, entonces su estado se establece como "Borrador".
-- Dado que consulto una cotización recién creada, cuando visualizo su estado, entonces se muestra "Borrador".
-- Dado que una cotización está en "Borrador", cuando se realizan modificaciones, entonces permanece en "Borrador" hasta que se inicie un cálculo.
-
-**Prioridad**: Alta
-
-**Estimación**: 1 punto de historia
-
-**Dependencias**: HU-110 (Crear Nueva Cotización)
-
-**Componentes Técnicos**: Backend (Lógica de Inicialización de Cotización).
-
-**Notas de Implementación**: El estado "Borrador" es el estado inicial por defecto.
-
-**Estado**: Backlog
-
----
-### HU-134: Actualización Automática a Estado "Calculada"
-**Descripción**:
-Como usuario,
-Quiero que el estado de la cotización se actualice automáticamente a "Calculada" tras una ejecución exitosa del cálculo,
-Para reflejar que la información financiera está disponible y es válida.
-
-**Criterios de Aceptación**:
-- Dado que una cotización en estado "Borrador" se calcula exitosamente, cuando finaliza el proceso, entonces su estado cambia a "Calculada".
-- Dado que el cálculo falla, cuando finaliza el proceso, entonces el estado de la cotización no cambia a "Calculada" y permanece en el estado anterior (e.g., "Borrador" o "Pendiente de Cálculo").
-- Dado que el estado es "Calculada", cuando se visualiza, entonces indica que los resultados de prima están disponibles.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-127 (Persistir Resultados del Cálculo de Prima), HU-136 (No se puede calcular sin validaciones previas)
-
-**Componentes Técnicos**: Backend (Lógica de Transición de Estados).
-
-**Notas de Implementación**: La transición solo ocurre si todas las validaciones previas son exitosas.
-
-**Estado**: Backlog
-
----
-### HU-135: Cambiar Manualmente Estado a "Aprobada" o "Rechazada"
-**Descripción**:
-Como usuario,
-Quiero poder cambiar manualmente el estado de una cotización a "Aprobada" o "Rechazada" desde "Calculada",
-Para indicar el resultado de la negociación con el cliente.
-
-**Criterios de Aceptación**:
-- Dado que una cotización está en estado "Calculada", cuando selecciono "Aprobar", entonces su estado cambia a "Aprobada".
-- Dado que una cotización está en estado "Calculada", cuando selecciono "Rechazar", entonces su estado cambia a "Rechazada".
-- Dado que la cotización no está en estado "Calculada", cuando intento aprobar o rechazar, entonces el sistema me lo impide.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-134 (Actualización Automática a Estado "Calculada"), HU-137 (No se puede aprobar sin cálculo previo)
-
-**Componentes Técnicos**: Frontend (Botones de Acción de Estado), Backend (API de Actualización de Estado).
-
-**Notas de Implementación**: Estos cambios de estado son acciones manuales del usuario.
-
-**Estado**: Backlog
-
----
-### HU-136: No se puede calcular sin validaciones previas
-**Descripción**:
-Como usuario,
-Quiero que el sistema me impida calcular una cotización si no cumple con las validaciones previas,
-Para evitar cálculos erróneos y asegurar la calidad de los datos.
-
-**Criterios de Aceptación**:
-- Dado que una cotización tiene ubicaciones incompletas o inválidas, cuando intento calcular la prima, entonces el sistema me muestra los errores de validación y no procede.
-- Dado que una cotización tiene coberturas no definidas o con parámetros erróneos, cuando intento calcular la prima, entonces el sistema me lo impide.
-- Dado que todas las validaciones son exitosas, cuando intento calcular, entonces el cálculo procede sin impedimentos.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-166 (Prevenir Ejecución de Cálculo con Errores de Validación)
-
-**Componentes Técnicos**: Backend (Motor de Validación de Reglas de Negocio), Frontend (Mensajes de Error).
-
-**Notas de Implementación**: La validación debe ser exhaustiva antes de invocar el motor de cálculo.
-
-**Estado**: Backlog
-
----
-### HU-137: No se puede aprobar sin cálculo previo
-**Descripción**:
-Como usuario,
-Quiero que el sistema me impida aprobar una cotización si no ha sido previamente calculada,
-Para asegurar que solo se aprueban cotizaciones con información financiera validada.
-
-**Criterios de Aceptación**:
-- Dado que una cotización está en estado "Borrador" o "Pendiente de Cálculo", cuando intento cambiar su estado a "Aprobada", entonces el sistema me lo impide y muestra un mensaje de error.
-- Dado que una cotización está en estado "Calculada", cuando intento cambiar su estado a "Aprobada", entonces la operación es exitosa.
-- Dado que una cotización ha sido "Rechazada", cuando intento cambiar su estado a "Aprobada", entonces el sistema me lo impide.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-134 (Actualización Automática a Estado "Calculada"), HU-135 (Cambiar Manualmente Estado)
-
-**Componentes Técnicos**: Backend (Lógica de Transición de Estados).
-
-**Notas de Implementación**: Las reglas de transición de estado deben ser estrictas.
-
-**Estado**: Backlog
-
----
-### HU-138: Cualquier Modificación Invalida Cálculo
-**Descripción**:
-Como usuario,
-Quiero que cualquier modificación en una cotización en estado "CALCULADA" o superior invalide el cálculo,
-Para asegurar que los resultados financieros siempre correspondan a la información actual.
-
-**Criterios de Aceptación**:
-- Dado que una cotización está en estado "Calculada", cuando modifico datos generales o de una ubicación, entonces el estado de la cotización regresa a "Borrador" o "Pendiente de Cálculo".
-- Dado que el estado regresa a "Borrador" o "Pendiente de Cálculo", cuando visualizo los resultados financieros, entonces se indica que están desactualizados o no disponibles.
-- Dado que una cotización está en estado "Aprobada" o "Rechazada", cuando intento modificarla, entonces el sistema me lo permite pero regresa a un estado de borrador para recalculo.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-112 (Editar Datos Generales), HU-115 (Editar Detalles de Ubicación)
-
-**Componentes Técnicos**: Backend (Lógica de Transición de Estados y Validación).
-
-**Notas de Implementación**: Esta regla es crucial para mantener la integridad de los datos financieros.
-
-**Estado**: Backlog
-
----
-### HU-139: Establecer Estado "Emitida"
-**Descripción**:
-Como usuario,
-Quiero poder establecer el estado de una cotización como "Emitida" una vez que ha sido "Aprobada",
-Para indicar que la póliza ha sido formalmente emitida y es un estado terminal.
-
-**Criterios de Aceptación**:
-- Dado que una cotización está en estado "Aprobada", cuando selecciono "Emitir", entonces su estado cambia a "Emitida".
-- Dado que una cotización está en estado "Emitida", cuando intento modificarla, entonces el sistema me lo impide o me notifica que es un estado terminal.
-- Dado que una cotización no está en estado "Aprobada", cuando intento cambiar su estado a "Emitida", entonces el sistema me lo impide.
-
-**Prioridad**: Media
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-135 (Cambiar Manualmente Estado a "Aprobada" o "Rechazada")
-
-**Componentes Técnicos**: Frontend (Botón "Emitir"), Backend (API de Actualización de Estado).
-
-**Notas de Implementación**: "Emitida" debe ser un estado terminal sin transiciones de salida.
-
-**Estado**: Backlog
-
----
-### HU-140: Visualizar Estado Actual de la Cotización
-**Descripción**:
-Como usuario,
-Quiero ver claramente el estado actual de la cotización,
-Para tener un seguimiento visual del progreso del proceso de venta.
-
-**Criterios de Aceptación**:
-- Dado que tengo una cotización abierta, cuando la visualizo, entonces se muestra una etiqueta o indicador con su estado actual (e.g., Borrador, Calculada).
-- Dado que el estado de la cotización cambia, cuando la consulto de nuevo, entonces la interfaz refleja el nuevo estado.
-- Dado que el estado es importante, cuando se muestra, entonces es prominente y fácil de identificar.
-
-**Prioridad**: Alta
-
-**Estimación**: 1 punto de historia
-
-**Dependencias**: Ninguna (es una funcionalidad de visualización)
-
-**Componentes Técnicos**: Frontend (Elemento de Visualización de Estado).
-
-**Notas de Implementación**: El estado puede ser representado con colores o iconos para mayor claridad.
-
-**Estado**: Backlog
-
----
-## FT-007: Integración con Servicios de Referencia (Catálogos y Tarifas)
-
-### HU-141: Consumir Catálogos de Suscriptores, Agentes y Giros
-**Descripción**:
-Como sistema,
-Quiero consumir los catálogos de suscriptores, agentes y giros desde `Plataforma-core-ohs` (o su simulación),
-Para proveer opciones de selección actualizadas en la interfaz de datos generales.
-
-**Criterios de Aceptación**:
-- Dado que el sistema requiere los catálogos, cuando realiza la consulta, entonces obtiene los datos de suscriptores, agentes y giros del servicio externo.
-- Dado que los datos son recibidos, cuando se procesan, entonces se mapean correctamente al modelo interno del cotizador.
-- Dado que el servicio externo no responde, cuando se realiza la consulta, entonces el sistema maneja la excepción y registra el error.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
-
-**Componentes Técnicos**: Backend (Clientes API REST para `Plataforma-core-ohs`), Capa de Integración.
-
-**Notas de Implementación**: Considerar estrategia de caché para estos catálogos.
-
-**Estado**: Backlog
-
----
-## FT-008: Gestión de Persistencia Avanzada y Versionado Optimista
-
-### HU-142: Consumir Datos de Códigos Postales y Zonas de Riesgo
-**Descripción**:
-Como sistema,
-Quiero consultar y validar información de códigos postales y sus zonas de riesgo desde `Plataforma-core-ohs` (o su simulación),
-Para asegurar la correcta evaluación del riesgo por ubicación.
-
-**Criterios de Aceptación**:
-- Dado que el sistema requiere validar un código postal, cuando realiza la consulta, entonces obtiene la información de zona (CAT, nivel técnico) asociada al CP.
-- Dado que el código postal es inválido o no encontrado en el catálogo, cuando se realiza la consulta, entonces el servicio devuelve una indicación de error.
-- Dado que los datos de zona se reciben, cuando se procesan, entonces están disponibles para la lógica de cálculo de primas.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
-
-**Componentes Técnicos**: Backend (Clientes API REST para `Plataforma-core-ohs`), Servicio de Validación de CP.
-**Notas de Implementación**: Optimizar la consulta de CP para grandes volúmenes.
-
-**Estado**: Backlog
-
----
-### HU-143: Consumir Catálogos de Clasificación de Riesgo y Garantías
-**Descripción**:
-Como sistema,
-Quiero obtener los catálogos de clasificación de riesgo y garantías desde `Plataforma-core-ohs` (o su simulación),
-Para permitir la configuración detallada de coberturas y la evaluación de riesgo.
-
-**Criterios de Aceptación**:
-- Dado que el sistema requiere los catálogos, cuando realiza la consulta, entonces obtiene los datos de clasificación de riesgo y garantías del servicio externo.
-- Dado que los datos son recibidos, cuando se procesan, entonces se mapean correctamente al modelo interno del cotizador.
-- Dado que los catálogos se actualizan en el sistema de origen, cuando se consultan, entonces los cambios se reflejan en el cotizador.
-
-**Prioridad**: Media
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
-
-**Componentes Técnicos**: Backend (Clientes API REST para `Plataforma-core-ohs`), Capa de Integración.
-
-**Notas de Implementación**: Estos catálogos suelen ser menos voluminosos y de actualización menos frecuente.
-
-**Estado**: Backlog
-
----
-### HU-144: Consumir Tarifas y Factores Técnicos
-**Descripción**:
-Como sistema,
-Quiero consultar las tarifas (incendio, CAT, FHM) y factores técnicos (equipo electrónico) desde `Plataforma-core-ohs` (o su simulación),
-Para utilizarlos en el cálculo preciso de las primas.
-
-**Criterios de Aceptación**:
-- Dado que el sistema requiere tarifas o factores, cuando realiza la consulta, entonces obtiene los datos necesarios del servicio externo.
-- Dado que los datos son recibidos, cuando se procesan, entonces se mapean correctamente para ser utilizados en la lógica de cálculo.
-- Dado que el servicio externo no responde o devuelve datos inconsistentes, cuando se realiza la consulta, entonces el sistema maneja el error y notifica.
-
-**Prioridad**: Alta
-
-**Estimación**: 4 puntos de historia
-
-**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
-
-**Componentes Técnicos**: Backend (Clientes API REST para `Plataforma-core-ohs`), Módulo de Adaptación de Tarifas.
-
-**Notas de Implementación**: La estructura de tarifas y factores puede ser compleja y requiere mapeo cuidadoso.
-
-**Estado**: Backlog
-
----
-### HU-145: Manejo de Errores de Comunicación con Servicio Externo
-**Descripción**:
-Como sistema,
-Quiero manejar posibles errores de comunicación con el servicio `Plataforma-core-ohs`,
-Para asegurar la robustez de la integración y evitar fallos en el cotizador.
-
-**Criterios de Aceptación**:
-- Dado que `Plataforma-core-ohs` no está disponible, cuando el sistema intenta consultarlo, entonces se registra un error y se notifica al usuario o sistema.
-- Dado que la respuesta de `Plataforma-core-ohs` es inconsistente, cuando el sistema la recibe, entonces se maneja la inconsistencia y se registra.
-- Dado que hay un error de comunicación, cuando se intenta una operación dependiente, entonces el sistema puede reintentar la operación o usar datos en caché (si aplica).
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-141, HU-142, HU-143, HU-144
-
-**Componentes Técnicos**: Capa de Integración Backend (Manejo de Excepciones, Circuit Breakers, Reintentos).
-
-**Notas de Implementación**: Implementar patrones de resiliencia como Circuit Breaker y Retry.
-
-**Estado**: Backlog
-
----
-## FT-009: Implementación de Reglas de Negocio y Validaciones
-
-### HU-146: Incrementar Versión en Ediciones de Cotización
-**Descripción**:
-Como sistema,
-Quiero que cada edición de una cotización incremente automáticamente un campo de versión,
-Para facilitar el control de concurrencia y la trazabilidad de los cambios.
-
-**Criterios de Aceptación**:
-- Dado que se guarda una cotización modificada, cuando la operación es exitosa, entonces el campo `version` de la cotización se incrementa en uno.
-- Dado que se crea una nueva cotización, cuando se guarda por primera vez, entonces su campo `version` se inicializa en un valor (e.g., 1).
-- Dado que ocurre un error al guardar, cuando la operación falla, entonces el campo `version` no se incrementa.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: Todas las HUs que modifican la cotización (ej. HU-112, HU-115)
-
-**Componentes Técnicos**: Backend (Capa de Persistencia, Modelo de Datos de Cotización).
-
-**Notas de Implementación**: La gestión del campo de versión debe ser automática y transparente para el usuario.
-
-**Estado**: Backlog
-
----
-### HU-147: Actualizar Fecha de Última Actualización en Ediciones
-**Descripción**:
-Como sistema,
-Quiero que cada edición de una cotización actualice el campo `fechaUltimaActualizacion`,
-Para tener un registro de cuándo fue la última modificación de la cotización.
-
-**Criterios de Aceptación**:
-- Dado que se guarda una cotización modificada, cuando la operación es exitosa, entonces el campo `fechaUltimaActualizacion` se actualiza con la fecha y hora actual.
-- Dado que se crea una nueva cotización, cuando se guarda por primera vez, entonces su campo `fechaUltimaActualizacion` se establece con la fecha y hora de creación.
-- Dado que ocurre un error al guardar, cuando la operación falla, entonces el campo `fechaUltimaActualizacion` no se actualiza.
-
-**Prioridad**: Alta
-
-**Estimación**: 1 punto de historia
-
-**Dependencias**: HU-146 (Incrementar Versión en Ediciones de Cotización)
-
-**Componentes Técnicos**: Backend (Capa de Persistencia, Modelo de Datos de Cotización).
-
-**Notas de Implementación**: La actualización de la fecha debe ser automática.
-
-**Estado**: Backlog
-
----
-### HU-148: Prevenir Sobrescritura con Versionado Optimista
-**Descripción**:
-Como sistema,
-Quiero prevenir la sobrescritura de cambios si una versión más reciente ya fue guardada (versionado optimista),
-Para evitar la pérdida de datos en ediciones concurrentes.
-
-**Criterios de Aceptación**:
-- Dado que un usuario intenta guardar una cotización con una versión desactualizada, cuando la operación se realiza, entonces el sistema detecta el conflicto y la rechaza.
-- Dado que se detecta un conflicto de versión, cuando el sistema lo notifica, entonces se envía un mensaje de error al usuario indicando que la cotización ha sido modificada por otro usuario.
-- Dado que la versión de la cotización en memoria coincide con la de la base de datos, cuando se guarda, entonces la operación es exitosa.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-146 (Incrementar Versión en Ediciones de Cotización), HU-177 (Comparar Versiones de Cotización en Guardado)
-
-**Componentes Técnicos**: Backend (Lógica de Control de Concurrencia en Persistencia).
-
-**Notas de Implementación**: La estrategia específica para el versionado optimista será un número de versión incremental gestionado por el backend.
-
-**Estado**: Backlog
-
----
-### HU-149: Permitir Actualización Parcial de Campos
-**Descripción**:
-Como sistema,
-Quiero permitir la actualización parcial de campos de la cotización sin afectar otros datos,Para optimizar las operaciones de guardado y reducir la carga de datos.
-
-**Criterios de Aceptación**:
-- Dado que un usuario modifica solo un subconjunto de campos de la cotización, cuando guarda, entonces solo esos campos modificados se actualizan en la base de datos.
-- Dado que se realiza una actualización parcial, cuando se completa, entonces los campos no modificados permanecen intactos.
-- Dado que una actualización parcial es exitosa, cuando se guarda, entonces el campo `fechaUltimaActualizacion` y la `version` se actualizan.
-
-**Prioridad**: Media
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-146 (Incrementar Versión en Ediciones de Cotización)
-
-**Componentes Técnicos**: Backend (API de Actualización Parcial, Capa de Persistencia).
-
-**Notas de Implementación**: Utilizar DTOs específicos para actualizaciones o mapeo inteligente de campos.
-
-**Estado**: Backlog
-
----
-### HU-150: Persistencia Transaccional de Cotización y Ubicaciones
-**Descripción**:
-Como sistema,
-Quiero asegurar que la persistencia de la cotización y sus ubicaciones es transaccional y consistente,
-Para garantizar la integridad de los datos en caso de errores.
-
-**Criterios de Aceptación**:
-- Dado que se guarda una cotización con sus ubicaciones, cuando la operación es exitosa, entonces todos los datos (cotización y todas sus ubicaciones) se persisten.
-- Dado que ocurre un error durante la persistencia de una ubicación, cuando la operación falla, entonces todos los cambios (cotización y ubicaciones) se deshacen (rollback).
-- Dado que la persistencia es transaccional, cuando se completa, entonces la base de datos refleja un estado consistente.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-114 (Agregar Nueva Ubicación), HU-116 (Eliminar Ubicación de Riesgo)
-
-**Componentes Técnicos**: Backend (Capa de Persistencia, Transacciones en MongoDB).
-
-**Notas de Implementación**: MongoDB no tiene transacciones ACID a nivel de múltiples documentos por defecto, por lo que se debe simular la atomicidad a nivel de agregado.
-
-**Estado**: Backlog
-
----
-## FT-010: Configuración y Gestión de Parámetros de Cálculo
-
-### HU-151: Validar Datos Generales de la Cotización
-**Descripción**:
-Como sistema,
-Quiero implementar reglas de validación para los datos generales de la cotización (ej., formato RFC, rangos de vigencia),
-Para asegurar la consistencia y corrección de la información inicial.
-
-**Criterios de Aceptación**:
-- Dado que el usuario ingresa un RFC, cuando se valida, entonces se comprueba que cumple con el formato requerido.
-- Dado que el usuario selecciona una vigencia, cuando se valida, entonces se comprueba que las fechas de inicio y fin son coherentes y dentro de rangos válidos.
-- Dado que un campo obligatorio está vacío, cuando se guarda la cotización, entonces el sistema muestra un mensaje de error claro y no permite guardar.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-112 (Editar Datos Generales de la Cotización)
-
-**Componentes Técnicos**: Backend (Módulo de Validación de Datos Generales).
-
-**Notas de Implementación**: Las validaciones deben ejecutarse tanto en frontend como en backend.
-
-**Estado**: Backlog
-
----
-### HU-152: Validar Datos Específicos de Ubicación de Riesgo
-**Descripción**:
-Como sistema,
-Quiero implementar reglas de validación para los datos específicos de cada ubicación de riesgo (ej., valor del bien, año de construcción),
-Para asegurar la integridad de la información utilizada en la evaluación del riesgo.
-
-**Criterios de Aceptación**:
-- Dado que el usuario ingresa el valor de un bien, cuando se valida, entonces se comprueba que está dentro de los rangos permitidos.
-- Dado que el usuario ingresa el año de construcción, cuando se valida, entonces se comprueba que es un año válido y consistente.
-- Dado que un campo obligatorio de una ubicación está vacío, cuando se guarda la ubicación, entonces el sistema muestra un mensaje de error claro.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-115 (Editar Detalles de Ubicación de Riesgo)
-
-**Componentes Técnicos**: Backend (Módulo de Validación de Datos de Ubicación).
-
-**Notas de Implementación**: Las reglas de validación deben ser configurables y extensibles.
-
-**Estado**: Backlog
-
----
-### HU-153: Aplicar Lógica de Negocio en Cálculo de Primas
-**Descripción**:
-Como sistema,
-Quiero que la lógica de cálculo de primas incorpore las reglas de negocio y factores técnicos definidos (ej., aplicación de recargos, descuentos),
-Para asegurar que la prima final sea correcta y consistente con las políticas de suscripción.
-
-**Criterios de Aceptación**:
-- Dado que se cumplen ciertas condiciones (ej. tipo de cliente, canal de venta), cuando se calcula la prima, entonces se aplican los recargos o descuentos correspondientes.
-- Dado que se utilizan factores técnicos, cuando se aplican en el cálculo, entonces se hace según las especificaciones de las tarifas.
-- Dado que una regla de negocio impacta el cálculo, cuando se ejecuta, entonces el resultado final de la prima lo refleja.
-
-**Prioridad**: Alta
-
-**Estimación**: 4 puntos de historia
-
-**Dependencias**: HU-128 (Aplicar Reglas de Negocio y Factores Técnicos en Cálculo)
-
-**Componentes Técnicos**: Backend (Motor Central de Cálculo de Primas, Módulo de Reglas de Negocio).
-
-**Notas de Implementación**: La lógica de negocio debe ser trazable y documentada.
-
-**Estado**: Backlog
-
----
-### HU-154: Proporcionar Mensajes de Error Claros
-**Descripción**:
-Como sistema,
-Quiero proporcionar mensajes de error claros y útiles cuando las validaciones fallan,
-Para guiar al usuario en la corrección de los datos.
-
-**Criterios de Aceptación**:
-- Dado que una validación falla, cuando se muestra el error, entonces el mensaje indica claramente qué campo es erróneo y por qué.
-- Dado que múltiples validaciones fallan, cuando se muestran los errores, entonces se presentan de forma organizada y fácil de entender.
-- Dado que un error es crítico, cuando se muestra, entonces se destaca para la acción inmediata del usuario.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-151 (Validar Datos Generales), HU-152 (Validar Datos Específicos de Ubicación)
-
-**Componentes Técnicos**: Frontend (Sistema de Notificaciones/Validaciones de UI), Backend (Servicio de Mensajes de Error).
-
-**Notas de Implementación**: Los mensajes deben ser amigables y orientados a la solución.
-
-**Estado**: Backlog
-
----
-### HU-155: Asegurar Trazabilidad de Reglas de Negocio
-**Descripción**:
-Como sistema,
-Quiero que las reglas de negocio implementadas sean trazables y documentadas,
-Para facilitar la auditoría, mantenimiento y comprensión de la lógica del sistema.
-
-**Criterios de Aceptación**:
-- Dado que se implementa una regla de negocio, cuando se realiza, entonces existe documentación que describe su propósito, condiciones y efectos.
-- Dado que se necesita auditar un cálculo, cuando se consulta, entonces es posible identificar qué reglas de negocio fueron aplicadas y con qué parámetros.
-- Dado que se requiere modificar una regla, cuando se busca, entonces su implementación es fácilmente identificable en el código.
-
-**Prioridad**: Media
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-153 (Aplicar Lógica de Negocio en Cálculo de Primas)
-
-**Componentes Técnicos**: Backend (Módulo de Reglas de Negocio, Herramientas de Documentación).
-
-**Notas de Implementación**: Considerar el uso de un motor de reglas o un enfoque basado en especificaciones.
-
-**Estado**: Backlog
-
----
-### HU-156: Consumir Tarifas de Incendio
-**Descripción**:
-Como sistema,
-Quiero consumir o simular la consulta de `tarifas_incendio` del servicio `Plataforma-core-ohs`,
-Para obtener las tasas base necesarias para el cálculo de primas.
-
-**Criterios de Aceptación**:
-- Dado que el motor de cálculo requiere tarifas de incendio, cuando las consulta, entonces obtiene los datos del servicio `Plataforma-core-ohs` o del mock.
-- Dado que las tarifas se reciben, cuando se procesan, entonces se mapean correctamente y están disponibles para el cálculo.
-- Dado que el servicio de tarifas no está disponible, cuando se realiza la consulta, entonces el sistema maneja la excepción y registra el error.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
-
-**Componentes Técnicos**: Backend (Adaptador para `Plataforma-core-ohs`), Repositorio de Parámetros.
-**Notas de Implementación**: La simulación debe ser fiel a los contratos de la API real.
-
-**Estado**: Backlog
-
----
-### HU-157: Consumir Tarifas de Catástrofe (CAT)
-**Descripción**:
-Como sistema,
-Quiero consumir o simular la consulta de `tarifas_cat` del servicio `Plataforma-core-ohs`,
-Para aplicar los factores de catástrofe según la zona de riesgo.
-
-**Criterios de Aceptación**:
-- Dado que el motor de cálculo requiere tarifas CAT, cuando las consulta, entonces obtiene los datos del servicio `Plataforma-core-ohs` o del mock.
-- Dado que las tarifas se reciben, cuando se procesan, entonces se mapean correctamente y están disponibles para el cálculo.
-- Dado que se consulta una zona de riesgo, cuando se aplican las tarifas CAT, entonces se utiliza el factor correcto para esa zona.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
-
-**Componentes Técnicos**: Backend (Adaptador para `Plataforma-core-ohs`), Repositorio de Parámetros.
-
-**Notas de Implementación**: Se debe considerar cómo se relaciona la zona con la tarifa CAT.
-
-**Estado**: Backlog
-
----
-### HU-158: Consumir Tarifa FHM
-**Descripción**:
-Como sistema,
-Quiero consumir o simular la consulta de `tarifa_fhm` del servicio `Plataforma-core-ohs`,
-Para aplicar las cuotas de Fenómenos Hidrometeorológicos (FHM) en el cálculo.
-
-**Criterios de Aceptación**:
-- Dado que el motor de cálculo requiere tarifa FHM, cuando la consulta, entonces obtiene los datos del servicio `Plataforma-core-ohs` o del mock.
-- Dado que la tarifa se recibe, cuando se procesa, entonces se mapea correctamente y está disponible para el cálculo.
-- Dado que se consulta una ubicación, cuando se aplica la tarifa FHM, entonces se utiliza la cuota correcta según el grupo, zona y condición.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
-
-**Componentes Técnicos**: Backend (Adaptador para `Plataforma-core-ohs`), Repositorio de Parámetros.
-
-**Notas de Implementación**: La tarifa FHM puede tener múltiples criterios de aplicación.
-
-**Estado**: Backlog
-
----
-### HU-159: Consumir Factores de Equipo Electrónico
-**Descripción**:
-Como sistema,
-Quiero consumir o simular la consulta de `factores_equipo_electronico` del servicio `Plataforma-core-ohs`,
-Para aplicar el factor técnico de equipo electrónico en el cálculo de primas.
-
-**Criterios de Aceptación**:
-- Dado que el motor de cálculo requiere factores de equipo electrónico, cuando los consulta, entonces obtiene los datos del servicio `Plataforma-core-ohs` o del mock.
-- Dado que los factores se reciben, cuando se procesan, entonces se mapean correctamente y están disponibles para el cálculo.
-- Dado que se consulta una ubicación con equipo electrónico, cuando se aplica el factor, entonces se utiliza el valor correcto según la clase y nivel de zona.
-
-**Prioridad**: Media
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
-
-**Componentes Técnicos**: Backend (Adaptador para `Plataforma-core-ohs`), Repositorio de Parámetros.
-
-**Notas de Implementación**: Definir cómo se clasifica el equipo electrónico y su relación con las zonas.
-
-**Estado**: Backlog
-
----
-### HU-160: Consumir Catálogo de Códigos Postales y Zonas (EP-002)
-**Descripción**:
-Como sistema,
-Quiero consumir o simular la consulta de `catalogo_cp_zonas` del servicio `Plataforma-core-ohs` y mapear zonas,
-Para obtener la relación entre códigos postales y sus zonas (CAT, nivel técnico) para el cálculo.
-
-**Criterios de Aceptación**:
-- Dado que el motor de cálculo requiere el catálogo CP-Zonas, cuando lo consulta, entonces obtiene los datos del servicio `Plataforma-core-ohs` o del mock.
-- Dado que el catálogo se recibe, cuando se procesa, entonces los códigos postales se mapean correctamente a sus zonas CAT y nivel técnico.
-- Dado que se consulta un código postal, cuando se obtienen sus zonas, entonces la información es precisa y completa.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
-
-**Componentes Técnicos**: Backend (Adaptador para `Plataforma-core-ohs`), Mapeador de Datos.
-
-**Notas de Implementación**: La gestión de versionado o fechas de vigencia para estos parámetros es una mejora futura.
-
-**Estado**: Backlog
-
----
-### HU-161: Parámetros Disponibles para Motores de Cálculo y Validación
-**Descripción**:
-Como sistema,
-Quiero que todos los parámetros y tarifas cargados estén disponibles para el Motor de Validación y el Motor Central de Cálculo,
-Para asegurar que ambos motores operan con la información más reciente y correcta.
-
-**Criterios de Aceptación**:
-- Dado que los parámetros y tarifas han sido cargados exitosamente, cuando el Motor de Validación los requiere, entonces tiene acceso a ellos.
-- Dado que los parámetros y tarifas han sido cargados exitosamente, cuando el Motor Central de Cálculo los requiere, entonces tiene acceso a ellos.
-- Dado que un parámetro se actualiza, cuando se consulta, entonces ambos motores reciben el valor actualizado.
-**Prioridad**: Alta
-
-**Estimación**: 1 punto de historia
-
-**Dependencias**: HU-156, HU-157, HU-158, HU-159, HU-160
-
-**Componentes Técnicos**: Backend (Repositorios de Parámetros, Servicios de Consulta de Parámetros).
-
-**Notas de Implementación**: Implementar una interfaz común para acceder a los parámetros.
-
-**Estado**: Backlog
-
----
-## FT-011: Motor de Validación de Reglas de Negocio
-
-### HU-162: Validar Rangos de Sumas Aseguradas
-**Descripción**:
-Como sistema,
-Quiero validar que las sumas aseguradas de las coberturas estén dentro de los rangos predefinidos,
-Para asegurar que los valores son coherentes con las políticas de suscripción.
-
-**Criterios de Aceptación**:
-- Dado que el usuario ingresa una suma asegurada, cuando se valida, entonces se comprueba que está entre el mínimo y el máximo permitido.
-- Dado que la suma asegurada está fuera de rango, cuando se valida, entonces el sistema genera un error de validación claro.
-- Dado que la suma asegurada está dentro de rango, cuando se valida, entonces no se genera ningún error.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-122 (Configurar Parámetros Específicos de Cobertura), HU-161 (Parámetros Disponibles para Motores)
-
-**Componentes Técnicos**: Backend (Módulo de Reglas de Validación).
-
-**Notas de Implementación**: Los rangos deben ser configurables y accesibles desde los parámetros de cálculo.
-
-**Estado**: Backlog
-
----
-### HU-163: Validar Códigos Postales Contra Catálogo
-**Descripción**:
-Como sistema,
-Quiero validar los códigos postales de las ubicaciones contra el `catalogo_cp_zonas` provisto,
-Para asegurar que solo se usan códigos postales válidos y asociados a zonas de riesgo.
-
-**Criterios de Aceptación**:
-- Dado que una ubicación tiene un código postal, cuando se valida, entonces se verifica su existencia en el `catalogo_cp_zonas`.
-- Dado que el código postal no se encuentra en el catálogo, cuando se valida, entonces el sistema genera un error de validación.
-- Dado que el código postal es válido y existe en el catálogo, cuando se valida, entonces no se genera ningún error.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-118 (Validar Código Postal de Ubicación), HU-160 (Consumir Catálogo de Códigos Postales y Zonas)
-
-**Componentes Técnicos**: Backend (Módulo de Reglas de Validación, Servicio de Consulta de Catálogos).
-
-**Notas de Implementación**: La validación debe ser eficiente, especialmente con grandes catálogos de CP.
-
-**Estado**: Backlog
-
----
-### HU-164: Verificar Datos Mínimos Requeridos por Ubicación
-**Descripción**:
-Como sistema,
-Quiero verificar que todas las ubicaciones tengan los datos mínimos requeridos para el cálculo,
-Para asegurar que el motor de cálculo recibe información completa.
-
-**Criterios de Aceptación**:
-- Dado que una ubicación es procesada para cálculo, cuando se valida, entonces se comprueba que todos los campos obligatorios están completos.
-- Dado que faltan datos mínimos en una ubicación, cuando se valida, entonces el sistema genera un error de validación específico para esa ubicación.
-- Dado que todos los datos mínimos están presentes, cuando se valida, entonces no se genera ningún error.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-115 (Editar Detalles de Ubicación de Riesgo)
-
-**Componentes Técnicos**: Backend (Módulo de Reglas de Validación).
-
-**Notas de Implementación**: La definición de "datos mínimos" debe ser clara y documentada.
-
-**Estado**: Backlog
-
----
-### HU-165: Proporcionar Mensajes de Error Específicos de Validación
-**Descripción**:
-Como sistema,
-Quiero que el motor de validación proporcione mensajes de error claros y específicos para cada regla incumplida,
-Para facilitar la identificación y corrección de los problemas por parte del usuario.
-
-**Criterios de Aceptación**:
-- Dado que una regla de validación falla, cuando se reporta el error, entonces el mensaje identifica la regla específica y el campo afectado.
-- Dado que múltiples reglas fallan, cuando se reportan los errores, entonces se agrupan o listan de forma comprensible.
-- Dado que un error es de alta prioridad, cuando se reporta, entonces se destaca visualmente en la interfaz de usuario.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-162, HU-163, HU-164
-
-**Componentes Técnicos**: Backend (Componente de Reporte de Errores), Frontend (Interfaz de Mensajes de Error).
-
-**Notas de Implementación**: Los mensajes deben ser orientados al usuario final.
-
-**Estado**: Backlog
-
----
-### HU-166: Prevenir Ejecución de Cálculo cuando No Existen Ubicaciones Válidas
-
-**Descripción**:
-Como sistema,
-Quiero que el cálculo de prima no se ejecute únicamente cuando no existe ninguna ubicación calculable,
-Para evitar calcular cotizaciones sin ningún riesgo válido asegurado.
-
-**Criterios de Aceptación**:
-- Dado que la cotización tiene al menos una ubicación con `estadoValidacion: COMPLETA`, cuando se inicia el cálculo, entonces el sistema **procede con el cálculo** para esas ubicaciones, ignorando las incompletas.
-- Dado que una ubicación tiene `estadoValidacion: INCOMPLETA`, cuando el motor de cálculo la evalúa, entonces esa ubicación se **excluye individualmente** del cálculo y sus `alertasBloqueantes` se incluyen en el resultado como parte de `primasPorUbicacion[]` con estado `EXCLUIDA`.
-- Dado que **todas** las ubicaciones de la cotización tienen `estadoValidacion: INCOMPLETA` o `INACTIVA`, cuando se intenta calcular, entonces el sistema impide el cálculo y notifica que no hay ubicaciones calculables.
-- Dado que el cálculo procede con ubicaciones parcialmente excluidas, cuando finaliza, entonces el resultado incluye las primas de las ubicaciones válidas y las alertas de las excluidas en un mismo response.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-124 (Iniciar Proceso de Cálculo de Prima), HU-165 (Proporcionar Mensajes de Error Específicos de Validación)
-
-**Componentes Técnicos**: Backend (Motor de Validación de Reglas de Negocio, Endpoint de Cálculo `POST /v1/quotes/{folio}/calculate`).
-
-**Notas de Implementación**:
-- Este comportamiento es el requisito explícito del reto: "si una ubicación está incompleta, genera alerta, pero no debe impedir calcular las demás."
-- El motor de validación determina `estadoValidacion` de cada ubicación **antes** de iterar el motor de cálculo.
-- Los criterios mínimos para que una ubicación sea calculable son: `codigoPostal` válido en el catálogo, `giro.claveIncendio` presente y al menos una garantía tarifable.
-
-**Estado**: Backlog
-
----
-## FT-012: Motor Central de Cálculo de Primas
-### HU-167: Calcular Prima Neta por Ubicación
-
-**Descripción**:
-Como sistema,
-Quiero calcular la prima neta para cada ubicación de riesgo con `estadoValidacion: COMPLETA` utilizando las tarifas y factores correspondientes,
-Para determinar el costo base de la cobertura por cada lugar asegurado calculable.
-
-**Criterios de Aceptación**:
-- Dado que se proporciona una ubicación con `estadoValidacion: COMPLETA` y sus coberturas, cuando se ejecuta el cálculo, entonces se aplican los componentes técnicos activos de los 14 disponibles según las garantías y coberturas configuradas.
-- Dado que la ubicación tiene `giro.claveIncendio` y garantías tarifables, cuando se calcula la prima, entonces se usan las tarifas de incendio correspondientes al giro como base del cálculo.
-- Dado que una ubicación tiene `estadoValidacion: INCOMPLETA`, cuando el motor de cálculo la evalúa, entonces **la omite completamente** y registra la exclusión en el resultado.
-- Dado que el cálculo es exitoso, cuando se completa, entonces la prima neta resultante es un valor numérico preciso con al menos dos decimales.
-
-**Prioridad**: Alta
-
-**Estimación**: 4 puntos de historia
-
-**Dependencias**: HU-126 (Calcular Prima por Ubicación de Riesgo), HU-161 (Parámetros Disponibles para Motores)
-
-**Componentes Técnicos**: Backend (Algoritmos de Cálculo de Prima en el Motor de Cálculo).
-
-**Notas de Implementación**:
-- Solo se procesan ubicaciones con `estadoValidacion: COMPLETA`.
-- El motor itera los 14 componentes técnicos pero solo aplica los activos según `opcionesCobertura` y `garantías[]`.
-- Las fórmulas simplificadas deben ser implementadas con alta precisión y documentadas para trazabilidad.
-
-**Estado**: Backlog
-
----
-### HU-168: Aplicar Factores de Catástrofe (CAT) y FHM
-**Descripción**:
-Como sistema,
-Quiero aplicar los factores de Catástrofe (CAT) y FHM según la zona y condiciones de la ubicación,
-Para ajustar la prima neta por el riesgo específico de eventos catastróficos.
-
-**Criterios de Aceptación**:
-- Dado que una ubicación está en una zona CAT, cuando se calcula la prima, entonces el factor CAT correspondiente se aplica a la prima neta.
-- Dado que una ubicación cumple las condiciones FHM, cuando se calcula la prima, entonces la cuota FHM correspondiente se aplica.
-- Dado que los factores se aplican, cuando se completa el cálculo, entonces el resultado refleja el ajuste por CAT y FHM.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-147 (Calcular Prima Neta por Ubicación), HU-157 (Consumir Tarifas de Catástrofe (CAT)), HU-158 (Consumir Tarifa FHM)
-
-**Componentes Técnicos**: Backend (Servicio de Aplicación de Factores en el Motor de Cálculo).
-
-**Notas de Implementación**: La lógica de aplicación debe ser clara y basada en los catálogos de zonas.
-
-**Estado**: Backlog
-
----
-### HU-169: Calcular Prima Comercial Total
-**Descripción**:
-Como sistema,
-Quiero calcular la prima comercial total de la cotización a partir de la suma de las primas netas y la aplicación de factores comerciales,
-Para determinar el precio final que se presenta al cliente.
-
-**Criterios de Aceptación**:
-- Dado que se han calculado las primas netas por ubicación, cuando se ejecuta el cálculo, entonces se suman para obtener la prima neta total.
-- Dado que la prima neta total se ha obtenido, cuando se calcula la prima comercial, entonces se aplican los factores comerciales (e.g., recargos administrativos, impuestos).
-- Dado que el cálculo es exitoso, cuando se completa, entonces la prima comercial resultante es un valor numérico preciso.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-**Dependencias**: HU-147 (Calcular Prima Neta por Ubicación)
-
-**Componentes Técnicos**: Backend (Consolidación de Primas en el Motor de Cálculo).
-
-**Notas de Implementación**: Los factores comerciales deben estar definidos y ser accesibles.
-
-**Estado**: Backlog
-
----
-### HU-170: Generar Desglose de Primas por Ubicación
-**Descripción**:
-Como sistema,
-Quiero generar el desglose de primas por cada ubicación de riesgo,
-Para proporcionar una vista detallada de cómo se compone el costo total.
-
-**Criterios de Aceptación**:
-- Dado que se han calculado las primas por ubicación, cuando se completa el proceso, entonces el desglose de primas por cada ubicación está disponible.
-- Dado que el desglose se genera, cuando se almacena, entonces incluye la prima neta, y los ajustes por factores para cada ubicación.
-- Dado que el desglose se genera, cuando se consulta, entonces la información es consistente con el cálculo total.
-
-**Prioridad**: Media
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-147 (Calcular Prima Neta por Ubicación)
-
-**Componentes Técnicos**: Backend (Consolidación de Primas en el Motor de Cálculo).
-
-**Notas de Implementación**: El desglose debe ser granular y fácil de interpretar.
-
-**Estado**: Backlog
-
----
-### HU-171: Asegurar Precisión del Cálculo Según Fórmulas Simplificadas
-**Descripción**:
-Como sistema,
-Quiero que los cálculos sean 100% precisos según las fórmulas simplificadas y documentadas,
-Para garantizar la fiabilidad de los resultados financieros.
-
-**Criterios de Aceptación**:
-- Dado que se ejecuta un cálculo, cuando se compara el resultado con un cálculo manual basado en las fórmulas documentadas, entonces ambos coinciden.
-- Dado que se modifican los parámetros de entrada, cuando se recalcula, entonces el resultado se ajusta de forma predecible según las fórmulas.
-- Dado que se implementa una fórmula, cuando se prueba, entonces la cobertura unitaria es alta (>90%).
-
-**Prioridad**: Alta
-
-**Estimación**: 5 puntos de historia
-
-**Dependencias**: Todas las HUs de cálculo (HU-147, HU-168, HU-169, HU-170)
-
-**Componentes Técnicos**: Backend (Algoritmos de Cálculo de Prima, Pruebas Unitarias).
-
-**Notas de Implementación**: La lógica de cálculo se basará en la interpretación directa de los datos proporcionados por el servicio, utilizando fórmulas simplificadas definidas en el alcance del proyecto, sin implementar lógica actuarial compleja o inferida.
-
-**Estado**: Backlog
-
----
-## FT-013: Persistencia y Trazabilidad de Resultados de Cálculo
-
-### HU-172: Persistir Prima Neta y Comercial en Cotización
-**Descripción**:
-Como sistema,
-Quiero persistir la prima neta, prima comercial y el desglose por ubicación como parte del documento de cotización en MongoDB,
-Para que los resultados financieros sean intrínsecos a la cotización.
-
-**Criterios de Aceptación**:
-- Dado que se ha completado el cálculo, cuando se guardan los resultados, entonces los valores de prima neta total, prima comercial total y el desglose por ubicación se añaden al documento de la cotización.
-- Dado que el documento de cotización se consulta, cuando se recupera, entonces contiene todos los resultados del cálculo.
-- Dado que los resultados se persisten, cuando se guarda, entonces se aseguran los tipos de datos correctos (e.g., numéricos, decimales).
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-127 (Persistir Resultados del Cálculo de Prima), HU-169 (Calcular Prima Comercial Total)
-
-**Componentes Técnicos**: Backend (Repositorio de Cotizaciones), Base de Datos (MongoDB).
-
-**Notas de Implementación**: Diseño de esquema de datos en MongoDB para resultados de cálculo.
-
-**Estado**: Backlog
-
----
-### HU-173: Asegurar Persistencia Atómica del Cálculo
-**Descripción**:
-Como sistema,
-Quiero asegurar que la operación de persistencia del cálculo es atómica,
-Para garantizar que todos los resultados se guarden o ninguno, manteniendo la consistencia.
-
-**Criterios de Aceptación**:
-- Dado que se intenta guardar los resultados del cálculo, cuando la operación es exitosa, entonces todos los componentes de la prima (neta, comercial, desglose) se guardan juntos.
-- Dado que ocurre un error durante la persistencia de los resultados, cuando la operación falla, entonces ningún resultado parcial se guarda y el estado de la cotización no se actualiza a "Calculada".
-- Dado que la persistencia es atómica, cuando se completa, entonces la cotización en la base de datos es consistente con el cálculo.
-
-**Prioridad**: Alta
-
-**Estimación**: 3 puntos de historia
-
-**Dependencias**: HU-172 (Persistir Prima Neta y Comercial en Cotización)
-
-**Componentes Técnicos**: Backend (Módulo de Persistencia de Resultados, Transacciones en MongoDB).
-
-**Notas de Implementación**: Requiere un manejo cuidadoso de las transacciones o la simulación de atomicidad en MongoDB.
-
-**Estado**: Backlog
-
----
-### HU-174: Actualizar Metadatos de Cotización Tras Persistencia de Cálculo
-**Descripción**:
-Como sistema,
-Quiero que el sistema actualice el campo `fechaUltimaActualizacion` y el número de versión de la cotización tras cada persistencia de cálculo,
-Para reflejar que la cotización ha sido modificada y sus resultados financieros actualizados.
-
-**Criterios de Aceptación**:
-- Dado que se persisten los resultados de un cálculo, cuando la operación es exitosa, entonces el campo `fechaUltimaActualizacion` de la cotización se actualiza.
-- Dado que se persisten los resultados de un cálculo, cuando la operación es exitosa, entonces el número de `version` de la cotización se incrementa.
-- Dado que los metadatos se actualizan, cuando se consulta la cotización, entonces reflejan los cambios del cálculo.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-146 (Incrementar Versión en Ediciones de Cotización), HU-147 (Actualizar Fecha de Última Actualización en Ediciones)
-
-**Componentes Técnicos**: Backend (Módulo de Persistencia de Resultados).
-
-**Notas de Implementación**: La actualización de metadatos debe ser parte de la misma operación atómica de persistencia de cálculo.
-
-**Estado**: Backlog
-
----
-### HU-175: Registrar Snapshot para Trazabilidad del Cálculo
-**Descripción**:
-Como sistema,
-Quiero registrar un snapshot de parámetros de entrada relevantes, identificadores y valores de tarifas/factores utilizados, el resultado detallado del cálculo y metadatos de ejecución,
-Para permitir la trazabilidad y auditoría de cómo se llegó a un resultado específico.
-
-**Criterios de Aceptación**:
-- Dado que se realiza un cálculo exitoso, cuando se persisten los resultados, entonces se guarda un snapshot de los datos clave de entrada (sumas aseguradas, coberturas, datos clave de ubicación).
-- Dado que se realiza un cálculo exitoso, cuando se persisten los resultados, entonces se registran los identificadores y versión lógica de tarifas/factores utilizados (tipo de tarifa, versión o timestamp).
-- Dado que se realiza un cálculo exitoso, cuando se persisten los resultados, entonces se registran los valores numéricos concretos de los factores aplicados y el resultado detallado del cálculo.
-- Dado que se realiza un cálculo exitoso, cuando se persisten los resultados, entonces se guardan metadatos de ejecución (fecha/hora del cálculo, versión de la cotización).
-- Dado que se necesita auditar un cálculo, cuando se consulta el snapshot, entonces es posible reconstruir los insumos y lógica aplicados.
-
-**Prioridad**: Alta
-
-**Estimación**: 4 puntos de historia
-
-**Dependencias**: HU-161 (Parámetros Disponibles para Motores), HU-171 (Asegurar Precisión del Cálculo)
-
-**Componentes Técnicos**: Backend (Componente de Auditoría/Logging de Cálculo, Repositorio de Cotizaciones).
-
-**Notas de Implementación**: El diseño del esquema de datos debe evitar duplicidades innecesarias y facilitar consultas de trazabilidad.
-
-**Estado**: Backlog
-
----
-## FT-014: Gestión de Concurrencia y Versionado Optimista
-
-### HU-176: Implementar Campo de Versión Incremental
-**Descripción**:
-Como sistema,
-Quiero utilizar un campo de versión incremental para cada cotización,
-Para detectar si una cotización ha sido modificada por otro usuario o proceso.
-
-**Criterios de Aceptación**:
-- Dado que se crea una nueva cotización, cuando se guarda, entonces el campo `version` se inicializa en 1.
-- Dado que se actualiza una cotización, cuando se guarda, entonces el campo `version` se incrementa en 1.
-- Dado que el campo de versión es numérico, cuando se utiliza, entonces permite comparaciones para detección de concurrencia.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-146 (Incrementar Versión en Ediciones de Cotización)
-
-**Componentes Técnicos**: Backend (Modelo de Datos de Cotización, Capa de Persistencia).
-
-**Notas de Implementación**: El campo de versión debe ser gestionado automáticamente por el backend.
-
-**Estado**: Backlog
-
----
-### HU-177: Comparar Versiones de Cotización en Guardado
-**Descripción**:
-Como sistema,
-Quiero que al intentar guardar una cotización, se compare la versión de la cotización en memoria con la versión en la base de datos,
-Para detectar posibles conflictos de concurrencia.
-
-**Criterios de Aceptación**:
-- Dado que un usuario intenta guardar una cotización, cuando se inicia la operación de guardado, entonces el sistema lee la versión actual de la cotización en la base de datos.
-- Dado que la versión en memoria coincide con la de la base de datos, cuando se compara, entonces la operación de guardado procede.
-- Dado que la versión en memoria es diferente a la de la base de datos, cuando se compara, entonces el sistema identifica un conflicto potencial.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-176 (Implementar Campo de Versión Incremental)
-
-**Componentes Técnicos**: Backend (Lógica de Control de Concurrencia en Persistencia).
-
-**Notas de Implementación**: Esta comparación debe realizarse como parte de la operación transaccional de guardado.
-
-**Estado**: Backlog
-
----
-### HU-178: Detectar Conflicto de Concurrencia
-**Descripción**:
-Como sistema,
-Quiero que si las versiones no coinciden al intentar guardar una cotización, se detecte un conflicto de concurrencia,
-Para activar el mecanismo de resolución de conflictos.
-
-**Criterios de Aceptación**:
-- Dado que la versión de la cotización en la base de datos es mayor que la versión que el usuario intentó guardar, cuando se realiza la comparación, entonces se detecta un conflicto de concurrencia.
-- Dado que se detecta un conflicto, cuando se notifica, entonces el sistema lo marca para su manejo posterior.
-- Dado que no hay conflicto de versión, cuando se compara, entonces el sistema permite continuar con la operación de guardado.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-177 (Comparar Versiones de Cotización en Guardado)
-
-**Componentes Técnicos**: Backend (Lógica de Detección de Conflicto).
-
-**Notas de Implementación**: La detección debe ser explícita y generar una excepción o un código de error específico.
-
-**Estado**: Backlog
-
----
-### HU-179: Notificar Usuario de Versión Más Reciente
-**Descripción**:
-Como sistema,
-Quiero que en caso de conflicto de concurrencia, se notifique al usuario de la existencia de una versión más reciente,
-Para informarle que sus cambios podrían sobrescribir los de otro.
-
-**Criterios de Aceptación**:
-- Dado que se detecta un conflicto de concurrencia, cuando se notifica al usuario, entonces se muestra un mensaje claro indicando que la cotización ha sido actualizada por otro usuario.
-- Dado que el mensaje se muestra, cuando lo visualiza el usuario, entonces le informa sobre la necesidad de recargar la cotización.
-- Dado que la notificación es crítica, cuando se muestra, entonces es prominente y requiere una acción del usuario.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-178 (Detectar Conflicto de Concurrencia)
-
-**Componentes Técnicos**: Frontend (Sistema de Notificación al Usuario), Backend (Servicio de Mensajes de Error de Concurrencia).
-
-**Notas de Implementación**: La notificación debe ser amigable y ofrecer opciones de acción.
-**Estado**: Backlog
-
----
-### HU-180: Permitir Recargar Última Versión de Cotización
-**Descripción**:
-Como usuario,
-Quiero que el sistema me permita recargar la cotización con la última versión desde la base de datos en caso de conflicto,
-Para poder ver los cambios de otros usuarios y reintentar mis propias modificaciones.
-
-**Criterios de Aceptación**:
-- Dado que recibo una notificación de conflicto, cuando hago clic en "Recargar", entonces la cotización se carga nuevamente desde la base de datos con la versión más reciente.
-- Dado que la cotización se recarga, cuando se muestra, entonces refleja los cambios realizados por otros usuarios.
-- Dado que recargo la cotización, cuando intento guardar mis cambios de nuevo, entonces puedo hacerlo si no hay nuevos conflictos.
-
-**Prioridad**: Alta
-
-**Estimación**: 2 puntos de historia
-
-**Dependencias**: HU-179 (Notificar Usuario de Versión Más Reciente)
-
-**Componentes Técnicos**: Frontend (Botón "Recargar", Lógica de Recarga de Datos).
-
-**Notas de Implementación**: La recarga debe ser una operación que actualice completamente la vista de la cotización.
-
-**Estado**: Backlog
-
----
-
-### HU-181: Gestión de Layout de Ubicaciones
+### HU-114: Gestión de Layout de Ubicaciones
 
 **Descripción**:
 Como usuario,
@@ -4903,7 +3252,505 @@ Para definir la estructura de campos que se capturarán en cada ubicación del f
 
 ---
 
-### HU-182: Pantalla de Información Técnica del Cálculo
+## FT-002: Gestión Dinámica de Ubicaciones de Riesgo
+
+### HU-115: Agregar Nueva Ubicación de Riesgo
+
+**Descripción**:
+Como usuario,
+Quiero añadir una nueva ubicación de riesgo a mi cotización,
+Para especificar múltiples lugares de interés para el seguro con todos sus datos del dominio.
+
+**Criterios de Aceptación**:
+- Dado que tengo una cotización abierta, cuando hago clic en "Agregar Ubicación", entonces se presenta un formulario para capturar los datos del dominio de la ubicación: `nombreUbicacion`, `direccion`, `codigoPostal`, `estado`, `municipio`, `colonia`, `ciudad`, `tipoConstructivo`, `nivel`, `anioConstruccion`, `giro` (con `giro.claveIncendio`), `garantías[]`.
+- Dado que he alcanzado el límite configurable de ubicaciones, cuando intento agregar una nueva, entonces el sistema me notifica que no puedo añadir más.
+- Dado que agrego una ubicación, cuando guardo la cotización, entonces la nueva ubicación se persiste como parte de la cotización con un `índice` asignado y `estadoValidacion` calculado.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-112 (Editar Datos Generales de la Cotización), HU-155 (Validar Datos Específicos de Ubicación de Riesgo)
+
+**Componentes Técnicos**: Frontend (Botón "Agregar Ubicación", Formulario de Ubicación con campos del dominio), Backend (API de Cotizaciones para agregar ubicaciones).
+
+**Notas de Implementación**:
+- El límite de ubicaciones debe ser configurable a nivel de sistema.
+- Al guardar, el backend calcula automáticamente `estadoValidacion` y `alertasBloqueantes`.
+- El campo `zonaCatastrofica` se obtiene automáticamente del catálogo CP al validar el código postal.
+
+**Estado**: Backlog
+
+---
+
+### HU-116: Editar Detalles de Ubicación de Riesgo
+
+**Descripción**:
+Como usuario,
+Quiero modificar los datos específicos de una ubicación de riesgo existente con todos sus campos del dominio,
+Para asegurar la precisión de la evaluación del riesgo.
+
+**Criterios de Aceptación**:
+- Dado que tengo una cotización con ubicaciones, cuando selecciono una ubicación para editar, entonces sus datos se cargan en el formulario con todos los campos del dominio: `nombreUbicacion`, `direccion`, `codigoPostal`, `estado`, `municipio`, `colonia`, `ciudad`, `tipoConstructivo`, `nivel`, `anioConstruccion`, `giro` (con `giro.claveIncendio`), `garantías[]`, `zonaCatastrofica`.
+- Dado que modifico los datos de una ubicación y guardo, entonces los cambios se persisten a través de `PATCH /v1/quotes/{folio}/locations/{índice}` y el `estadoValidacion` se recalcula.
+- Dado que ingreso un código postal válido, cuando el sistema lo valida, entonces `zonaCatastrofica` se actualiza automáticamente con los datos de la zona CAT y nivel técnico.
+- Dado que intento guardar datos inválidos (e.g., código postal incorrecto o sin garantías), cuando confirmo la edición, entonces el sistema actualiza `alertasBloqueantes` con los campos problemáticos.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-115 (Agregar Nueva Ubicación de Riesgo), HU-155 (Validar Datos Específicos de Ubicación de Riesgo)
+
+**Componentes Técnicos**: Frontend (Formulario de Edición de Ubicación con todos los campos del dominio), Backend (PATCH de ubicaciones).
+
+**Notas de Implementación**:
+- Los campos `alertasBloqueantes` y `estadoValidacion` se recalculan automáticamente en el backend tras cada edición.
+- El formulario debe mostrar visualmente cuáles campos son los `alertasBloqueantes` activos de esa ubicación.
+
+**Estado**: Backlog
+
+---
+
+### HU-117: Marcar Ubicación de Riesgo como Inactiva
+
+**Descripción**:
+Como usuario,
+Quiero marcar una ubicación de riesgo como inactiva en mi cotización,
+Para excluirla del flujo activo y del cálculo sin eliminarla del histórico.
+
+**Criterios de Aceptación**:
+- Dado que tengo una cotización con ubicaciones, cuando selecciono una ubicación y confirmo marcarla como inactiva, entonces su `estadoValidacion` cambia a `INACTIVA`.
+- Dado que una ubicación está marcada como `INACTIVA`, cuando se ejecuta el cálculo, entonces esa ubicación no se procesa ni se incluye en el resultado financiero.
+- Dado que marco una ubicación como inactiva, cuando guardo, entonces el número de versión de la cotización se incrementa.
+
+**Prioridad**: Media
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-116 (Editar Detalles de Ubicación de Riesgo)
+
+**Componentes Técnicos**: Frontend (Opción "Marcar como Inactiva"), Backend (PATCH de ubicación con cambio de `estadoValidacion`).
+
+**Notas de Implementación**:
+- Las ubicaciones **no se eliminan físicamente** del documento en MongoDB, conforme al requisito del reto técnico.
+- Se debe solicitar confirmación al usuario antes de marcar una ubicación como inactiva.
+
+**Estado**: Backlog
+
+---
+
+### HU-118: Visualizar Múltiples Ubicaciones de Riesgo
+**Descripción**:
+Como usuario,
+Quiero ver un resumen de todas las ubicaciones de riesgo en mi cotización,
+Para tener una visión general de los riesgos asegurados y navegar entre ellas fácilmente.
+
+**Criterios de Aceptación**:
+- Dado que una cotización tiene múltiples ubicaciones, cuando la abro, entonces la interfaz muestra una lista o pestañas con cada ubicación.
+- Dado que hago clic en una ubicación en la lista o pestaña, cuando navego, entonces se muestran los detalles completos de esa ubicación para edición.
+- Dado que hay un límite de ubicaciones, cuando se alcanza, entonces la interfaz lo indica claramente.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-115 (Agregar Nueva Ubicación de Riesgo)
+
+**Componentes Técnicos**: Frontend (Interfaz de Maestro-Detalle/Pestañas para Ubicaciones).
+
+**Notas de Implementación**: Implementar un patrón de interfaz híbrido basado en maestro-detalle con navegación tipo pestañas.
+
+**Estado**: Backlog
+
+---
+
+### HU-119: Validar Código Postal de Ubicación
+**Descripción**:
+Como usuario,
+Quiero que el sistema valide el código postal de cada ubicación de riesgo,
+Para asegurar que la dirección es válida y obtener la zonificación de riesgo correcta.
+
+**Criterios de Aceptación**:
+- Dado que ingreso un código postal en una ubicación, cuando el campo pierde el foco o se guarda, entonces el sistema valida el CP contra el `catalogo_cp_zonas`.
+- Dado que ingreso un código postal válido, cuando se valida, entonces se muestran los datos de zona (CAT, nivel técnico) asociados a ese CP.
+- Dado que ingreso un código postal inválido o no encontrado, cuando se valida, entonces el sistema muestra un mensaje de error claro y no permite guardar la ubicación con un CP erróneo.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-145 (Consumir Datos de Códigos Postales y Zonas de Riesgo), HU-166 (Validar Códigos Postales Contra Catálogo)
+
+**Componentes Técnicos**: Frontend (Campo de Código Postal), Backend (Servicio de Validación de CP).
+
+**Notas de Implementación**: La validación puede ser asíncrona y en tiempo real.
+
+**Estado**: Backlog
+
+---
+
+### HU-120: Recibir Alertas por Datos Incompletos de Ubicación
+**Descripción**:
+Como usuario,
+Quiero recibir alertas visuales si una ubicación de riesgo tiene datos incompletos o inválidos,
+Para saber qué información necesito completar antes de calcular la prima.
+
+**Criterios de Aceptación**:
+- Dado que una ubicación tiene campos obligatorios vacíos, cuando la visualizo, entonces se muestra una alerta visual (e.g., icono, color) indicando datos incompletos.
+- Dado que una ubicación tiene datos inválidos (e.g., CP incorrecto), cuando la visualizo, entonces se muestra una alerta indicando la inconsistencia.
+- Dado que completo o corrijo los datos de una ubicación, cuando guardo, entonces la alerta visual desaparece.
+
+**Prioridad**: Media
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-116 (Editar Detalles de Ubicación de Riesgo), HU-155 (Validar Datos Específicos de Ubicación de Riesgo)
+
+**Componentes Técnicos**: Frontend (Elementos de Alerta Visual en la Interfaz de Ubicaciones).
+
+**Notas de Implementación**: Las alertas deben ser claras y no obstructivas, guiando al usuario a la acción.
+
+**Estado**: Backlog
+
+---
+
+## FT-003: Configuración y Selección de Coberturas por Ubicación
+
+### HU-121: Visualizar Catálogo de Coberturas por Ubicación
+**Descripción**:
+Como usuario,
+Quiero ver el catálogo de coberturas disponibles para cada ubicación de riesgo y tipo de seguro,
+Para seleccionar las protecciones adecuadas para mis clientes.
+
+**Criterios de Aceptación**:
+- Dado que estoy en la sección de coberturas de una ubicación, cuando accedo, entonces se muestra una lista de coberturas relevantes para el tipo de seguro de la cotización.
+- Dado que el catálogo de coberturas tiene descripciones, cuando lo consulto, entonces puedo ver la información detallada de cada cobertura.
+- Dado que no hay coberturas disponibles para el tipo de seguro, cuando accedo, entonces se muestra un mensaje informativo.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-116 (Editar Detalles de Ubicación de Riesgo), HU-146 (Consumir Catálogos de Clasificación de Riesgo y Garantías)
+
+**Componentes Técnicos**: Frontend (Interfaz de Selección de Coberturas), Backend (API de Consulta de Coberturas).
+
+**Notas de Implementación**: El catálogo de coberturas debe ser configurable y estar asociado a tipos de seguro.
+
+**Estado**: Backlog
+
+---
+
+### HU-122: Seleccionar y Deseleccionar Coberturas por Ubicación
+**Descripción**:
+Como usuario,
+Quiero poder seleccionar o deseleccionar coberturas específicas para cada ubicación de riesgo,
+Para personalizar la protección ofrecida según las necesidades del cliente.
+
+**Criterios de Aceptación**:
+- Dado que visualizo el catálogo de coberturas, cuando selecciono una o varias, entonces se marcan como activas para la ubicación.
+- Dado que una cobertura está seleccionada, cuando la deselecciono, entonces deja de estar activa para la ubicación.
+- Dado que guardo la cotización, cuando se persisten los cambios, entonces las coberturas seleccionadas se asocian correctamente a la ubicación.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-121 (Visualizar Catálogo de Coberturas), HU-116 (Editar Detalles de Ubicación de Riesgo)
+
+**Componentes Técnicos**: Frontend (Controles de Selección de Coberturas), Backend (API de Cotizaciones para gestión de coberturas).
+
+**Notas de Implementación**: La selección de coberturas debe ser intuitiva (e.g., checkboxes, toggles).
+
+**Estado**: Backlog
+
+---
+
+### HU-123: Configurar Parámetros Específicos de Cobertura
+**Descripción**:
+Como usuario,
+Quiero configurar parámetros específicos para cada cobertura seleccionada (e.g., sumas aseguradas, deducibles),
+Para ajustar con precisión el alcance y las condiciones de la protección.
+
+**Criterios de Aceptación**:
+- Dado que selecciono una cobertura que requiere parámetros, cuando la activo, entonces se habilitan los campos para configurar sus valores (e.g., suma asegurada, deducible).
+- Dado que ingreso valores en los parámetros de cobertura y guardo, entonces estos valores se persisten junto con la cobertura y la ubicación.
+- Dado que los parámetros tienen rangos de validación, cuando ingreso un valor fuera de rango, entonces el sistema me lo notifica con un mensaje de error.
+
+**Prioridad**: Media
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-122 (Seleccionar y Deseleccionar Coberturas por Ubicación), HU-165 (Validar Rangos de Sumas Aseguradas)
+
+**Componentes Técnicos**: Frontend (Campos de Entrada de Parámetros), Backend (API de Cotizaciones para persistencia de parámetros).
+
+**Notas de Implementación**: La interfaz debe mostrar claramente qué parámetros son configurables para cada cobertura.
+
+**Estado**: Backlog
+
+---
+
+### HU-124: Visualizar Coberturas Activas por Ubicación
+**Descripción**:
+Como usuario,
+Quiero ver claramente qué coberturas están activas para cada ubicación de riesgo,
+Para tener un resumen rápido de la protección configurada.
+
+**Criterios de Aceptación**:
+- Dado que he seleccionado coberturas para una ubicación, cuando la visualizo, entonces se muestra una indicación clara de las coberturas activas.
+- Dado que una cobertura tiene parámetros configurados, cuando la visualizo, entonces se muestran también sus valores (e.g., suma asegurada, deducible).
+- Dado que no hay coberturas activas para una ubicación, cuando la visualizo, entonces se muestra un mensaje indicando la ausencia de coberturas.
+
+**Prioridad**: Media
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-122 (Seleccionar y Deseleccionar Coberturas por Ubicación)
+
+**Componentes Técnicos**: Frontend (Elementos de Visualización de Coberturas Activas).
+
+**Notas de Implementación**: La presentación debe ser concisa y fácil de entender.
+
+**Estado**: Backlog
+
+---
+
+## FT-004: Ejecución y Persistencia del Cálculo de Primas
+
+### HU-125: Iniciar Proceso de Cálculo de Prima
+
+**Descripción**:
+Como usuario,
+Quiero solicitar el cálculo de la prima de mi cotización,
+Para obtener los resultados financieros de las ubicaciones válidas.
+
+**Criterios de Aceptación**:
+- Dado que tengo al menos una ubicación con `estadoValidacion: COMPLETA`, cuando hago clic en el botón "Calcular Prima", entonces el sistema inicia el proceso de cálculo para las ubicaciones calculables.
+- Dado que algunas ubicaciones tienen `estadoValidacion: INCOMPLETA`, cuando inicio el cálculo, entonces el sistema **continúa calculando las ubicaciones válidas** y muestra las alertas de las excluidas sin detener el proceso.
+- Dado que **todas** las ubicaciones tienen `estadoValidacion: INCOMPLETA` o `INACTIVA` y no existe ninguna calculable, cuando intento calcular, entonces el sistema notifica que no hay ubicaciones válidas y no procede con el cálculo.
+- Dado que el cálculo se inicia, cuando está en progreso, entonces la interfaz muestra un indicador de carga.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-169 (Prevenir Ejecución de Cálculo cuando no hay ubicaciones válidas), HU-168 (Proporcionar Mensajes de Error Específicos de Validación)
+
+**Componentes Técnicos**: Frontend (Botón "Calcular Prima"), Backend (Endpoint `POST /v1/quotes/{folio}/calculate`).
+
+**Notas de Implementación**:
+- El botón solo se deshabilita completamente cuando no existe ninguna ubicación calculable.
+- Las ubicaciones incompletas se excluyen del cálculo individualmente, no bloquean el proceso general.
+
+**Estado**: Backlog
+
+---
+
+### HU-126: Calcular Prima Neta y Comercial Total
+**Descripción**:
+Como usuario,
+Quiero que el sistema calcule la prima neta y comercial total de la cotización,
+Para conocer el costo global del seguro.
+
+**Criterios de Aceptación**:
+- Dado que se ha iniciado el cálculo, cuando finaliza exitosamente, entonces el sistema calcula la prima neta total sumando las primas netas de las ubicaciones calculables.
+- Dado que se ha iniciado el cálculo, cuando finaliza exitosamente, entonces el sistema calcula la prima comercial total aplicando factores comerciales y otros recargos a la prima neta total.
+- Dado que los cálculos se realizan, cuando se completan, entonces los resultados están disponibles para persistencia y visualización.
+
+**Prioridad**: Alta
+
+**Estimación**: 4 puntos de historia
+
+**Dependencias**: HU-127 (Calcular Prima por Ubicación de Riesgo), HU-172 (Calcular Prima Comercial Total)
+
+**Componentes Técnicos**: Backend (Motor Central de Cálculo de Primas).
+
+**Notas de Implementación**: Las fórmulas de cálculo deben ser las simplificadas y documentadas.
+
+**Estado**: Backlog
+
+---
+
+### HU-127: Calcular Prima por Ubicación de Riesgo
+**Descripción**:
+Como usuario,
+Quiero que el sistema calcule la prima para cada ubicación de riesgo calculable individualmente,
+Para entender el desglose del costo por cada lugar asegurado.
+
+**Criterios de Aceptación**:
+- Dado que se ha iniciado el cálculo, cuando finaliza exitosamente, entonces el sistema calcula la prima neta para cada ubicación con `estadoValidacion: COMPLETA`.
+- Dado que la ubicación tiene coberturas y parámetros, cuando se calcula su prima, entonces se aplican las tarifas y factores técnicos correspondientes.
+- Dado que se calcula la prima por ubicación, cuando se completa, entonces el resultado está disponible para persistencia y visualización.
+
+**Prioridad**: Alta
+
+**Estimación**: 4 puntos de historia
+
+**Dependencias**: HU-123 (Configurar Parámetros Específicos de Cobertura), HU-170 (Calcular Prima Neta por Ubicación)
+
+**Componentes Técnicos**: Backend (Motor Central de Cálculo de Primas).
+
+**Notas de Implementación**: Los factores técnicos (incendio, CAT, FHM, equipo electrónico) deben ser aplicados por ubicación.
+
+**Estado**: Backlog
+
+---
+
+### HU-128: Persistir Resultados del Cálculo de Prima
+**Descripción**:
+Como usuario,
+Quiero que los resultados del cálculo (prima neta, comercial, por ubicación) se guarden con la cotización,
+Para que estén disponibles para consulta futura y no se pierdan.
+
+**Criterios de Aceptación**:
+- Dado que el cálculo de la prima ha finalizado exitosamente, cuando se guardan los resultados, entonces la prima neta total, comercial total y el desglose por ubicación se persisten en la cotización.
+- Dado que los resultados se persisten, cuando se guarda la cotización, entonces la operación es atómica y consistente.
+- Dado que los resultados se persisten, cuando se guarda la cotización, entonces el estado de la cotización cambia a "Calculada".
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-126 (Calcular Prima Neta y Comercial Total), HU-127 (Calcular Prima por Ubicación de Riesgo), HU-176 (Persistir Prima Neta y Comercial en Cotización)
+
+**Componentes Técnicos**: Backend (API de Persistencia de Cotizaciones), Base de Datos (MongoDB).
+
+**Notas de Implementación**: La persistencia debe incluir el versionado optimista.
+
+**Estado**: Backlog
+
+---
+
+### HU-129: Aplicar Reglas de Negocio y Factores Técnicos en Cálculo
+**Descripción**:
+Como usuario,
+Quiero que el cálculo de la prima considere las reglas de negocio y los factores técnicos definidos,
+Para asegurar que la prima refleje correctamente el riesgo y las políticas de la compañía.
+
+**Criterios de Aceptación**:
+- Dado que se realiza un cálculo, cuando se aplican las reglas de negocio, entonces los recargos o descuentos se consideran en la prima final.
+- Dado que se realiza un cálculo, cuando se aplican los factores técnicos (e.g., CAT, FHM), entonces el costo de la prima por ubicación se ajusta según estos factores.
+- Dado que los factores técnicos son obtenidos de catálogos, cuando se aplican, entonces se utilizan los valores correctos y actualizados.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-171 (Aplicar Factores de Catástrofe (CAT) y FHM), HU-167 (Verificar Datos Mínimos Requeridos por Ubicación)
+
+**Componentes Técnicos**: Backend (Motor Central de Cálculo de Primas, Módulo de Reglas de Negocio).
+
+**Notas de Implementación**: La lógica de aplicación de reglas y factores debe ser modular y testeable.
+
+**Estado**: Backlog
+
+---
+
+## FT-005: Visualización Detallada de Resultados Financieros
+
+### HU-130: Visualizar Resumen de Prima Neta y Comercial
+**Descripción**:
+Como usuario,
+Quiero ver un resumen claro de la prima neta y comercial total de mi cotización,
+Para tener una comprensión rápida del costo global.
+
+**Criterios de Aceptación**:
+- Dado que una cotización ha sido calculada, cuando la visualizo, entonces se muestra la prima neta total y la prima comercial total en un área destacada.
+- Dado que los valores de la prima son numéricos, cuando se muestran, entonces están formateados correctamente (e.g., moneda, decimales).
+- Dado que la cotización no ha sido calculada, cuando la visualizo, entonces los campos de prima total están vacíos o indican "Pendiente de Cálculo".
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-128 (Persistir Resultados del Cálculo de Prima)
+
+**Componentes Técnicos**: Frontend (Interfaz de Resultados Financieros).
+
+**Notas de Implementación**: La información debe ser fácil de encontrar y leer.
+
+**Estado**: Backlog
+
+---
+
+### HU-131: Visualizar Desglose de Prima por Ubicación
+**Descripción**:
+Como usuario,
+Quiero ver el desglose de la prima calculada para cada ubicación de riesgo,
+Para entender cómo se distribuye el costo total del seguro.
+
+**Criterios de Aceptación**:
+- Dado que una cotización ha sido calculada, cuando visualizo los resultados, entonces se muestra la prima asignada a cada ubicación calculable.
+- Dado que selecciono una ubicación específica, cuando la visualizo, entonces puedo ver su prima individual en detalle.
+- Dado que los valores de la prima por ubicación son numéricos, cuando se muestran, entonces están formateados correctamente.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-128 (Persistir Resultados del Cálculo de Prima)
+
+**Componentes Técnicos**: Frontend (Interfaz de Resultados Financieros, Sección de Ubicaciones).
+
+**Notas de Implementación**: La tabla o lista de ubicaciones debe incluir su prima correspondiente y el indicador de ubicaciones excluidas.
+
+**Estado**: Backlog
+
+---
+
+### HU-132: Visualizar Componentes Adicionales de la Prima
+**Descripción**:
+Como usuario,
+Quiero ver los componentes adicionales de la prima, como impuestos y recargos básicos,
+Para entender la composición completa del precio final del seguro.
+
+**Criterios de Aceptación**:
+- Dado que una cotización ha sido calculada, cuando visualizo los resultados, entonces se muestran los impuestos y recargos básicos aplicados.
+- Dado que los componentes adicionales son numéricos, cuando se muestran, entonces están formateados correctamente.
+- Dado que no hay impuestos o recargos aplicables, cuando visualizo los resultados, entonces estos campos no se muestran o indican "N/A".
+
+**Prioridad**: Media
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-128 (Persistir Resultados del Cálculo de Prima)
+
+**Componentes Técnicos**: Frontend (Interfaz de Resultados Financieros, Sección de Desglose).
+
+**Notas de Implementación**: Solo se mostrarán los impuestos y recargos básicos definidos en el cálculo.
+
+**Estado**: Backlog
+
+---
+
+### HU-133: Sincronizar Visualización de Resultados Financieros
+**Descripción**:
+Como usuario,
+Quiero que los resultados financieros mostrados estén siempre sincronizados con el último cálculo realizado,
+Para asegurar que la información es actual y precisa.
+
+**Criterios de Aceptación**:
+- Dado que se ha realizado un nuevo cálculo de prima, cuando accedo a la sección de resultados, entonces se muestran los resultados del cálculo más reciente.
+- Dado que se han realizado modificaciones a la cotización (ubicaciones, coberturas) después de un cálculo, cuando visualizo los resultados, entonces se muestra una advertencia de que el cálculo puede estar desactualizado.
+- Dado que un cálculo falla, cuando accedo a los resultados, entonces se muestra un mensaje de error y no se muestran resultados desactualizados.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-128 (Persistir Resultados del Cálculo de Prima), HU-140 (Cualquier Modificación Invalida Cálculo)
+
+**Componentes Técnicos**: Frontend (Lógica de Actualización de UI), Backend (API de Consulta de Cotizaciones).
+
+**Notas de Implementación**: El sistema debe tener un mecanismo para invalidar o marcar como desactualizado un cálculo si los datos de la cotización cambian.
+
+**Estado**: Backlog
+
+---
+
+### HU-134: Pantalla de Información Técnica del Cálculo
 
 **Descripción**:
 Como usuario,
@@ -4922,7 +3769,7 @@ Para entender en detalle cómo se compuso cada valor de prima calculada.
 
 **Feature Padre**: FT-005 (Visualización Detallada de Resultados Financieros)
 
-**Dependencias**: HU-129 (Visualizar Resumen de Prima Neta y Comercial), HU-127 (Persistir Resultados del Cálculo de Prima)
+**Dependencias**: HU-130 (Visualizar Resumen de Prima Neta y Comercial), HU-128 (Persistir Resultados del Cálculo de Prima)
 
 **Componentes Técnicos**:
 - Frontend: Ruta `/quotes/{folio}/technical-info`, componente de tabla técnica con desglose por componente y por ubicación.
@@ -4936,7 +3783,209 @@ Para entender en detalle cómo se compuso cada valor de prima calculada.
 
 ---
 
-### HU-183: Pantalla de Términos y Condiciones
+## FT-006: Gestión del Ciclo de Vida y Estados de la Cotización
+
+### HU-135: Cotización Inicia en Estado "Borrador"
+**Descripción**:
+Como usuario,
+Quiero que cada nueva cotización comience automáticamente en el estado "Borrador",
+Para indicar que aún está en proceso de creación y edición.
+
+**Criterios de Aceptación**:
+- Dado que creo una nueva cotización, cuando se guarda por primera vez, entonces su estado se establece como "Borrador".
+- Dado que consulto una cotización recién creada, cuando visualizo su estado, entonces se muestra "Borrador".
+- Dado que una cotización está en "Borrador", cuando se realizan modificaciones, entonces permanece en "Borrador" hasta que se inicie un cálculo.
+
+**Prioridad**: Alta
+
+**Estimación**: 1 punto de historia
+
+**Dependencias**: HU-110 (Crear Nueva Cotización)
+
+**Componentes Técnicos**: Backend (Lógica de Inicialización de Cotización).
+
+**Notas de Implementación**: El estado "Borrador" es el estado inicial por defecto.
+
+**Estado**: Backlog
+
+---
+
+### HU-136: Actualización Automática a Estado "Calculada"
+**Descripción**:
+Como usuario,
+Quiero que el estado de la cotización se actualice automáticamente a "Calculada" tras una ejecución exitosa del cálculo,
+Para reflejar que la información financiera está disponible y es válida.
+
+**Criterios de Aceptación**:
+- Dado que una cotización en estado "Borrador" se calcula exitosamente, cuando finaliza el proceso, entonces su estado cambia a "Calculada".
+- Dado que el cálculo falla, cuando finaliza el proceso, entonces el estado de la cotización no cambia a "Calculada" y permanece en el estado anterior.
+- Dado que el estado es "Calculada", cuando se visualiza, entonces indica que los resultados de prima están disponibles.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-128 (Persistir Resultados del Cálculo de Prima), HU-138 (No se puede calcular sin validaciones previas)
+
+**Componentes Técnicos**: Backend (Lógica de Transición de Estados).
+
+**Notas de Implementación**: La transición solo ocurre si todas las validaciones previas son exitosas y hay al menos una ubicación calculable.
+
+**Estado**: Backlog
+
+---
+
+### HU-137: Cambiar Manualmente Estado a "Aprobada" o "Rechazada"
+**Descripción**:
+Como usuario,
+Quiero poder cambiar manualmente el estado de una cotización a "Aprobada" o "Rechazada" desde "Calculada",
+Para indicar el resultado de la negociación con el cliente.
+
+**Criterios de Aceptación**:
+- Dado que una cotización está en estado "Calculada", cuando selecciono "Aprobar", entonces su estado cambia a "Aprobada".
+- Dado que una cotización está en estado "Calculada", cuando selecciono "Rechazar", entonces su estado cambia a "Rechazada".
+- Dado que la cotización no está en estado "Calculada", cuando intento aprobar o rechazar, entonces el sistema me lo impide.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-136 (Actualización Automática a Estado "Calculada"), HU-139 (No se puede aprobar sin cálculo previo)
+
+**Componentes Técnicos**: Frontend (Botones de Acción de Estado), Backend (API de Actualización de Estado).
+
+**Notas de Implementación**: Estos cambios de estado son acciones manuales del usuario.
+
+**Estado**: Backlog
+
+---
+
+### HU-138: No se puede calcular sin validaciones previas
+**Descripción**:
+Como usuario,
+Quiero que el sistema me impida calcular una cotización si no existe ninguna ubicación calculable,
+Para evitar cálculos erróneos y asegurar la calidad de los datos.
+
+**Criterios de Aceptación**:
+- Dado que una cotización no tiene ninguna ubicación con `estadoValidacion: COMPLETA`, cuando intento calcular la prima, entonces el sistema me muestra los errores de validación y no procede.
+- Dado que una cotización tiene coberturas no definidas o con parámetros erróneos pero al menos una ubicación válida, cuando intento calcular, entonces el cálculo procede para las ubicaciones válidas.
+- Dado que todas las validaciones son exitosas en al menos una ubicación, cuando intento calcular, entonces el cálculo procede sin impedimentos.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-169 (Prevenir Ejecución de Cálculo cuando no hay ubicaciones válidas)
+
+**Componentes Técnicos**: Backend (Motor de Validación de Reglas de Negocio), Frontend (Mensajes de Error).
+
+**Notas de Implementación**: La validación debe ser exhaustiva antes de invocar el motor de cálculo.
+
+**Estado**: Backlog
+
+---
+
+### HU-139: No se puede aprobar sin cálculo previo
+**Descripción**:
+Como usuario,
+Quiero que el sistema me impida aprobar una cotización si no ha sido previamente calculada,
+Para asegurar que solo se aprueban cotizaciones con información financiera validada.
+
+**Criterios de Aceptación**:
+- Dado que una cotización está en estado "Borrador" o "Pendiente de Cálculo", cuando intento cambiar su estado a "Aprobada", entonces el sistema me lo impide y muestra un mensaje de error.
+- Dado que una cotización está en estado "Calculada", cuando intento cambiar su estado a "Aprobada", entonces la operación es exitosa.
+- Dado que una cotización ha sido "Rechazada", cuando intento cambiar su estado a "Aprobada", entonces el sistema me lo impide.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-136 (Actualización Automática a Estado "Calculada"), HU-137 (Cambiar Manualmente Estado)
+
+**Componentes Técnicos**: Backend (Lógica de Transición de Estados).
+
+**Notas de Implementación**: Las reglas de transición de estado deben ser estrictas.
+
+**Estado**: Backlog
+
+---
+
+### HU-140: Cualquier Modificación Invalida Cálculo
+**Descripción**:
+Como usuario,
+Quiero que cualquier modificación en una cotización en estado "CALCULADA" o superior invalide el cálculo,
+Para asegurar que los resultados financieros siempre correspondan a la información actual.
+
+**Criterios de Aceptación**:
+- Dado que una cotización está en estado "Calculada", cuando modifico datos generales o de una ubicación, entonces el estado de la cotización regresa a "Borrador" o "Pendiente de Cálculo".
+- Dado que el estado regresa a "Borrador" o "Pendiente de Cálculo", cuando visualizo los resultados financieros, entonces se indica que están desactualizados o no disponibles.
+- Dado que una cotización está en estado "Aprobada" o "Rechazada", cuando intento modificarla, entonces el sistema me lo permite pero regresa a un estado de borrador para recálculo.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-112 (Editar Datos Generales de la Cotización), HU-116 (Editar Detalles de Ubicación de Riesgo)
+
+**Componentes Técnicos**: Backend (Lógica de Transición de Estados y Validación).
+
+**Notas de Implementación**: Esta regla es crucial para mantener la integridad de los datos financieros.
+
+**Estado**: Backlog
+
+---
+
+### HU-141: Establecer Estado "Emitida"
+**Descripción**:
+Como usuario,
+Quiero poder establecer el estado de una cotización como "Emitida" una vez que ha sido "Aprobada",
+Para indicar que la póliza ha sido formalmente emitida y es un estado terminal.
+
+**Criterios de Aceptación**:
+- Dado que una cotización está en estado "Aprobada", cuando selecciono "Emitir", entonces su estado cambia a "Emitida".
+- Dado que una cotización está en estado "Emitida", cuando intento modificarla, entonces el sistema me lo impide o me notifica que es un estado terminal.
+- Dado que una cotización no está en estado "Aprobada", cuando intento cambiar su estado a "Emitida", entonces el sistema me lo impide.
+
+**Prioridad**: Media
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-137 (Cambiar Manualmente Estado a "Aprobada" o "Rechazada")
+
+**Componentes Técnicos**: Frontend (Botón "Emitir"), Backend (API de Actualización de Estado).
+
+**Notas de Implementación**: "Emitida" debe ser un estado terminal sin transiciones de salida.
+
+**Estado**: Backlog
+
+---
+
+### HU-142: Visualizar Estado Actual de la Cotización
+**Descripción**:
+Como usuario,
+Quiero ver claramente el estado actual de la cotización,
+Para tener un seguimiento visual del progreso del proceso de venta.
+
+**Criterios de Aceptación**:
+- Dado que tengo una cotización abierta, cuando la visualizo, entonces se muestra una etiqueta o indicador con su estado actual (e.g., Borrador, Calculada).
+- Dado que el estado de la cotización cambia, cuando la consulto de nuevo, entonces la interfaz refleja el nuevo estado.
+- Dado que el estado es importante, cuando se muestra, entonces es prominente y fácil de identificar.
+
+**Prioridad**: Alta
+
+**Estimación**: 1 punto de historia
+
+**Dependencias**: Ninguna (es una funcionalidad de visualización)
+
+**Componentes Técnicos**: Frontend (Elemento de Visualización de Estado).
+
+**Notas de Implementación**: El estado puede ser representado con colores o iconos para mayor claridad.
+
+**Estado**: Backlog
+
+---
+
+### HU-143: Pantalla de Términos y Condiciones
 
 **Descripción**:
 Como usuario,
@@ -4955,7 +4004,7 @@ Para revisar y confirmar las condiciones del seguro previo a su formalización.
 
 **Feature Padre**: FT-006 (Gestión del Ciclo de Vida y Estados de la Cotización)
 
-**Dependencias**: HU-134 (Actualización Automática a Estado "Calculada"), HU-135 (Cambiar Manualmente Estado a "Aprobada" o "Rechazada")
+**Dependencias**: HU-136 (Actualización Automática a Estado "Calculada"), HU-137 (Cambiar Manualmente Estado a "Aprobada" o "Rechazada")
 
 **Componentes Técnicos**:
 - Frontend: Ruta `/quotes/{folio}/terms-and-conditions`, componente de revisión y aceptación de términos.
@@ -4969,7 +4018,804 @@ Para revisar y confirmar las condiciones del seguro previo a su formalización.
 
 ---
 
-### HU-184: Calcular Componentes Técnicos de Prima por Ubicación (14 Componentes)
+## FT-007: Integración con Servicios de Referencia (Catálogos y Tarifas)
+
+### HU-144: Consumir Catálogos de Suscriptores, Agentes y Giros
+**Descripción**:
+Como sistema,
+Quiero consumir los catálogos de suscriptores, agentes y giros desde `Plataforma-core-ohs` (o su simulación),
+Para proveer opciones de selección actualizadas en la interfaz de datos generales.
+
+**Criterios de Aceptación**:
+- Dado que el sistema requiere los catálogos, cuando realiza la consulta, entonces obtiene los datos de suscriptores, agentes y giros del servicio externo.
+- Dado que los datos son recibidos, cuando se procesan, entonces se mapean correctamente al modelo interno del cotizador.
+- Dado que el servicio externo no responde, cuando se realiza la consulta, entonces el sistema maneja la excepción y registra el error.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
+
+**Componentes Técnicos**: Backend (Clientes API REST para `Plataforma-core-ohs`), Capa de Integración.
+
+**Notas de Implementación**: Considerar estrategia de caché para estos catálogos.
+
+**Estado**: Backlog
+
+---
+
+### HU-145: Consumir Datos de Códigos Postales y Zonas de Riesgo
+**Descripción**:
+Como sistema,
+Quiero consultar y validar información de códigos postales y sus zonas de riesgo desde `Plataforma-core-ohs` (o su simulación),
+Para asegurar la correcta evaluación del riesgo por ubicación.
+
+**Criterios de Aceptación**:
+- Dado que el sistema requiere validar un código postal, cuando realiza la consulta, entonces obtiene la información de zona (CAT, nivel técnico) asociada al CP.
+- Dado que el código postal es inválido o no encontrado en el catálogo, cuando se realiza la consulta, entonces el servicio devuelve una indicación de error.
+- Dado que los datos de zona se reciben, cuando se procesan, entonces están disponibles para la lógica de cálculo de primas.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
+
+**Componentes Técnicos**: Backend (Clientes API REST para `Plataforma-core-ohs`), Servicio de Validación de CP.
+
+**Notas de Implementación**: Optimizar la consulta de CP para grandes volúmenes.
+
+**Estado**: Backlog
+
+---
+
+### HU-146: Consumir Catálogos de Clasificación de Riesgo y Garantías
+**Descripción**:
+Como sistema,
+Quiero obtener los catálogos de clasificación de riesgo y garantías desde `Plataforma-core-ohs` (o su simulación),
+Para permitir la configuración detallada de coberturas y la evaluación de riesgo.
+
+**Criterios de Aceptación**:
+- Dado que el sistema requiere los catálogos, cuando realiza la consulta, entonces obtiene los datos de clasificación de riesgo y garantías del servicio externo.
+- Dado que los datos son recibidos, cuando se procesan, entonces se mapean correctamente al modelo interno del cotizador.
+- Dado que los catálogos se actualizan en el sistema de origen, cuando se consultan, entonces los cambios se reflejan en el cotizador.
+
+**Prioridad**: Media
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
+
+**Componentes Técnicos**: Backend (Clientes API REST para `Plataforma-core-ohs`), Capa de Integración.
+
+**Notas de Implementación**: Estos catálogos suelen ser menos voluminosos y de actualización menos frecuente.
+
+**Estado**: Backlog
+
+---
+
+### HU-147: Consumir Tarifas y Factores Técnicos
+**Descripción**:
+Como sistema,
+Quiero consultar las tarifas (incendio, CAT, FHM) y factores técnicos (equipo electrónico) desde `Plataforma-core-ohs` (o su simulación),
+Para utilizarlos en el cálculo preciso de las primas.
+
+**Criterios de Aceptación**:
+- Dado que el sistema requiere tarifas o factores, cuando realiza la consulta, entonces obtiene los datos necesarios del servicio externo.
+- Dado que los datos son recibidos, cuando se procesan, entonces se mapean correctamente para ser utilizados en la lógica de cálculo.
+- Dado que el servicio externo no responde o devuelve datos inconsistentes, cuando se realiza la consulta, entonces el sistema maneja el error y notifica.
+
+**Prioridad**: Alta
+
+**Estimación**: 4 puntos de historia
+
+**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
+
+**Componentes Técnicos**: Backend (Clientes API REST para `Plataforma-core-ohs`), Módulo de Adaptación de Tarifas.
+
+**Notas de Implementación**: La estructura de tarifas y factores puede ser compleja y requiere mapeo cuidadoso.
+
+**Estado**: Backlog
+
+---
+
+### HU-148: Manejo de Errores de Comunicación con Servicio Externo
+**Descripción**:
+Como sistema,
+Quiero manejar posibles errores de comunicación con el servicio `Plataforma-core-ohs`,
+Para asegurar la robustez de la integración y evitar fallos en el cotizador.
+
+**Criterios de Aceptación**:
+- Dado que `Plataforma-core-ohs` no está disponible, cuando el sistema intenta consultarlo, entonces se registra un error y se notifica al usuario o sistema.
+- Dado que la respuesta de `Plataforma-core-ohs` es inconsistente, cuando el sistema la recibe, entonces se maneja la inconsistencia y se registra.
+- Dado que hay un error de comunicación, cuando se intenta una operación dependiente, entonces el sistema puede reintentar la operación o usar datos en caché (si aplica).
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-144, HU-145, HU-146, HU-147
+
+**Componentes Técnicos**: Capa de Integración Backend (Manejo de Excepciones, Circuit Breakers, Reintentos).
+
+**Notas de Implementación**: Implementar patrones de resiliencia como Circuit Breaker y Retry.
+
+**Estado**: Backlog
+
+---
+
+## FT-008: Gestión de Persistencia Avanzada y Versionado Optimista
+
+### HU-149: Incrementar Versión en Ediciones de Cotización
+**Descripción**:
+Como sistema,
+Quiero que cada edición de una cotización incremente automáticamente un campo de versión,
+Para facilitar el control de concurrencia y la trazabilidad de los cambios.
+
+**Criterios de Aceptación**:
+- Dado que se guarda una cotización modificada, cuando la operación es exitosa, entonces el campo `version` de la cotización se incrementa en uno.
+- Dado que se crea una nueva cotización, cuando se guarda por primera vez, entonces su campo `version` se inicializa en 1.
+- Dado que ocurre un error al guardar, cuando la operación falla, entonces el campo `version` no se incrementa.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: Todas las HUs que modifican la cotización (ej. HU-112, HU-116)
+
+**Componentes Técnicos**: Backend (Capa de Persistencia, Modelo de Datos de Cotización).
+
+**Notas de Implementación**: La gestión del campo de versión debe ser automática y transparente para el usuario.
+
+**Estado**: Backlog
+
+---
+
+### HU-150: Actualizar Fecha de Última Actualización en Ediciones
+**Descripción**:
+Como sistema,
+Quiero que cada edición de una cotización actualice el campo `fechaUltimaActualizacion`,
+Para tener un registro de cuándo fue la última modificación de la cotización.
+
+**Criterios de Aceptación**:
+- Dado que se guarda una cotización modificada, cuando la operación es exitosa, entonces el campo `fechaUltimaActualizacion` se actualiza con la fecha y hora actual.
+- Dado que se crea una nueva cotización, cuando se guarda por primera vez, entonces su campo `fechaUltimaActualizacion` se establece con la fecha y hora de creación.
+- Dado que ocurre un error al guardar, cuando la operación falla, entonces el campo `fechaUltimaActualizacion` no se actualiza.
+
+**Prioridad**: Alta
+
+**Estimación**: 1 punto de historia
+
+**Dependencias**: HU-149 (Incrementar Versión en Ediciones de Cotización)
+
+**Componentes Técnicos**: Backend (Capa de Persistencia, Modelo de Datos de Cotización).
+
+**Notas de Implementación**: La actualización de la fecha debe ser automática.
+
+**Estado**: Backlog
+
+---
+
+### HU-151: Prevenir Sobrescritura con Versionado Optimista
+**Descripción**:
+Como sistema,
+Quiero prevenir la sobrescritura de cambios si una versión más reciente ya fue guardada (versionado optimista),
+Para evitar la pérdida de datos en ediciones concurrentes.
+
+**Criterios de Aceptación**:
+- Dado que un usuario intenta guardar una cotización con una versión desactualizada, cuando la operación se realiza, entonces el sistema detecta el conflicto y la rechaza.
+- Dado que se detecta un conflicto de versión, cuando el sistema lo notifica, entonces se envía un mensaje de error al usuario indicando que la cotización ha sido modificada por otro usuario.
+- Dado que la versión de la cotización en memoria coincide con la de la base de datos, cuando se guarda, entonces la operación es exitosa.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-149 (Incrementar Versión en Ediciones de Cotización), HU-181 (Comparar Versiones de Cotización en Guardado)
+
+**Componentes Técnicos**: Backend (Lógica de Control de Concurrencia en Persistencia).
+
+**Notas de Implementación**: La estrategia específica para el versionado optimista será un número de versión incremental gestionado por el backend.
+
+**Estado**: Backlog
+
+---
+
+### HU-152: Permitir Actualización Parcial de Campos
+**Descripción**:
+Como sistema,
+Quiero permitir la actualización parcial de campos de la cotización sin afectar otros datos,
+Para optimizar las operaciones de guardado y reducir la carga de datos.
+
+**Criterios de Aceptación**:
+- Dado que un usuario modifica solo un subconjunto de campos de la cotización, cuando guarda, entonces solo esos campos modificados se actualizan en la base de datos.
+- Dado que se realiza una actualización parcial, cuando se completa, entonces los campos no modificados permanecen intactos.
+- Dado que una actualización parcial es exitosa, cuando se guarda, entonces el campo `fechaUltimaActualizacion` y la `version` se actualizan.
+
+**Prioridad**: Media
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-149 (Incrementar Versión en Ediciones de Cotización)
+
+**Componentes Técnicos**: Backend (API de Actualización Parcial, Capa de Persistencia).
+
+**Notas de Implementación**: Utilizar DTOs específicos para actualizaciones o mapeo inteligente de campos.
+
+**Estado**: Backlog
+
+---
+
+### HU-153: Persistencia Transaccional de Cotización y Ubicaciones
+**Descripción**:
+Como sistema,
+Quiero asegurar que la persistencia de la cotización y sus ubicaciones es transaccional y consistente,
+Para garantizar la integridad de los datos en caso de errores.
+
+**Criterios de Aceptación**:
+- Dado que se guarda una cotización con sus ubicaciones, cuando la operación es exitosa, entonces todos los datos (cotización y todas sus ubicaciones) se persisten.
+- Dado que ocurre un error durante la persistencia de una ubicación, cuando la operación falla, entonces todos los cambios (cotización y ubicaciones) se deshacen (rollback).
+- Dado que la persistencia es transaccional, cuando se completa, entonces la base de datos refleja un estado consistente.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-115 (Agregar Nueva Ubicación de Riesgo), HU-117 (Marcar Ubicación de Riesgo como Inactiva)
+
+**Componentes Técnicos**: Backend (Capa de Persistencia, Transacciones en MongoDB).
+
+**Notas de Implementación**: MongoDB no tiene transacciones ACID a nivel de múltiples documentos por defecto, por lo que se debe simular la atomicidad a nivel de agregado.
+
+**Estado**: Backlog
+
+---
+
+## FT-009: Implementación de Reglas de Negocio y Validaciones
+
+### HU-154: Validar Datos Generales de la Cotización
+**Descripción**:
+Como sistema,
+Quiero implementar reglas de validación para los datos generales de la cotización (ej., formato RFC, rangos de vigencia),
+Para asegurar la consistencia y corrección de la información inicial.
+
+**Criterios de Aceptación**:
+- Dado que el usuario ingresa un RFC, cuando se valida, entonces se comprueba que cumple con el formato requerido.
+- Dado que el usuario selecciona una vigencia, cuando se valida, entonces se comprueba que las fechas de inicio y fin son coherentes y dentro de rangos válidos.
+- Dado que un campo obligatorio está vacío, cuando se guarda la cotización, entonces el sistema muestra un mensaje de error claro y no permite guardar.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-112 (Editar Datos Generales de la Cotización)
+
+**Componentes Técnicos**: Backend (Módulo de Validación de Datos Generales).
+
+**Notas de Implementación**: Las validaciones deben ejecutarse tanto en frontend como en backend.
+
+**Estado**: Backlog
+
+---
+
+### HU-155: Validar Datos Específicos de Ubicación de Riesgo
+**Descripción**:
+Como sistema,
+Quiero implementar reglas de validación para los datos específicos de cada ubicación de riesgo (ej., valor del bien, año de construcción),
+Para asegurar la integridad de la información utilizada en la evaluación del riesgo.
+
+**Criterios de Aceptación**:
+- Dado que el usuario ingresa el valor de un bien, cuando se valida, entonces se comprueba que está dentro de los rangos permitidos.
+- Dado que el usuario ingresa el año de construcción, cuando se valida, entonces se comprueba que es un año válido y consistente.
+- Dado que un campo obligatorio de una ubicación está vacío, cuando se guarda la ubicación, entonces el sistema muestra un mensaje de error claro.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-116 (Editar Detalles de Ubicación de Riesgo)
+
+**Componentes Técnicos**: Backend (Módulo de Validación de Datos de Ubicación).
+
+**Notas de Implementación**: Las reglas de validación deben ser configurables y extensibles.
+
+**Estado**: Backlog
+
+---
+
+### HU-156: Aplicar Lógica de Negocio en Cálculo de Primas
+**Descripción**:
+Como sistema,
+Quiero que la lógica de cálculo de primas incorpore las reglas de negocio y factores técnicos definidos (ej., aplicación de recargos, descuentos),
+Para asegurar que la prima final sea correcta y consistente con las políticas de suscripción.
+
+**Criterios de Aceptación**:
+- Dado que se cumplen ciertas condiciones (ej. tipo de cliente, canal de venta), cuando se calcula la prima, entonces se aplican los recargos o descuentos correspondientes.
+- Dado que se utilizan factores técnicos, cuando se aplican en el cálculo, entonces se hace según las especificaciones de las tarifas.
+- Dado que una regla de negocio impacta el cálculo, cuando se ejecuta, entonces el resultado final de la prima lo refleja.
+
+**Prioridad**: Alta
+
+**Estimación**: 4 puntos de historia
+
+**Dependencias**: HU-129 (Aplicar Reglas de Negocio y Factores Técnicos en Cálculo)
+
+**Componentes Técnicos**: Backend (Motor Central de Cálculo de Primas, Módulo de Reglas de Negocio).
+
+**Notas de Implementación**: La lógica de negocio debe ser trazable y documentada.
+
+**Estado**: Backlog
+
+---
+
+### HU-157: Proporcionar Mensajes de Error Claros
+**Descripción**:
+Como sistema,
+Quiero proporcionar mensajes de error claros y útiles cuando las validaciones fallan,
+Para guiar al usuario en la corrección de los datos.
+
+**Criterios de Aceptación**:
+- Dado que una validación falla, cuando se muestra el error, entonces el mensaje indica claramente qué campo es erróneo y por qué.
+- Dado que múltiples validaciones fallan, cuando se muestran los errores, entonces se presentan de forma organizada y fácil de entender.
+- Dado que un error es crítico, cuando se muestra, entonces se destaca para la acción inmediata del usuario.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-154 (Validar Datos Generales de la Cotización), HU-155 (Validar Datos Específicos de Ubicación de Riesgo)
+
+**Componentes Técnicos**: Frontend (Sistema de Notificaciones/Validaciones de UI), Backend (Servicio de Mensajes de Error).
+
+**Notas de Implementación**: Los mensajes deben ser amigables y orientados a la solución.
+
+**Estado**: Backlog
+
+---
+
+### HU-158: Asegurar Trazabilidad de Reglas de Negocio
+**Descripción**:
+Como sistema,
+Quiero que las reglas de negocio implementadas sean trazables y documentadas,
+Para facilitar la auditoría, mantenimiento y comprensión de la lógica del sistema.
+
+**Criterios de Aceptación**:
+- Dado que se implementa una regla de negocio, cuando se realiza, entonces existe documentación que describe su propósito, condiciones y efectos.
+- Dado que se necesita auditar un cálculo, cuando se consulta, entonces es posible identificar qué reglas de negocio fueron aplicadas y con qué parámetros.
+- Dado que se requiere modificar una regla, cuando se busca, entonces su implementación es fácilmente identificable en el código.
+
+**Prioridad**: Media
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-156 (Aplicar Lógica de Negocio en Cálculo de Primas)
+
+**Componentes Técnicos**: Backend (Módulo de Reglas de Negocio, Herramientas de Documentación).
+
+**Notas de Implementación**: Considerar el uso de un motor de reglas o un enfoque basado en especificaciones.
+
+**Estado**: Backlog
+
+---
+
+## FT-010: Configuración y Gestión de Parámetros de Cálculo
+
+### HU-159: Consumir Tarifas de Incendio
+**Descripción**:
+Como sistema,
+Quiero consumir o simular la consulta de `tarifas_incendio` del servicio `Plataforma-core-ohs`,
+Para obtener las tasas base necesarias para el cálculo de primas.
+
+**Criterios de Aceptación**:
+- Dado que el motor de cálculo requiere tarifas de incendio, cuando las consulta, entonces obtiene los datos del servicio `Plataforma-core-ohs` o del mock.
+- Dado que las tarifas se reciben, cuando se procesan, entonces se mapean correctamente y están disponibles para el cálculo.
+- Dado que el servicio de tarifas no está disponible, cuando se realiza la consulta, entonces el sistema maneja la excepción y registra el error.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
+
+**Componentes Técnicos**: Backend (Adaptador para `Plataforma-core-ohs`), Repositorio de Parámetros.
+
+**Notas de Implementación**: La simulación debe ser fiel a los contratos de la API real.
+
+**Estado**: Backlog
+
+---
+
+### HU-160: Consumir Tarifas de Catástrofe (CAT)
+**Descripción**:
+Como sistema,
+Quiero consumir o simular la consulta de `tarifas_cat` del servicio `Plataforma-core-ohs`,
+Para aplicar los factores de catástrofe según la zona de riesgo.
+
+**Criterios de Aceptación**:
+- Dado que el motor de cálculo requiere tarifas CAT, cuando las consulta, entonces obtiene los datos del servicio `Plataforma-core-ohs` o del mock.
+- Dado que las tarifas se reciben, cuando se procesan, entonces se mapean correctamente y están disponibles para el cálculo.
+- Dado que se consulta una zona de riesgo, cuando se aplican las tarifas CAT, entonces se utiliza el factor correcto para esa zona.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
+
+**Componentes Técnicos**: Backend (Adaptador para `Plataforma-core-ohs`), Repositorio de Parámetros.
+
+**Notas de Implementación**: Se debe considerar cómo se relaciona la zona con la tarifa CAT.
+
+**Estado**: Backlog
+
+---
+
+### HU-161: Consumir Tarifa FHM
+**Descripción**:
+Como sistema,
+Quiero consumir o simular la consulta de `tarifa_fhm` del servicio `Plataforma-core-ohs`,
+Para aplicar las cuotas de Fenómenos Hidrometeorológicos (FHM) en el cálculo.
+
+**Criterios de Aceptación**:
+- Dado que el motor de cálculo requiere tarifa FHM, cuando la consulta, entonces obtiene los datos del servicio `Plataforma-core-ohs` o del mock.
+- Dado que la tarifa se recibe, cuando se procesa, entonces se mapea correctamente y está disponible para el cálculo.
+- Dado que se consulta una ubicación, cuando se aplica la tarifa FHM, entonces se utiliza la cuota correcta según el grupo, zona y condición.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
+
+**Componentes Técnicos**: Backend (Adaptador para `Plataforma-core-ohs`), Repositorio de Parámetros.
+
+**Notas de Implementación**: La tarifa FHM puede tener múltiples criterios de aplicación.
+
+**Estado**: Backlog
+
+---
+
+### HU-162: Consumir Factores de Equipo Electrónico
+**Descripción**:
+Como sistema,
+Quiero consumir o simular la consulta de `factores_equipo_electronico` del servicio `Plataforma-core-ohs`,
+Para aplicar el factor técnico de equipo electrónico en el cálculo de primas.
+
+**Criterios de Aceptación**:
+- Dado que el motor de cálculo requiere factores de equipo electrónico, cuando los consulta, entonces obtiene los datos del servicio `Plataforma-core-ohs` o del mock.
+- Dado que los factores se reciben, cuando se procesan, entonces se mapean correctamente y están disponibles para el cálculo.
+- Dado que se consulta una ubicación con equipo electrónico, cuando se aplica el factor, entonces se utiliza el valor correcto según la clase y nivel de zona.
+
+**Prioridad**: Media
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
+
+**Componentes Técnicos**: Backend (Adaptador para `Plataforma-core-ohs`), Repositorio de Parámetros.
+
+**Notas de Implementación**: Definir cómo se clasifica el equipo electrónico y su relación con las zonas.
+
+**Estado**: Backlog
+
+---
+
+### HU-163: Consumir Catálogo de Códigos Postales y Zonas (EP-002)
+**Descripción**:
+Como sistema,
+Quiero consumir o simular la consulta de `catalogo_cp_zonas` del servicio `Plataforma-core-ohs` y mapear zonas,
+Para obtener la relación entre códigos postales y sus zonas (CAT, nivel técnico) para el cálculo.
+
+**Criterios de Aceptación**:
+- Dado que el motor de cálculo requiere el catálogo CP-Zonas, cuando lo consulta, entonces obtiene los datos del servicio `Plataforma-core-ohs` o del mock.
+- Dado que el catálogo se recibe, cuando se procesa, entonces los códigos postales se mapean correctamente a sus zonas CAT y nivel técnico.
+- Dado que se consulta un código postal, cuando se obtienen sus zonas, entonces la información es precisa y completa.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-092 (Configurar Mock Server Base, FT-020)
+
+**Componentes Técnicos**: Backend (Adaptador para `Plataforma-core-ohs`), Mapeador de Datos.
+
+**Notas de Implementación**: La gestión de versionado o fechas de vigencia para estos parámetros es una mejora futura.
+
+**Estado**: Backlog
+
+---
+
+### HU-164: Parámetros Disponibles para Motores de Cálculo y Validación
+**Descripción**:
+Como sistema,
+Quiero que todos los parámetros y tarifas cargados estén disponibles para el Motor de Validación y el Motor Central de Cálculo,
+Para asegurar que ambos motores operan con la información más reciente y correcta.
+
+**Criterios de Aceptación**:
+- Dado que los parámetros y tarifas han sido cargados exitosamente, cuando el Motor de Validación los requiere, entonces tiene acceso a ellos.
+- Dado que los parámetros y tarifas han sido cargados exitosamente, cuando el Motor Central de Cálculo los requiere, entonces tiene acceso a ellos.
+- Dado que un parámetro se actualiza, cuando se consulta, entonces ambos motores reciben el valor actualizado.
+
+**Prioridad**: Alta
+
+**Estimación**: 1 punto de historia
+
+**Dependencias**: HU-159, HU-160, HU-161, HU-162, HU-163
+
+**Componentes Técnicos**: Backend (Repositorios de Parámetros, Servicios de Consulta de Parámetros).
+
+**Notas de Implementación**: Implementar una interfaz común para acceder a los parámetros.
+
+**Estado**: Backlog
+
+---
+
+## FT-011: Motor de Validación de Reglas de Negocio
+
+### HU-165: Validar Rangos de Sumas Aseguradas
+**Descripción**:
+Como sistema,
+Quiero validar que las sumas aseguradas de las coberturas estén dentro de los rangos predefinidos,
+Para asegurar que los valores son coherentes con las políticas de suscripción.
+
+**Criterios de Aceptación**:
+- Dado que el usuario ingresa una suma asegurada, cuando se valida, entonces se comprueba que está entre el mínimo y el máximo permitido.
+- Dado que la suma asegurada está fuera de rango, cuando se valida, entonces el sistema genera un error de validación claro.
+- Dado que la suma asegurada está dentro de rango, cuando se valida, entonces no se genera ningún error.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-123 (Configurar Parámetros Específicos de Cobertura), HU-164 (Parámetros Disponibles para Motores de Cálculo y Validación)
+
+**Componentes Técnicos**: Backend (Módulo de Reglas de Validación).
+
+**Notas de Implementación**: Los rangos deben ser configurables y accesibles desde los parámetros de cálculo.
+
+**Estado**: Backlog
+
+---
+
+### HU-166: Validar Códigos Postales Contra Catálogo
+**Descripción**:
+Como sistema,
+Quiero validar los códigos postales de las ubicaciones contra el `catalogo_cp_zonas` provisto,
+Para asegurar que solo se usan códigos postales válidos y asociados a zonas de riesgo.
+
+**Criterios de Aceptación**:
+- Dado que una ubicación tiene un código postal, cuando se valida, entonces se verifica su existencia en el `catalogo_cp_zonas`.
+- Dado que el código postal no se encuentra en el catálogo, cuando se valida, entonces el sistema genera un error de validación.
+- Dado que el código postal es válido y existe en el catálogo, cuando se valida, entonces no se genera ningún error.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-119 (Validar Código Postal de Ubicación), HU-163 (Consumir Catálogo de Códigos Postales y Zonas)
+
+**Componentes Técnicos**: Backend (Módulo de Reglas de Validación, Servicio de Consulta de Catálogos).
+
+**Notas de Implementación**: La validación debe ser eficiente, especialmente con grandes catálogos de CP.
+
+**Estado**: Backlog
+
+---
+
+### HU-167: Verificar Datos Mínimos Requeridos por Ubicación
+**Descripción**:
+Como sistema,
+Quiero verificar que cada ubicación candidata a cálculo tenga los datos mínimos requeridos,
+Para determinar su `estadoValidacion` y si puede incluirse en el proceso de cálculo.
+
+**Criterios de Aceptación**:
+- Dado que una ubicación es evaluada para cálculo, cuando se validan los datos mínimos, entonces se comprueba que tiene `codigoPostal` válido, `giro.claveIncendio` y al menos una garantía tarifable.
+- Dado que falta alguno de los datos mínimos en una ubicación, cuando se evalúa, entonces el sistema marca esa ubicación con `estadoValidacion: INCOMPLETA` y registra los campos faltantes en `alertasBloqueantes`.
+- Dado que todos los datos mínimos están presentes, cuando se evalúa, entonces la ubicación se marca con `estadoValidacion: COMPLETA` y puede participar en el cálculo.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-116 (Editar Detalles de Ubicación de Riesgo)
+
+**Componentes Técnicos**: Backend (Módulo de Reglas de Validación).
+
+**Notas de Implementación**: La definición de "datos mínimos" según el reto: CP válido + giro.claveIncendio + garantías tarifables. Una ubicación incompleta genera alerta pero no bloquea el cálculo de las demás.
+
+**Estado**: Backlog
+
+---
+
+### HU-168: Proporcionar Mensajes de Error Específicos de Validación
+**Descripción**:
+Como sistema,
+Quiero que el motor de validación proporcione mensajes de error claros y específicos para cada regla incumplida,
+Para facilitar la identificación y corrección de los problemas por parte del usuario.
+
+**Criterios de Aceptación**:
+- Dado que una regla de validación falla, cuando se reporta el error, entonces el mensaje identifica la regla específica y el campo afectado.
+- Dado que múltiples reglas fallan, cuando se reportan los errores, entonces se agrupan o listan de forma comprensible.
+- Dado que un error es de alta prioridad, cuando se reporta, entonces se destaca visualmente en la interfaz de usuario.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-165, HU-166, HU-167
+
+**Componentes Técnicos**: Backend (Componente de Reporte de Errores), Frontend (Interfaz de Mensajes de Error).
+
+**Notas de Implementación**: Los mensajes deben ser orientados al usuario final.
+
+**Estado**: Backlog
+
+---
+
+### HU-169: Prevenir Ejecución de Cálculo cuando No Existen Ubicaciones Válidas
+
+**Descripción**:
+Como sistema,
+Quiero que el cálculo de prima no se ejecute únicamente cuando no existe ninguna ubicación calculable,
+Para evitar calcular cotizaciones sin ningún riesgo válido asegurado.
+
+**Criterios de Aceptación**:
+- Dado que la cotización tiene al menos una ubicación con `estadoValidacion: COMPLETA`, cuando se inicia el cálculo, entonces el sistema **procede con el cálculo** para esas ubicaciones, ignorando las incompletas.
+- Dado que una ubicación tiene `estadoValidacion: INCOMPLETA`, cuando el motor de cálculo la evalúa, entonces esa ubicación se **excluye individualmente** del cálculo y sus `alertasBloqueantes` se incluyen en el resultado como parte de `primasPorUbicacion[]` con estado `EXCLUIDA`.
+- Dado que **todas** las ubicaciones de la cotización tienen `estadoValidacion: INCOMPLETA` o `INACTIVA`, cuando se intenta calcular, entonces el sistema impide el cálculo y notifica que no hay ubicaciones calculables.
+- Dado que el cálculo procede con ubicaciones parcialmente excluidas, cuando finaliza, entonces el resultado incluye las primas de las ubicaciones válidas y las alertas de las excluidas en un mismo response.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-125 (Iniciar Proceso de Cálculo de Prima), HU-168 (Proporcionar Mensajes de Error Específicos de Validación)
+
+**Componentes Técnicos**: Backend (Motor de Validación de Reglas de Negocio, Endpoint de Cálculo `POST /v1/quotes/{folio}/calculate`).
+
+**Notas de Implementación**:
+- Este comportamiento es el requisito explícito del reto: "si una ubicación está incompleta, genera alerta, pero no debe impedir calcular las demás."
+- El motor de validación determina `estadoValidacion` de cada ubicación **antes** de iterar el motor de cálculo.
+- Los criterios mínimos para que una ubicación sea calculable son: `codigoPostal` válido en el catálogo, `giro.claveIncendio` presente y al menos una garantía tarifable.
+
+**Estado**: Backlog
+
+---
+
+## FT-012: Motor Central de Cálculo de Primas
+
+### HU-170: Calcular Prima Neta por Ubicación
+
+**Descripción**:
+Como sistema,
+Quiero calcular la prima neta para cada ubicación de riesgo con `estadoValidacion: COMPLETA` utilizando las tarifas y factores correspondientes,
+Para determinar el costo base de la cobertura por cada lugar asegurado calculable.
+
+**Criterios de Aceptación**:
+- Dado que se proporciona una ubicación con `estadoValidacion: COMPLETA` y sus coberturas, cuando se ejecuta el cálculo, entonces se aplican los componentes técnicos activos de los 14 disponibles según las garantías y coberturas configuradas.
+- Dado que la ubicación tiene `giro.claveIncendio` y garantías tarifables, cuando se calcula la prima, entonces se usan las tarifas de incendio correspondientes al giro como base del cálculo.
+- Dado que una ubicación tiene `estadoValidacion: INCOMPLETA`, cuando el motor de cálculo la evalúa, entonces **la omite completamente** y registra la exclusión en el resultado.
+- Dado que el cálculo es exitoso, cuando se completa, entonces la prima neta resultante es un valor numérico preciso con al menos dos decimales.
+
+**Prioridad**: Alta
+
+**Estimación**: 4 puntos de historia
+
+**Dependencias**: HU-127 (Calcular Prima por Ubicación de Riesgo), HU-164 (Parámetros Disponibles para Motores de Cálculo y Validación)
+
+**Componentes Técnicos**: Backend (Algoritmos de Cálculo de Prima en el Motor de Cálculo).
+
+**Notas de Implementación**:
+- Solo se procesan ubicaciones con `estadoValidacion: COMPLETA`.
+- El motor itera los 14 componentes técnicos pero solo aplica los activos según `opcionesCobertura` y `garantías[]`.
+- Las fórmulas simplificadas deben ser implementadas con alta precisión y documentadas para trazabilidad.
+
+**Estado**: Backlog
+
+---
+
+### HU-171: Aplicar Factores de Catástrofe (CAT) y FHM
+**Descripción**:
+Como sistema,
+Quiero aplicar los factores de Catástrofe (CAT) y FHM según la zona y condiciones de la ubicación,
+Para ajustar la prima neta por el riesgo específico de eventos catastróficos.
+
+**Criterios de Aceptación**:
+- Dado que una ubicación está en una zona CAT, cuando se calcula la prima, entonces el factor CAT correspondiente se aplica a la prima neta.
+- Dado que una ubicación cumple las condiciones FHM, cuando se calcula la prima, entonces la cuota FHM correspondiente se aplica.
+- Dado que los factores se aplican, cuando se completa el cálculo, entonces el resultado refleja el ajuste por CAT y FHM.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-170 (Calcular Prima Neta por Ubicación), HU-160 (Consumir Tarifas de Catástrofe (CAT)), HU-161 (Consumir Tarifa FHM)
+
+**Componentes Técnicos**: Backend (Servicio de Aplicación de Factores en el Motor de Cálculo).
+
+**Notas de Implementación**: La lógica de aplicación debe ser clara y basada en los catálogos de zonas.
+
+**Estado**: Backlog
+
+---
+
+### HU-172: Calcular Prima Comercial Total
+**Descripción**:
+Como sistema,
+Quiero calcular la prima comercial total de la cotización a partir de la suma de las primas netas y la aplicación de factores comerciales,
+Para determinar el precio final que se presenta al cliente.
+
+**Criterios de Aceptación**:
+- Dado que se han calculado las primas netas por ubicación, cuando se ejecuta el cálculo, entonces se suman para obtener la prima neta total.
+- Dado que la prima neta total se ha obtenido, cuando se calcula la prima comercial, entonces se aplican los factores comerciales (e.g., recargos administrativos, impuestos).
+- Dado que el cálculo es exitoso, cuando se completa, entonces la prima comercial resultante es un valor numérico preciso.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-170 (Calcular Prima Neta por Ubicación)
+
+**Componentes Técnicos**: Backend (Consolidación de Primas en el Motor de Cálculo).
+
+**Notas de Implementación**: Los factores comerciales deben estar definidos y ser accesibles.
+
+**Estado**: Backlog
+
+---
+
+### HU-173: Generar Desglose de Primas por Ubicación
+**Descripción**:
+Como sistema,
+Quiero generar el desglose de primas por cada ubicación de riesgo calculable,
+Para proporcionar una vista detallada de cómo se compone el costo total.
+
+**Criterios de Aceptación**:
+- Dado que se han calculado las primas por ubicación, cuando se completa el proceso, entonces el desglose de primas por cada ubicación calculable está disponible.
+- Dado que el desglose se genera, cuando se almacena, entonces incluye la prima neta y los ajustes por factores para cada ubicación.
+- Dado que el desglose se genera, cuando se consulta, entonces la información es consistente con el cálculo total.
+
+**Prioridad**: Media
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-170 (Calcular Prima Neta por Ubicación)
+
+**Componentes Técnicos**: Backend (Consolidación de Primas en el Motor de Cálculo).
+
+**Notas de Implementación**: El desglose debe ser granular y fácil de interpretar.
+
+**Estado**: Backlog
+
+---
+
+### HU-174: Asegurar Precisión del Cálculo Según Fórmulas Simplificadas
+**Descripción**:
+Como sistema,
+Quiero que los cálculos sean 100% precisos según las fórmulas simplificadas y documentadas,
+Para garantizar la fiabilidad de los resultados financieros.
+
+**Criterios de Aceptación**:
+- Dado que se ejecuta un cálculo, cuando se compara el resultado con un cálculo manual basado en las fórmulas documentadas, entonces ambos coinciden.
+- Dado que se modifican los parámetros de entrada, cuando se recalcula, entonces el resultado se ajusta de forma predecible según las fórmulas.
+- Dado que se implementa una fórmula, cuando se prueba, entonces la cobertura unitaria es alta (>90%).
+
+**Prioridad**: Alta
+
+**Estimación**: 5 puntos de historia
+
+**Dependencias**: Todas las HUs de cálculo (HU-170, HU-171, HU-172, HU-173)
+
+**Componentes Técnicos**: Backend (Algoritmos de Cálculo de Prima, Pruebas Unitarias).
+
+**Notas de Implementación**: La lógica de cálculo se basará en la interpretación directa de los datos proporcionados, utilizando fórmulas simplificadas definidas en el alcance del proyecto, sin implementar lógica actuarial compleja o inferida.
+
+**Estado**: Backlog
+
+---
+
+### HU-175: Calcular Componentes Técnicos de Prima por Ubicación (14 Componentes)
 
 **Descripción**:
 Como sistema,
@@ -5002,7 +4848,7 @@ Para determinar con precisión y trazabilidad cada parte del costo de la cobertu
 
 **Feature Padre**: FT-012 (Motor Central de Cálculo de Primas)
 
-**Dependencias**: HU-167 (Calcular Prima Neta por Ubicación), HU-168 (Aplicar Factores de Catástrofe CAT y FHM), HU-156 (Consumir Tarifas de Incendio), HU-157 (Consumir Tarifas de Catástrofe), HU-158 (Consumir Tarifa FHM), HU-159 (Consumir Factores de Equipo Electrónico), HU-161 (Parámetros Disponibles para Motores)
+**Dependencias**: HU-170 (Calcular Prima Neta por Ubicación), HU-171 (Aplicar Factores de Catástrofe CAT y FHM), HU-159 (Consumir Tarifas de Incendio), HU-160 (Consumir Tarifas de Catástrofe), HU-161 (Consumir Tarifa FHM), HU-162 (Consumir Factores de Equipo Electrónico), HU-164 (Parámetros Disponibles para Motores)
 
 **Componentes Técnicos**:
 - Backend: Motor de cálculo con implementación de los 14 componentes, Servicio de aplicación de factores, Consolidación de resultados.
@@ -5016,3 +4862,232 @@ Para determinar con precisión y trazabilidad cada parte del costo de la cobertu
 **Estado**: Backlog
 
 ---
+
+## FT-013: Persistencia y Trazabilidad de Resultados de Cálculo
+
+### HU-176: Persistir Prima Neta y Comercial en Cotización
+**Descripción**:
+Como sistema,
+Quiero persistir la prima neta, prima comercial y el desglose por ubicación como parte del documento de cotización en MongoDB,
+Para que los resultados financieros sean intrínsecos a la cotización.
+
+**Criterios de Aceptación**:
+- Dado que se ha completado el cálculo, cuando se guardan los resultados, entonces los valores de prima neta total, prima comercial total y el desglose por ubicación se añaden al documento de la cotización.
+- Dado que el documento de cotización se consulta, cuando se recupera, entonces contiene todos los resultados del cálculo.
+- Dado que los resultados se persisten, cuando se guarda, entonces se aseguran los tipos de datos correctos (e.g., numéricos, decimales).
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-128 (Persistir Resultados del Cálculo de Prima), HU-172 (Calcular Prima Comercial Total)
+
+**Componentes Técnicos**: Backend (Repositorio de Cotizaciones), Base de Datos (MongoDB).
+
+**Notas de Implementación**: Diseño de esquema de datos en MongoDB para resultados de cálculo.
+
+**Estado**: Backlog
+
+---
+
+### HU-177: Asegurar Persistencia Atómica del Cálculo
+**Descripción**:
+Como sistema,
+Quiero asegurar que la operación de persistencia del cálculo es atómica,
+Para garantizar que todos los resultados se guarden o ninguno, manteniendo la consistencia.
+
+**Criterios de Aceptación**:
+- Dado que se intenta guardar los resultados del cálculo, cuando la operación es exitosa, entonces todos los componentes de la prima (neta, comercial, desglose) se guardan juntos.
+- Dado que ocurre un error durante la persistencia de los resultados, cuando la operación falla, entonces ningún resultado parcial se guarda y el estado de la cotización no se actualiza a "Calculada".
+- Dado que la persistencia es atómica, cuando se completa, entonces la cotización en la base de datos es consistente con el cálculo.
+
+**Prioridad**: Alta
+
+**Estimación**: 3 puntos de historia
+
+**Dependencias**: HU-176 (Persistir Prima Neta y Comercial en Cotización)
+
+**Componentes Técnicos**: Backend (Módulo de Persistencia de Resultados, Transacciones en MongoDB).
+
+**Notas de Implementación**: Requiere un manejo cuidadoso de las transacciones o la simulación de atomicidad en MongoDB.
+
+**Estado**: Backlog
+
+---
+
+### HU-178: Actualizar Metadatos de Cotización Tras Persistencia de Cálculo
+**Descripción**:
+Como sistema,
+Quiero que el sistema actualice el campo `fechaUltimaActualizacion` y el número de versión de la cotización tras cada persistencia de cálculo,
+Para reflejar que la cotización ha sido modificada y sus resultados financieros actualizados.
+
+**Criterios de Aceptación**:
+- Dado que se persisten los resultados de un cálculo, cuando la operación es exitosa, entonces el campo `fechaUltimaActualizacion` de la cotización se actualiza.
+- Dado que se persisten los resultados de un cálculo, cuando la operación es exitosa, entonces el número de `version` de la cotización se incrementa.
+- Dado que los metadatos se actualizan, cuando se consulta la cotización, entonces reflejan los cambios del cálculo.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-149 (Incrementar Versión en Ediciones de Cotización), HU-150 (Actualizar Fecha de Última Actualización en Ediciones)
+
+**Componentes Técnicos**: Backend (Módulo de Persistencia de Resultados).
+
+**Notas de Implementación**: La actualización de metadatos debe ser parte de la misma operación atómica de persistencia de cálculo.
+
+**Estado**: Backlog
+
+---
+
+### HU-179: Registrar Snapshot para Trazabilidad del Cálculo
+**Descripción**:
+Como sistema,
+Quiero registrar un snapshot de parámetros de entrada relevantes, identificadores y valores de tarifas/factores utilizados, el resultado detallado del cálculo y metadatos de ejecución,
+Para permitir la trazabilidad y auditoría de cómo se llegó a un resultado específico.
+
+**Criterios de Aceptación**:
+- Dado que se realiza un cálculo exitoso, cuando se persisten los resultados, entonces se guarda un snapshot de los datos clave de entrada (sumas aseguradas, coberturas, datos clave de ubicación).
+- Dado que se realiza un cálculo exitoso, cuando se persisten los resultados, entonces se registran los identificadores y versión lógica de tarifas/factores utilizados (tipo de tarifa, versión o timestamp).
+- Dado que se realiza un cálculo exitoso, cuando se persisten los resultados, entonces se registran los valores numéricos concretos de los factores aplicados y el resultado detallado del cálculo.
+- Dado que se realiza un cálculo exitoso, cuando se persisten los resultados, entonces se guardan metadatos de ejecución (fecha/hora del cálculo, versión de la cotización).
+- Dado que se necesita auditar un cálculo, cuando se consulta el snapshot, entonces es posible reconstruir los insumos y lógica aplicados.
+
+**Prioridad**: Alta
+
+**Estimación**: 4 puntos de historia
+
+**Dependencias**: HU-164 (Parámetros Disponibles para Motores de Cálculo y Validación), HU-174 (Asegurar Precisión del Cálculo Según Fórmulas Simplificadas)
+
+**Componentes Técnicos**: Backend (Componente de Auditoría/Logging de Cálculo, Repositorio de Cotizaciones).
+
+**Notas de Implementación**: El diseño del esquema de datos debe evitar duplicidades innecesarias y facilitar consultas de trazabilidad.
+
+**Estado**: Backlog
+
+---
+
+## FT-014: Gestión de Concurrencia y Versionado Optimista
+
+### HU-180: Implementar Campo de Versión Incremental
+**Descripción**:
+Como sistema,
+Quiero utilizar un campo de versión incremental para cada cotización,
+Para detectar si una cotización ha sido modificada por otro usuario o proceso.
+
+**Criterios de Aceptación**:
+- Dado que se crea una nueva cotización, cuando se guarda, entonces el campo `version` se inicializa en 1.
+- Dado que se actualiza una cotización, cuando se guarda, entonces el campo `version` se incrementa en 1.
+- Dado que el campo de versión es numérico, cuando se utiliza, entonces permite comparaciones para detección de concurrencia.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-149 (Incrementar Versión en Ediciones de Cotización)
+
+**Componentes Técnicos**: Backend (Modelo de Datos de Cotización, Capa de Persistencia).
+
+**Notas de Implementación**: El campo de versión debe ser gestionado automáticamente por el backend.
+
+**Estado**: Backlog
+
+---
+
+### HU-181: Comparar Versiones de Cotización en Guardado
+**Descripción**:
+Como sistema,
+Quiero que al intentar guardar una cotización, se compare la versión de la cotización en memoria con la versión en la base de datos,
+Para detectar posibles conflictos de concurrencia.
+
+**Criterios de Aceptación**:
+- Dado que un usuario intenta guardar una cotización, cuando se inicia la operación de guardado, entonces el sistema lee la versión actual de la cotización en la base de datos.
+- Dado que la versión en memoria coincide con la de la base de datos, cuando se compara, entonces la operación de guardado procede.
+- Dado que la versión en memoria es diferente a la de la base de datos, cuando se compara, entonces el sistema identifica un conflicto potencial.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-180 (Implementar Campo de Versión Incremental)
+
+**Componentes Técnicos**: Backend (Lógica de Control de Concurrencia en Persistencia).
+
+**Notas de Implementación**: Esta comparación debe realizarse como parte de la operación transaccional de guardado.
+
+**Estado**: Backlog
+
+---
+
+### HU-182: Detectar Conflicto de Concurrencia
+**Descripción**:
+Como sistema,
+Quiero que si las versiones no coinciden al intentar guardar una cotización, se detecte un conflicto de concurrencia,
+Para activar el mecanismo de resolución de conflictos.
+
+**Criterios de Aceptación**:
+- Dado que la versión de la cotización en la base de datos es mayor que la versión que el usuario intentó guardar, cuando se realiza la comparación, entonces se detecta un conflicto de concurrencia.
+- Dado que se detecta un conflicto, cuando se notifica, entonces el sistema lo marca para su manejo posterior.
+- Dado que no hay conflicto de versión, cuando se compara, entonces el sistema permite continuar con la operación de guardado.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-181 (Comparar Versiones de Cotización en Guardado)
+
+**Componentes Técnicos**: Backend (Lógica de Detección de Conflicto).
+
+**Notas de Implementación**: La detección debe ser explícita y generar una excepción o un código de error específico.
+
+**Estado**: Backlog
+
+---
+
+### HU-183: Notificar Usuario de Versión Más Reciente
+**Descripción**:
+Como sistema,
+Quiero que en caso de conflicto de concurrencia, se notifique al usuario de la existencia de una versión más reciente,
+Para informarle que sus cambios podrían sobrescribir los de otro.
+
+**Criterios de Aceptación**:
+- Dado que se detecta un conflicto de concurrencia, cuando se notifica al usuario, entonces se muestra un mensaje claro indicando que la cotización ha sido actualizada por otro usuario.
+- Dado que el mensaje se muestra, cuando lo visualiza el usuario, entonces le informa sobre la necesidad de recargar la cotización.
+- Dado que la notificación es crítica, cuando se muestra, entonces es prominente y requiere una acción del usuario.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-182 (Detectar Conflicto de Concurrencia)
+
+**Componentes Técnicos**: Frontend (Sistema de Notificación al Usuario), Backend (Servicio de Mensajes de Error de Concurrencia).
+
+**Notas de Implementación**: La notificación debe ser amigable y ofrecer opciones de acción.
+
+**Estado**: Backlog
+
+---
+
+### HU-184: Permitir Recargar Última Versión de Cotización
+**Descripción**:
+Como usuario,
+Quiero que el sistema me permita recargar la cotización con la última versión desde la base de datos en caso de conflicto,
+Para poder ver los cambios de otros usuarios y reintentar mis propias modificaciones.
+
+**Criterios de Aceptación**:
+- Dado que recibo una notificación de conflicto, cuando hago clic en "Recargar", entonces la cotización se carga nuevamente desde la base de datos con la versión más reciente.
+- Dado que la cotización se recarga, cuando se muestra, entonces refleja los cambios realizados por otros usuarios.
+- Dado que recargo la cotización, cuando intento guardar mis cambios de nuevo, entonces puedo hacerlo si no hay nuevos conflictos.
+
+**Prioridad**: Alta
+
+**Estimación**: 2 puntos de historia
+
+**Dependencias**: HU-183 (Notificar Usuario de Versión Más Reciente)
+
+**Componentes Técnicos**: Frontend (Botón "Recargar", Lógica de Recarga de Datos).
+
+**Notas de Implementación**: La recarga debe ser una operación que actualice completamente la vista de la cotización.
+
+**Estado**: Backlog

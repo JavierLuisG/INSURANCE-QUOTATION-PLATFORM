@@ -2,13 +2,13 @@
 
 ### 1. Descripción
 
-Esta feature permite la gestión de múltiples ubicaciones de riesgo dentro de una cotización, incluyendo su creación, edición, eliminación, validación de dirección mediante código postal y control de completitud de datos.
+Esta feature permite la creación, edición, gestión y control del ciclo de vida de las ubicaciones de riesgo dentro de una cotización, asegurando que cada ubicación contenga información completa, válida y estructurada para su uso en validaciones y cálculos posteriores.
 
 ---
 
 ### 2. Objetivo de Negocio
 
-Permitir la correcta definición de los riesgos a asegurar mediante ubicaciones estructuradas y validadas, garantizando calidad de datos para el cálculo de primas.
+Permitir la correcta definición y administración de múltiples ubicaciones de riesgo dentro de una cotización, garantizando integridad de datos, trazabilidad y preparación adecuada para el cálculo de primas.
 
 ---
 
@@ -16,58 +16,66 @@ Permitir la correcta definición de los riesgos a asegurar mediante ubicaciones 
 
 Incluye:
 
-* Agregar nuevas ubicaciones de riesgo
-* Editar información de ubicaciones
-* Eliminar ubicaciones
-* Validar código postal contra catálogo
-* Autocompletar datos de dirección
-* Visualizar alertas por datos incompletos
+* Creación de múltiples ubicaciones de riesgo
+* Edición completa de datos de ubicación
+* Marcado de ubicaciones como inactivas (soft delete)
+* Validación de código postal contra catálogo externo
+* Visualización de alertas por datos incompletos
+* Asociación de ubicaciones a una cotización
 
 No incluye:
 
-* Cálculo de prima
-* Evaluación de riesgo técnico
-* Geolocalización avanzada
+* Validaciones avanzadas de negocio (FT-011)
+* Cálculo de primas (FT-012)
+* Persistencia de resultados de cálculo (FT-013)
 
 ---
 
 ### 4. Historias de Usuario
 
-| HU     | Nombre                | Descripción corta               |
-| ------ | --------------------- | ------------------------------- |
-| HU-006 | Agregar ubicación     | Crear nueva ubicación de riesgo |
-| HU-007 | Editar ubicación      | Modificar datos de ubicación    |
-| HU-008 | Eliminar ubicación    | Remover ubicación               |
-| HU-009 | Validar código postal | Consulta y autocompletado       |
-| HU-010 | Alertas de datos      | Indicadores de completitud      |
+| HU     | Nombre                | Descripción corta                            |
+| ------ | --------------------- | -------------------------------------------- |
+| HU-006 | Agregar ubicación     | Crea una nueva ubicación en la cotización    |
+| HU-007 | Editar ubicación      | Modifica datos completos de una ubicación    |
+| HU-008 | Inactivar ubicación   | Marca ubicación como inactiva sin eliminarla |
+| HU-009 | Validar código postal | Verifica CP contra catálogo externo          |
+| HU-010 | Alertas visuales      | Indica errores o datos incompletos           |
 
 ---
 
 ### 5. Flujo Funcional
 
-1. Usuario agrega ubicación (HU-006)
-2. Ingresa código postal y se valida (HU-009)
-3. Sistema autocompleta dirección
-4. Usuario edita información adicional (HU-007)
-5. Sistema valida completitud (HU-010)
-6. Usuario puede eliminar ubicación (HU-008)
+1. Usuario crea o abre una cotización
+2. Agrega una nueva ubicación (HU-006)
+3. Ingresa y edita datos de la ubicación (HU-007)
+4. Sistema valida código postal y autocompleta información (HU-009)
+5. Sistema evalúa completitud y genera alertas visuales (HU-010)
+6. Usuario puede marcar ubicación como inactiva (HU-008)
+7. Ubicaciones activas quedan disponibles para validación y cálculo
 
 ---
 
 ### 6. Dependencias Técnicas
 
-* API de cotizaciones
-* Servicio de catálogos (`Plataforma-core-ohs`)
-* Servicio de validación de código postal
+* API de cotizaciones (gestión de ubicaciones)
+* Servicio de catálogo de códigos postales (`Plataforma-core-ohs`)
+* Módulo de validaciones (FT-009)
+* Modelo de dominio de Ubicación
+* Componentes UI de gestión (tabs / maestro-detalle)
 
 ---
 
 ### 7. Consideraciones Técnicas
 
-* Validación de CP en frontend (formato) y backend (existencia)
-* Manejo de latencia en servicio externo
-* Uso de autocompletado basado en catálogo
-* Control de estado de completitud por ubicación
-* Manejo de errores en integraciones externas
+* Las ubicaciones deben manejarse como **entidades dentro del agregado Cotización**
+* No se eliminan físicamente (soft delete mediante `estadoValidacion = INACTIVA`)
+* Límite configurable de ubicaciones (ej. máximo 10)
+* Actualizaciones deben ser parciales (`PATCH`) para evitar sobreescritura
+* El estado de la ubicación (`COMPLETA`, `INCOMPLETA`, `INACTIVA`) debe calcularse automáticamente
+* Integración con catálogo de CP debe ser eficiente (posible cache)
+* Validaciones pueden ser híbridas: frontend (formato) + backend (existencia)
+* UI debe reflejar estado mediante indicadores claros (UX-driven validation)
+* Preparado para consumo por motores de validación y cálculo posteriores
+* Estructura de datos debe permitir extensibilidad (nuevos campos de riesgo en el futuro)
 
 ---

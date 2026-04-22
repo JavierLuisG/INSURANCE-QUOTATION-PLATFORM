@@ -1,5 +1,7 @@
 # Arquitectura Evolucionada (TO-BE) — Cotizador de Seguros de Daños
 
+> **Nota sobre el stack tecnológico**: Las versiones específicas, frameworks, bibliotecas y herramientas de implementación están centralizados en **TECH_STACK.md**. Las etiquetas de tecnología en los diagramas C4 (tercer parámetro de `Container`) apuntan a ese archivo. Este documento define la arquitectura; TECH_STACK.md define con qué se construye.
+
 ---
 
 ## [C1] Diagrama de Contexto Evolucionado
@@ -18,31 +20,31 @@ C4Context
     Person(usuario, "Usuario Final / Agente de Seguros", "Gestiona cotizaciones de daños a través de la interfaz web.")
     Person(adminParams, "Administrador de Parámetros", "Gestiona catálogos y tarifas de referencia del sistema.")
 
-    System(frontend, "Cotizador Web (Frontend SPA)", "Interfaz de usuario para la creación y gestión de cotizaciones (React 18). Rutas: /cotizador, /quotes/{folio}/general-info, /quotes/{folio}/locations, /quotes/{folio}/technical-info, /quotes/{folio}/terms-and-conditions.")
-    System(backend, "Backend de Cotizaciones", "Servicio principal de lógica de negocio y persistencia (Java 17 Spring Boot). Incluye motor de cálculo de primas (14 componentes), versionado optimista y gestión del ciclo de vida.")
-    System(dbCotizaciones, "Base de Datos de Cotizaciones", "Almacena cotizaciones como agregado principal, ubicaciones, resultados de cálculo y snapshots de trazabilidad (MongoDB). Cifrado AES-256 en reposo.")
+    System(frontend, "Cotizador Web (Frontend SPA)", "Interfaz de usuario para la creación y gestión de cotizaciones. Rutas: /cotizador, /quotes/{folio}/general-info, /quotes/{folio}/locations, /quotes/{folio}/technical-info, /quotes/{folio}/terms-and-conditions.")
+    System(backend, "Backend de Cotizaciones", "Servicio principal de lógica de negocio y persistencia. Incluye motor de cálculo de primas (14 componentes), versionado optimista y gestión del ciclo de vida.")
+    System(dbCotizaciones, "Base de Datos de Cotizaciones", "Almacena cotizaciones como agregado principal, ubicaciones, resultados de cálculo y snapshots de trazabilidad. Cifrado AES-256 en reposo.")
 
     System_Ext(coreOhs, "Plataforma Core OHS (Externo)", "Servicio externo de catálogos, tarifas y generación de folios. Endpoints: GET /v1/subscribers, /v1/agents, /v1/business-lines, /v1/zip-codes/{zipCode}, POST /v1/zip-codes/validate, GET /v1/folios, /v1/catalogs/risk-classification, /v1/catalogs/guarantees, GET|PUT /v1/tariffs/...")
 
     System(apiGateway, "API Gateway de Integración", "Centraliza el enrutamiento, caching y resiliencia (Circuit Breaker + Retry) para servicios externos. Redirige a Plataforma Core OHS (producción) o al Simulador (dev/test).")
     System(cache, "Servicio de Caché", "Caché de alto rendimiento para datos maestros y tarifas. TTL configurable: catálogos 12-24h, tarifas 1-6h.")
-    System(mockCoreOhs, "Simulador de Plataforma Core OHS", "Mock server para desarrollo y pruebas (Node.js/Express + MongoDB + Flyway). Soporta respuestas dinámicas y escenarios de error controlados.")
-    System(monitoring, "Sistema de Observabilidad", "Recopila logs, métricas y trazas para monitoreo y diagnóstico (ELK Stack / Prometheus+Grafana).")
+    System(mockCoreOhs, "Simulador de Plataforma Core OHS", "Mock server para desarrollo y pruebas. Soporta respuestas dinámicas y escenarios de error controlados. Ver TECH_STACK.md para implementación.")
+    System(monitoring, "Sistema de Observabilidad", "Recopila logs, métricas y trazas para monitoreo y diagnóstico. Ver TECH_STACK.md para stack de observabilidad.")
 
     Rel(usuario, frontend, "Usa", "HTTPS/443")
     Rel(adminParams, frontend, "Gestiona parámetros y configuración", "HTTPS/443")
 
     Rel(frontend, backend, "Consume API REST", "HTTPS/JSON")
 
-    Rel(backend, dbCotizaciones, "Persiste y consulta datos de cotización", "TCP/27017")
+    Rel(backend, dbCotizaciones, "Persiste y consulta datos de cotización", "Protocolo BD")
     Rel(backend, apiGateway, "Consulta catálogos, tarifas y folios", "HTTPS/JSON")
     Rel(backend, monitoring, "Envía logs y métricas", "TCP/5044")
 
-    Rel(apiGateway, cache, "Lee y escribe datos maestros en caché", "Redis Protocol")
+    Rel(apiGateway, cache, "Lee y escribe datos maestros en caché", "Protocolo de Caché")
     Rel(apiGateway, coreOhs, "Consume API REST (producción)", "HTTPS/JSON")
     Rel(apiGateway, mockCoreOhs, "Consume API REST (dev/test)", "HTTPS/JSON")
 
-    Rel(mockCoreOhs, dbCotizaciones, "Persiste datos de prueba (instancia separada)", "TCP/27017")
+    Rel(mockCoreOhs, dbCotizaciones, "Persiste datos de prueba (instancia separada)", "Protocolo BD")
 ```
 
 **Análisis de Evolución de Componentes (C1):**
@@ -69,8 +71,8 @@ C4Context
 
 ### Cotizador Web (Frontend SPA) — `cotizador-danos-web`
 - **Estrategia**: 🔄 Evolve
-- **AS-IS**: Interfaz React básica para captura de cotizaciones.
-- **Cambio TO-BE**: Refactorizado a React 18 con:
+- **AS-IS**: Interfaz SPA básica para captura de cotizaciones.
+- **Cambio TO-BE**: Evolucionado con las siguientes capacidades:
   - Gestión dinámica de hasta 10 ubicaciones con campos completos del dominio (RFR-002, HU-006, HU-007 del bloque 1; HU-115, HU-116, HU-118 del bloque 2).
   - Layout de ubicaciones configurable (`configuracionLayout`) — nueva ruta `/quotes/{folio}/locations` (RFR-009, HU-114).
   - Cálculo con alerta por ubicaciones incompletas sin bloqueo total (RFR-008, HU-015 bloque 1; HU-125 bloque 2).
@@ -85,8 +87,8 @@ C4Context
 
 ### Backend de Cotizaciones — `plataformas-danos-back`
 - **Estrategia**: 🔄 Evolve
-- **AS-IS**: Backend Java Spring Boot identificado como "God Component" con toda la lógica centralizada.
-- **Cambio TO-BE**: Refactorizado en Java 17 Spring Boot con responsabilidades claramente separadas en módulos internos (o microservicios en una evolución futura):
+- **AS-IS**: Backend identificado como "God Component" con toda la lógica centralizada.
+- **Cambio TO-BE**: Refactorizado con responsabilidades claramente separadas en módulos internos (o microservicios en una evolución futura):
   - Motor de cálculo modular para los 14 componentes técnicos (RFR-003, CON-001, HU-041 bloque 1; HU-175 bloque 2).
   - Versionado optimista con campo `version` incremental (RFR-006, CON-003, HU-035, HU-062, HU-064 bloque 1; HU-149, HU-180, HU-182 bloque 2).
   - Gestión del ciclo de vida con máquina de estados (RFR-007, HU-024 a HU-028 bloque 1; HU-135 a HU-142 bloque 2).
@@ -99,16 +101,16 @@ C4Context
 
 ---
 
-### Base de Datos de Cotizaciones — `MongoDB`
+### Base de Datos de Cotizaciones
 - **Estrategia**: 🔄 Evolve
-- **AS-IS**: MongoDB para persistencia básica de cotizaciones.
+- **AS-IS**: Base de datos NoSQL de documentos para persistencia básica de cotizaciones.
 - **Cambio TO-BE**:
   - Esquema de agregado principal con ubicaciones embebidas (CON-004) que incluyen todos los campos del dominio: `estadoValidacion` (COMPLETA / INCOMPLETA / INACTIVA), `alertasBloqueantes`, `zonaCatastrofica`, `giro.claveIncendio`, `garantías[]`, etc.
   - Campo `version` incremental para versionado optimista (CON-003).
   - Snapshot de trazabilidad embebido con parámetros de entrada, identificadores de tarifas y valores por componente (RFR-010).
   - Cifrado AES-256 en reposo para datos sensibles de asegurados y ubicaciones (CON-005, RNF-006).
   - Las ubicaciones **nunca se eliminan físicamente**; se marcan con `estadoValidacion: INACTIVA` (RFR-002, CON-007).
-- **Justificación**: Cumplir restricción MongoDB (RT-001), mejorar Fiabilidad (QAS-006) y Seguridad (QAS-004).
+- **Justificación**: Cumplir restricción de base de datos NoSQL de documentos (RT-001), mejorar Fiabilidad (QAS-006) y Seguridad (QAS-004).
 - **Impacto**: Integridad y trazabilidad garantizadas, historial preservado, datos sensibles protegidos.
 
 ---
@@ -125,7 +127,7 @@ C4Context
 ### API Gateway de Integración
 - **Estrategia**: 🆕 New
 - **AS-IS**: No existía — el backend llamaba directamente al servicio externo.
-- **Cambio TO-BE**: Spring Cloud Gateway que centraliza: enrutamiento inteligente (producción → Core OHS real; dev/test → Simulador), Circuit Breaker (Resilience4j), Retry con backoff, lectura/escritura en caché Redis, y envío de métricas al sistema de observabilidad (OPT-004, CON-002).
+- **Cambio TO-BE**: Gateway de integración que centraliza: enrutamiento inteligente (producción → Core OHS real; dev/test → Simulador), Circuit Breaker, Retry con backoff, lectura/escritura en caché, y envío de métricas al sistema de observabilidad (OPT-004, CON-002). Ver TECH_STACK.md para implementación específica.
 - **Justificación**: Resolver anti-patrón "God Component" en el backend y problemas de latencia/resiliencia (PAC-002, OPT-004, IMP-002).
 - **Impacto**: Mayor resiliencia, mejor rendimiento en integración, backend más limpio y mantenible.
 
@@ -134,7 +136,7 @@ C4Context
 ### Servicio de Caché
 - **Estrategia**: 🆕 New
 - **AS-IS**: Sin caché centralizada para datos externos.
-- **Cambio TO-BE**: Caffeine (caché local en memoria) en primera versión, preparada para escalar a Redis Cluster si se requiere distribución. TTL diferenciado: catálogos estáticos 12-24h, tarifas/factores 1-6h. Desalojo LRU con tamaño limitado. Sin invalidación por eventos en primera versión (OPT-001, CON-002, PAC-006, BC-006).
+- **Cambio TO-BE**: Caché en memoria local en primera versión, escalable a caché distribuida si se requiere distribución. TTL diferenciado: catálogos estáticos 12-24h, tarifas/factores 1-6h. Desalojo LRU con tamaño limitado. Sin invalidación por eventos en primera versión (OPT-001, CON-002, PAC-006, BC-006). Ver TECH_STACK.md para implementación específica.
 - **Justificación**: Reducir latencia y carga sobre `Plataforma Core OHS` (anti-patrón "Chatty Communication").
 - **Impacto**: Reducción de latencia en consulta de datos maestros en 50-90%, mayor throughput, mayor disponibilidad ante fallos del servicio externo.
 
@@ -143,11 +145,12 @@ C4Context
 ### Simulador de Plataforma Core OHS
 - **Estrategia**: 🆕 New
 - **AS-IS**: Simulación ad-hoc o ausente.
-- **Cambio TO-BE**: Servicio Node.js/Express dedicado y robusto que:
+- **Cambio TO-BE**: Servidor de simulación dedicado y robusto que:
   - Replica fielmente los contratos REST de `Plataforma Core OHS` (todos los endpoints del reto).
-  - Usa MongoDB poblada con migraciones Flyway (RT-009, RT-010, RT-011).
+  - Usa base de datos de prueba con migraciones de datos versionadas (RT-012).
   - Soporta respuestas dinámicas y escenarios de error controlados para pruebas (BC-003, OOS-002).
   - El API Gateway lo consume automáticamente en entornos dev/test.
+  - Ver TECH_STACK.md para implementación específica del mock server.
 - **Justificación**: Acelerar el desarrollo y garantizar pruebas consistentes e independientes del servicio real (EP-003, BC-003).
 - **Impacto**: Mayor agilidad en desarrollo, pruebas fiables, cero dependencia del servicio externo real en entornos no productivos.
 
@@ -156,7 +159,7 @@ C4Context
 ### Sistema de Observabilidad
 - **Estrategia**: 🆕 New
 - **AS-IS**: Sin monitoreo centralizado.
-- **Cambio TO-BE**: ELK Stack (Elasticsearch, Logstash, Kibana) o Prometheus + Grafana para logs estructurados, métricas de rendimiento y trazas correlacionadas con IDs de correlación por solicitud (CON-006).
+- **Cambio TO-BE**: Stack de observabilidad centralizado para logs estructurados, métricas de rendimiento y trazas correlacionadas con IDs de correlación por solicitud (CON-006). Ver TECH_STACK.md para implementación específica.
 - **Justificación**: Mejorar Mantenibilidad (QA-004) y facilitar diagnóstico en producción. Soportar la trazabilidad del cálculo exigida por el reto (PAC-007, RFR-010).
 - **Impacto**: Detección temprana de problemas, diagnóstico eficiente, visibilidad del rendimiento, soporte para auditorías.
 
@@ -168,7 +171,7 @@ C4Context
 |---|---|
 | Gestión manual de datos maestros (catálogos, tarifas) | API Gateway + Caché con TTL + Simulador robusto |
 | Inconsistencias y errores en cálculos de primas | Motor de cálculo modular con 14 componentes, >90% cobertura unitaria |
-| Cotizaciones lentas (>10 min, cálculo >3s) | Caché de tarifas, motor optimizado, React 18 optimizado |
+| Cotizaciones lentas (>10 min, cálculo >3s) | Caché de tarifas, motor optimizado, Frontend SPA optimizado |
 | Pérdida de datos en ediciones concurrentes | Versionado optimista con campo `version`, detección de conflicto y recarga |
 | Falta de trazabilidad y auditabilidad | Snapshot de trazabilidad embebido + Sistema de Observabilidad |
 | Fallo del sistema Core bloquea todo el cotizador | Circuit Breaker + Retry + Caché de fallback + funcionalidad degradada |
@@ -180,9 +183,9 @@ C4Context
 ## [C2] Diagrama de Contenedores Evolucionados
 
 **Descripción**:
-Este diagrama detalla la arquitectura TO-BE descomponiendo los sistemas en sus contenedores individuales con tecnologías específicas. El `plataformas-danos-back` evoluciona hacia módulos especializados dentro de una arquitectura de backend con responsabilidades bien delimitadas.
+Este diagrama detalla la arquitectura TO-BE descomponiendo los sistemas en sus contenedores individuales. El `plataformas-danos-back` evoluciona hacia módulos especializados dentro de una arquitectura de backend con responsabilidades bien delimitadas.
 
-> **Decisión de implementación**: Para el alcance del reto técnico, los módulos de backend (Auth, Cotización, Folio, Motor de Cálculo) pueden implementarse como **módulos dentro de un único servicio Spring Boot** (monolito modular) o como microservicios independientes. La arquitectura está diseñada para soportar ambos enfoques.
+> **Decisión de implementación**: Para el alcance del reto técnico, los módulos de backend (Auth, Cotización, Folio, Motor de Cálculo) pueden implementarse como **módulos dentro de un único servicio backend (monolito modular)** o como microservicios independientes. La arquitectura está diseñada para soportar ambos enfoques. Ver TECH_STACK.md para el framework específico.
 
 ```mermaid
 C4Container
@@ -194,28 +197,28 @@ C4Container
     System_Ext(coreOhs, "Plataforma Core OHS", "Servicio externo de catálogos, tarifas y folios.")
 
     System_Boundary(cotizadorSystem, "Sistema Cotizador de Seguros de Daños — TO-BE") {
-        Container(spa, "Cotizador Web SPA", "React 18", "Interfaz de usuario. Rutas: /cotizador, /quotes/{folio}/general-info, /quotes/{folio}/locations, /quotes/{folio}/technical-info, /quotes/{folio}/terms-and-conditions.")
+        Container(spa, "Cotizador Web SPA", "SPA (ver TECH_STACK.md)", "Interfaz de usuario. Rutas: /cotizador, /quotes/{folio}/general-info, /quotes/{folio}/locations, /quotes/{folio}/technical-info, /quotes/{folio}/terms-and-conditions.")
 
         System_Boundary(backendServices, "plataformas-danos-back (Módulos de Backend)") {
-            Container(authSvc, "Módulo de Autenticación", "Java 17 Spring Boot", "Gestiona usuarios internos, autenticación (usuario/contraseña) y autorización RBAC (JWT). Roles: Agente, Asegurado.")
-            Container(cotizacionSvc, "Módulo de Cotización", "Java 17 Spring Boot", "Gestiona ciclo de vida, datos generales, layout de ubicaciones, coberturas y estados. Implementa versionado optimista. Endpoints principales del reto.")
-            Container(folioSvc, "Módulo de Folios", "Java 17 Spring Boot", "Genera folios alfanuméricos únicos e idempotentes (COT-AAAA-NNNNNN). Implementa reintentos con backoff y manejo de concurrencia.")
-            Container(calcEngineSvc, "Motor de Cálculo de Primas", "Java 17 Spring Boot", "Calcula prima neta/comercial aplicando los 14 componentes técnicos activos por cada ubicación calculable. Excluye ubicaciones incompletas con alertas sin bloquear el total. Persiste snapshot de trazabilidad.")
+            Container(authSvc, "Módulo de Autenticación", "Backend JVM (ver TECH_STACK.md)", "Gestiona usuarios internos, autenticación (usuario/contraseña) y autorización RBAC (JWT). Roles: Agente, Asegurado.")
+            Container(cotizacionSvc, "Módulo de Cotización", "Backend JVM (ver TECH_STACK.md)", "Gestiona ciclo de vida, datos generales, layout de ubicaciones, coberturas y estados. Implementa versionado optimista. Endpoints principales del reto.")
+            Container(folioSvc, "Módulo de Folios", "Backend JVM (ver TECH_STACK.md)", "Genera folios alfanuméricos únicos e idempotentes (COT-AAAA-NNNNNN). Implementa reintentos con backoff y manejo de concurrencia.")
+            Container(calcEngineSvc, "Motor de Cálculo de Primas", "Backend JVM (ver TECH_STACK.md)", "Calcula prima neta/comercial aplicando los 14 componentes técnicos activos por cada ubicación calculable. Excluye ubicaciones incompletas con alertas sin bloquear el total. Persiste snapshot de trazabilidad.")
         }
 
-        ContainerDb(cotizacionDb, "Base de Datos de Cotizaciones", "MongoDB", "Cotizaciones como agregado principal con ubicaciones embebidas (estadoValidacion, alertasBloqueantes, zonaCatastrofica), resultados financieros, snapshots de trazabilidad y datos de autenticación. Cifrado AES-256.")
+        ContainerDb(cotizacionDb, "Base de Datos de Cotizaciones", "BD NoSQL Documentos (ver TECH_STACK.md)", "Cotizaciones como agregado principal con ubicaciones embebidas (estadoValidacion, alertasBloqueantes, zonaCatastrofica), resultados financieros, snapshots de trazabilidad y datos de autenticación. Cifrado AES-256.")
 
         System_Boundary(integrationLayer, "Capa de Integración y Caché") {
-            Container(apiGateway, "API Gateway de Integración", "Spring Cloud Gateway", "Enrutamiento, Circuit Breaker (Resilience4j), Retry con backoff exponencial, lectura/escritura en caché. Redirige a Core OHS real (producción) o Simulador (dev/test).")
-            Container(cacheSvc, "Servicio de Caché", "Caffeine / Redis", "Caché de datos maestros con TTL configurable. Catálogos: 12-24h. Tarifas/factores: 1-6h. Desalojo LRU.")
+            Container(apiGateway, "API Gateway de Integración", "API Gateway (ver TECH_STACK.md)", "Enrutamiento, Circuit Breaker, Retry con backoff exponencial, lectura/escritura en caché. Redirige a Core OHS real (producción) o Simulador (dev/test).")
+            Container(cacheSvc, "Servicio de Caché", "Caché (ver TECH_STACK.md)", "Caché de datos maestros con TTL configurable. Catálogos: 12-24h. Tarifas/factores: 1-6h. Desalojo LRU.")
         }
 
-        Container(elkStack, "Sistema de Observabilidad", "ELK Stack / Prometheus+Grafana", "Logs estructurados, métricas de rendimiento y trazas correlacionadas de todos los módulos.")
+        Container(elkStack, "Sistema de Observabilidad", "Observabilidad (ver TECH_STACK.md)", "Logs estructurados, métricas de rendimiento y trazas correlacionadas de todos los módulos.")
     }
 
     System_Boundary(devTestEnv, "Entorno de Desarrollo y Pruebas") {
-        Container(mockCoreOhs, "Simulador de Plataforma Core OHS", "Node.js Express", "Mock server robusto. Replica todos los endpoints del servicio externo. Soporta escenarios de error controlados.")
-        ContainerDb(mockDb, "Base de Datos del Simulador", "MongoDB + Flyway", "Datos de referencia versionados para el Simulador (catálogos, tarifas, CPs, garantías).")
+        Container(mockCoreOhs, "Simulador de Plataforma Core OHS", "Servidor de Simulación (ver TECH_STACK.md)", "Mock server robusto. Replica todos los endpoints del servicio externo. Soporta escenarios de error controlados.")
+        ContainerDb(mockDb, "Base de Datos del Simulador", "BD NoSQL + Migraciones (ver TECH_STACK.md)", "Datos de referencia versionados para el Simulador (catálogos, tarifas, CPs, garantías).")
     }
 
     Rel(usuario, spa, "Usa", "HTTPS/443")
@@ -224,28 +227,28 @@ C4Container
     Rel(spa, authSvc, "Autentica y obtiene JWT", "HTTPS/443")
     Rel(spa, cotizacionSvc, "CRUD cotizaciones, ubicaciones, coberturas, estados, layout", "HTTPS/443")
 
-    Rel(authSvc, cotizacionDb, "R/W usuarios y roles", "MongoDB/27017")
+    Rel(authSvc, cotizacionDb, "R/W usuarios y roles", "Protocolo BD")
     Rel(authSvc, elkStack, "Envía logs/métricas", "TCP/5044")
 
-    Rel(cotizacionSvc, cotizacionDb, "R/W cotizaciones y ubicaciones (agregado principal)", "MongoDB/27017")
+    Rel(cotizacionSvc, cotizacionDb, "R/W cotizaciones y ubicaciones (agregado principal)", "Protocolo BD")
     Rel(cotizacionSvc, folioSvc, "Solicita generación de folio idempotente", "HTTP interno")
     Rel(cotizacionSvc, calcEngineSvc, "Invoca cálculo de prima (POST /calculate)", "HTTP interno")
     Rel(cotizacionSvc, apiGateway, "Consulta catálogos y validación de CP", "HTTPS/443")
     Rel(cotizacionSvc, elkStack, "Envía logs/métricas", "TCP/5044")
 
-    Rel(folioSvc, cotizacionDb, "R/W secuencia de folios (control de concurrencia)", "MongoDB/27017")
+    Rel(folioSvc, cotizacionDb, "R/W secuencia de folios (control de concurrencia)", "Protocolo BD")
     Rel(folioSvc, elkStack, "Envía logs/métricas", "TCP/5044")
 
-    Rel(calcEngineSvc, cotizacionDb, "Lee cotización, persiste resultados y snapshot atómicamente", "MongoDB/27017")
+    Rel(calcEngineSvc, cotizacionDb, "Lee cotización, persiste resultados y snapshot atómicamente", "Protocolo BD")
     Rel(calcEngineSvc, apiGateway, "Consulta tarifas y factores técnicos (14 componentes)", "HTTPS/443")
     Rel(calcEngineSvc, elkStack, "Envía logs/métricas", "TCP/5044")
 
-    Rel(apiGateway, cacheSvc, "Lee/escribe catálogos y tarifas con TTL", "Caffeine/Redis")
+    Rel(apiGateway, cacheSvc, "Lee/escribe catálogos y tarifas con TTL", "Protocolo de Caché")
     Rel(apiGateway, coreOhs, "Consume API REST (producción)", "HTTPS/443")
     Rel(apiGateway, mockCoreOhs, "Consume API REST (dev/test)", "HTTPS/443")
     Rel(apiGateway, elkStack, "Envía logs/métricas", "TCP/5044")
 
-    Rel(mockCoreOhs, mockDb, "R/W datos de prueba versionados con Flyway", "MongoDB/27017")
+    Rel(mockCoreOhs, mockDb, "R/W datos de prueba versionados", "Protocolo BD")
 ```
 
 **Análisis de Evolución de Contenedores (C2):**
@@ -254,7 +257,7 @@ C4Container
 
 ### Cotizador Web SPA — `cotizador-danos-web`
 - **Estrategia**: 🔄 Evolve
-- **Cambio**: React 18, rutas definidas para todas las pantallas del reto, gestión dinámica de ubicaciones con todos los campos del dominio, alertas de ubicaciones incompletas, desglose técnico por los 14 componentes, pantalla de términos y condiciones, manejo de conflictos de concurrencia.
+- **Cambio**: Aplicación web SPA con rutas definidas para todas las pantallas del reto, gestión dinámica de ubicaciones con todos los campos del dominio, alertas de ubicaciones incompletas, desglose técnico por los 14 componentes, pantalla de términos y condiciones, manejo de conflictos de concurrencia. Ver TECH_STACK.md para framework y versión.
 - **HUs clave (bloque 1)**: HU-006, HU-007, HU-010, HU-015, HU-020, HU-021, HU-028.
 - **HUs clave (bloque 2)**: HU-114 (layout), HU-115, HU-116, HU-117, HU-125, HU-130, HU-131, HU-134 (technical-info), HU-142, HU-143 (terms), HU-183, HU-184.
 - **Impacto**: Experiencia de usuario completa y alineada con el escenario de aceptación del reto.
@@ -263,7 +266,7 @@ C4Container
 
 ### Módulo de Autenticación
 - **Estrategia**: 🆕 New
-- **Cambio**: Extraído del "God Component". Gestiona usuarios propios (sin SSO), autenticación con usuario/contraseña, emisión y validación de JWT, y control de acceso por roles (Agente, Asegurado) conforme a BC-007 y RT-014.
+- **Cambio**: Extraído del "God Component". Gestiona usuarios propios (sin SSO), autenticación con usuario/contraseña, emisión y validación de JWT, y control de acceso por roles (Agente, Asegurado) conforme a BC-007 y RT-014. Ver TECH_STACK.md para framework específico.
 - **HUs clave**: RF-009 (Autenticación), RF-011 (Roles) del RF corregido.
 - **Impacto**: Seguridad explícita y modular. Base para futura integración SSO (OOS-005).
 
@@ -295,9 +298,9 @@ C4Container
 
 ---
 
-### Base de Datos de Cotizaciones — MongoDB
+### Base de Datos de Cotizaciones
 - **Estrategia**: 🔄 Evolve
-- **Cambio**: Esquema evolucionado con: (1) cotización como agregado principal con ubicaciones embebidas incluyendo todos los campos del dominio mínimo, (2) campo `version` para versionado optimista, (3) `estadoValidacion` con valores COMPLETA/INCOMPLETA/INACTIVA, (4) `alertasBloqueantes` como lista de campos problemáticos, (5) snapshot de trazabilidad del cálculo embebido, (6) cifrado AES-256 para campos sensibles.
+- **Cambio**: Esquema evolucionado con: (1) cotización como agregado principal con ubicaciones embebidas incluyendo todos los campos del dominio mínimo, (2) campo `version` para versionado optimista, (3) `estadoValidacion` con valores COMPLETA/INCOMPLETA/INACTIVA, (4) `alertasBloqueantes` como lista de campos problemáticos, (5) snapshot de trazabilidad del cálculo embebido, (6) cifrado AES-256 para campos sensibles. Ver TECH_STACK.md para motor de base de datos.
 - **HUs clave (bloque 1)**: HU-037, HU-060, HU-061, HU-062, HU-063, HU-064.
 - **HUs clave (bloque 2)**: HU-153, HU-176, HU-177, HU-178, HU-179.
 - **Impacto**: Consistencia transaccional a nivel de documento, auditoría completa, protección de datos sensibles.
@@ -306,30 +309,30 @@ C4Container
 
 ### API Gateway de Integración
 - **Estrategia**: 🆕 New
-- **Cambio**: Spring Cloud Gateway con Circuit Breaker (Resilience4j), Retry con backoff exponencial, enrutamiento condicional (producción vs. dev/test) y integración con la capa de caché. El backend no llama directamente a `Plataforma Core OHS`.
+- **Cambio**: Gateway de integración con Circuit Breaker, Retry con backoff exponencial, enrutamiento condicional (producción vs. dev/test) y capa de caché integrada. El backend no llama directamente a `Plataforma Core OHS`. Ver TECH_STACK.md para implementación específica.
 - **HUs clave (bloque 1)**: HU-029, HU-030, HU-031, HU-032, HU-033.
 - **Impacto**: Backend desacoplado de la lógica de resiliencia, mayor mantenibilidad y rendimiento de la integración.
 
 ---
 
-### Servicio de Caché (Caffeine / Redis)
+### Servicio de Caché
 - **Estrategia**: 🆕 New
-- **Cambio**: Caffeine en primera versión (caché local en memoria del proceso del API Gateway). Redis disponible para cuando se requiera distribución. TTL diferenciado por tipo de dato. Sin invalidación por eventos (BC-006, PAC-006).
+- **Cambio**: Caché en memoria local en primera versión, escalable a caché distribuida cuando se requiera. TTL diferenciado por tipo de dato. Sin invalidación por eventos (BC-006, PAC-006). Ver TECH_STACK.md para implementación específica.
 - **HUs clave (bloque 1)**: HU-104, HU-105, HU-106, HU-107, HU-108.
-- **Impacto**: Latencia de consulta de datos maestros < 500ms (RNF de EP-003). Reducción drástica de llamadas a `Plataforma Core OHS`.
+- **Impacto**: Latencia de consulta de datos maestros reducida. Reducción drástica de llamadas a `Plataforma Core OHS`.
 
 ---
 
 ### Sistema de Observabilidad
 - **Estrategia**: 🆕 New
-- **Cambio**: Todos los módulos del backend envían logs estructurados (JSON) con ID de correlación por solicitud. Métricas de rendimiento (latencia P95/P98, tasa de error, hit/miss de caché). Trazas para el flujo completo de cálculo.
+- **Cambio**: Todos los módulos del backend envían logs estructurados (JSON) con ID de correlación por solicitud. Métricas de rendimiento (latencia P95/P98, tasa de error, hit/miss de caché). Trazas para el flujo completo de cálculo. Ver TECH_STACK.md para implementación específica.
 - **Impacto**: Diagnóstico eficiente, soporte a auditorías, visibilidad del cumplimiento de RNFs de rendimiento.
 
 ---
 
 ### Simulador de Plataforma Core OHS
 - **Estrategia**: 🆕 New
-- **Cambio**: Node.js/Express con MongoDB + Flyway para migraciones de datos de prueba. Replica todos los endpoints del reto. Configuración de escenarios de error (HTTP 500, timeout, datos inconsistentes). El API Gateway lo consume automáticamente en dev/test.
+- **Cambio**: Servidor de simulación dedicado con base de datos de prueba y migraciones de datos versionadas. Replica todos los endpoints del reto. Configuración de escenarios de error (HTTP 500, timeout, datos inconsistentes). El API Gateway lo consume automáticamente en dev/test. Ver TECH_STACK.md para implementación específica.
 - **HUs clave (bloque 1)**: HU-034, HU-092, HU-093, HU-094, HU-095, HU-096, HU-097, HU-098, HU-099.
 - **Impacto**: Desarrollo completamente aislado del servicio externo real. Pruebas deterministas y reproducibles.
 
@@ -386,7 +389,7 @@ mindmap
 ---
 
 **Creación con folio automático e idempotente** — `🆕 New`
-- Servicio/módulo dedicado para generación de folios `COT-AAAA-NNNNNN` con reintentos y control de concurrencia.
+- Módulo dedicado para generación de folios `COT-AAAA-NNNNNN` con reintentos y control de concurrencia.
 - **HUs**: HU-001, HU-086, HU-087, HU-088, HU-089, HU-090, HU-091 (bloque 1).
 - **Brecha cerrada**: Riesgo de folios duplicados o perdidos (RFR-001).
 
@@ -433,7 +436,7 @@ mindmap
 **Vista de desglose técnico por componente** — `🔄 Evolved`
 - Ruta `/quotes/{folio}/technical-info` muestra el desglose por cada uno de los 14 componentes activos por ubicación calculable, y las alertas de las ubicaciones excluidas.
 - **HUs**: HU-057 (bloque 1); HU-134 (bloque 2).
-- **Brecha cerrada**: Transparencia financiera (OOS-006 no aplica — esta vista sí está en alcance).
+- **Brecha cerrada**: Transparencia financiera.
 
 **Pantalla de términos y condiciones** — `🆕 New`
 - Ruta `/quotes/{folio}/terms-and-conditions` como paso previo a la aprobación. Muestra resumen de condiciones y permite la aceptación formal.
@@ -445,12 +448,12 @@ mindmap
 - **Brecha cerrada**: Falta de visibilidad del comportamiento del sistema en producción (CON-006, PAC-007).
 
 **Circuit Breaker y Retry** — `🔄 Evolved`
-- Resilience4j con Circuit Breaker (estados: Closed → Open → Half-Open) y Retry con backoff exponencial. Degradación funcional con caché como fallback. Mensaje amigable en <5s sin bloquear la UI (QAS-005).
+- Circuit Breaker con estados (Closed → Open → Half-Open) y Retry con backoff exponencial. Degradación funcional con caché como fallback. Mensaje amigable en <5s sin bloquear la UI (QAS-005).
 - **HUs**: HU-033 (bloque 1); HU-148 (bloque 2).
 - **Brecha cerrada**: Dependencia crítica de `Plataforma Core OHS` paraliza el cotizador (PAC-002, IMP-002).
 
 **Caché con TTL diferenciado** — `🆕 New`
-- Caffeine (primera versión, preparada para Redis). Catálogos estáticos: 12-24h. Tarifas/factores: 1-6h. Sin invalidación por eventos (BC-006). Desalojo LRU.
+- Caché en memoria local en primera versión, escalable a caché distribuida. Catálogos estáticos: 12-24h. Tarifas/factores: 1-6h. Sin invalidación por eventos (BC-006). Desalojo LRU. Ver TECH_STACK.md para implementación.
 - **HUs**: HU-104, HU-105, HU-106, HU-107, HU-108 (bloque 1).
 - **Brecha cerrada**: Anti-patrón "Chatty Communication", latencia excesiva en consultas repetidas (PAC-006, OPT-001).
 
@@ -466,7 +469,7 @@ mindmap
 |---|---|
 | Esfuerzo manual en gestión de datos maestros | Caché con TTL + API Gateway + Simulador robusto |
 | Inconsistencias en cálculos de primas | Motor modular 14 componentes, >90% cobertura unitaria |
-| Cotizaciones lentas | React 18 optimizado, caché de tarifas, motor de cálculo eficiente |
+| Cotizaciones lentas | Frontend SPA optimizado, caché de tarifas, motor de cálculo eficiente |
 | Pérdida de datos por ediciones concurrentes | Versionado optimista + detección de conflicto + recarga |
 | Sin comportamiento definido para ubicaciones incompletas | RFR-008: exclusión individual con alerta, cálculo continúa |
 | Falta de trazabilidad y auditabilidad | Snapshot de trazabilidad embebido + Observabilidad centralizada |

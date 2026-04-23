@@ -27,7 +27,7 @@ Usuario Final/Asegurado: Interesado en la transparencia y rapidez de la cotizaci
 Analista Funcional: Interesado en la correcta implementación de los flujos de negocio.
 
 **Alcance Estimado**:
-**Features Estimadas**: 10-12 features
+**Features Estimadas**: 9 features (FT-001 a FT-009)
 **Complejidad**: Alta
 **Duración Estimada**: 4-6 meses
 
@@ -62,7 +62,7 @@ Desarrollador: Interesado en la robustez, escalabilidad y mantenibilidad del có
 Evaluador Técnico: Interesado en la calidad y cobertura de pruebas de la lógica central.
 
 **Alcance Estimado**:
-**Features Estimadas**: 8-10 features
+**Features Estimadas**: 5 features (FT-010 a FT-014)
 **Complejidad**: Alta
 **Duración Estimada**: 3-5 meses
 
@@ -96,7 +96,7 @@ Analista Funcional: Interesado en la completitud y corrección de los datos de r
 Evaluador Técnico: Interesado en la robustez de la simulación o integración real.
 
 **Alcance Estimado**:
-**Features Estimadas**: 8-10 features
+**Features Estimadas**: 8 features (FT-015 a FT-022)
 **Complejidad**: Media
 **Duración Estimada**: 2-4 meses
 

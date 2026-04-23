@@ -1,5 +1,13 @@
 # Historias de Usuario
 
+---
+
+# Core (HU-001 a HU-109)
+
+---
+
+## EP-001 Core: Gestión Integral de Cotizaciones de Daños
+
 ## FT-001: Creación y Edición de Datos Generales de la Cotización
 
 ### HU-001: Iniciar nueva cotización con folio automático
@@ -139,7 +147,9 @@ Como usuario, quiero definir las fechas de inicio y fin de la vigencia de la cot
 ---
 ## FT-002: Gestión Dinámica de Ubicaciones de Riesgo
 
-### HU-006: Agregar una nueva ubicación de riesgo a la cotizaciónComo usuario, quiero agregar una nueva ubicación de riesgo a la cotización, para detallar los diferentes lugares a asegurar.
+### HU-006: Agregar una nueva ubicación de riesgo a la cotización
+
+Como usuario, quiero agregar una nueva ubicación de riesgo a la cotización, para detallar los diferentes lugares a asegurar.
 
 **Criterios de Aceptación**:
 - Dado que estoy editando una cotización, cuando hago clic en "Agregar Ubicación", entonces se crea una nueva sección o pestaña para una ubicación.
@@ -841,7 +851,10 @@ Como usuario, quiero que el sistema consulte información de códigos postales y
 - La integración debe ser eficiente para soportar validaciones en tiempo real en el frontend.
 - Se debe diseñar un contrato claro para la respuesta del servicio de CP.
 
-**Estado**: Backlog---
+**Estado**: Backlog
+
+---
+
 ### HU-031: Obtener catálogos de clasificación de riesgo y garantías
 
 Como usuario, quiero que el sistema obtenga catálogos de clasificación de riesgo y garantías desde el servicio de referencia, para asociarlos a las ubicaciones y coberturas.
@@ -1195,6 +1208,9 @@ Como analista funcional, quiero que las reglas de negocio sean trazables y docum
 **Estado**: Backlog
 
 ---
+
+## EP-002 Core: Motor de Cálculo y Reglas de Negocio
+
 ## FT-010: Configuración y Gestión de Parámetros de Cálculo
 
 ### HU-044: Ingestión de Tarifas de Incendio
@@ -1449,7 +1465,10 @@ Para entender rápidamente qué debo corregir y cómo proceder.
 **Notas de Implementación**:
 Los mensajes deben ser localizables y consistentes en su tono y formato.
 
-**Estado**: Backlog---
+**Estado**: Backlog
+
+---
+
 ### HU-053: Bloqueo de Cálculo por Errores de Validación
 **Descripción**:
 Como usuario,
@@ -1569,7 +1588,8 @@ Definir los factores comerciales y su orden de aplicación.
 
 ---
 ### HU-057: Generación de Desglose de Primas por Ubicación
-**Descripción**:Como usuario,
+**Descripción**:
+Como usuario,
 Quiero que el sistema genere el desglose detallado de primas por cada ubicación de riesgo,
 Para entender la composición del costo y para fines de auditoría.
 
@@ -1711,7 +1731,8 @@ Considerar el uso de transacciones de MongoDB (si aplica a la versión y configu
 ### HU-062: Actualización de Metadatos de Cotización
 **Descripción**:
 Como desarrollador,
-Quiero que al guardar los resultados del cálculo, se actualice el campo `fechaUltimaActualizacion` y el número de versión de la cotización,Para mantener un registro de cambios y facilitar la gestión de concurrencia.
+Quiero que al guardar los resultados del cálculo, se actualice el campo `fechaUltimaActualizacion` y el número de versión de la cotización,
+Para mantener un registro de cambios y facilitar la gestión de concurrencia.
 
 **Criterios de Aceptación**:
 - Dado que se persiste un cálculo exitoso, cuando se guarda la cotización, entonces el campo `fechaUltimaActualizacion` se actualiza con la fecha y hora actuales.
@@ -1879,6 +1900,9 @@ Se debe considerar cómo el frontend gestiona los cambios no guardados del usuar
 **Estado**: Backlog
 
 ---
+
+## EP-003 Core: Integración y Gestión de Datos Maestros
+
 ## FT-015: Conectividad y Consumo de Catálogos Básicos (Suscriptores, Agentes, Giros)
 
 ### HU-068: Conectar a Servicio de Catálogos Básicos
@@ -2022,7 +2046,8 @@ Para garantizar su correcta utilización en la lógica de negocio y la interfaz 
 - Capa de mapeo de datos
 - Modelos de datos internos
 
-**Notas de Implementación**:Se recomienda el uso de un patrón de adaptador o DTO para el mapeo.
+**Notas de Implementación**:
+Se recomienda el uso de un patrón de adaptador o DTO para el mapeo.
 
 **Estado**: Backlog
 
@@ -2061,7 +2086,8 @@ Configuración del número de reintentos y tiempo de espera. Distinguir entre er
 
 ### HU-074: Consultar Información de Código Postal y Zona
 
-**Descripción**:Como usuario,
+**Descripción**:
+Como usuario,
 Quiero consultar un código postal y obtener su información de zona (CAT, nivel técnico) desde el servicio `Plataforma-core-ohs` (o su mock),
 Para que el cotizador pueda aplicar tarifas y factores de riesgo precisos basados en la ubicación.
 
@@ -2092,7 +2118,8 @@ La consulta debe ser rápida y eficiente para no retrasar la interacción del us
 ### HU-075: Validar Código Postal
 
 **Descripción**:
-Como usuario,Quiero que el sistema valide el código postal ingresado,
+Como usuario,
+Quiero que el sistema valide el código postal ingresado,
 Para asegurar que es un código postal válido y existente en el catálogo, y evitar errores en la cotización.
 
 **Criterios de Aceptación**:
@@ -2245,7 +2272,8 @@ Asegurar que los identificadores de riesgo y garantía sean únicos y estables.
 ### HU-080: Consultar Tarifas de Incendio
 
 **Descripción**:
-Como sistema,Quiero consultar las tarifas de incendio desde el servicio `Plataforma-core-ohs` (o su mock),
+Como sistema,
+Quiero consultar las tarifas de incendio desde el servicio `Plataforma-core-ohs` (o su mock),
 Para realizar el cálculo preciso de las primas de incendio.
 
 **Criterios de Aceptación**:
@@ -2417,7 +2445,10 @@ Para notificar al sistema o usuario y asegurar la integridad del cálculo.
 **Notas de Implementación**:
 Es crucial definir qué errores son críticos y detienen el cálculo, y cuáles pueden tener un fallback.
 
-**Estado**: Backlog---
+**Estado**: Backlog
+
+---
+
 ## FT-019: Generación y Gestión de Folios Alfanuméricos
 
 ### HU-086: Generar Folio Alfanumérico Único
@@ -2474,9 +2505,11 @@ Para asegurar la unicidad y continuidad de los folios, incluso después de reini
 
 **Notas de Implementación**:
 La operación de actualización de la secuencia debe ser atómica y transaccional para evitar duplicados en entornos concurrentes.
+
 **Estado**: Backlog
 
 ---
+
 ### HU-088: Implementar Reintentos en Generación de Folio
 
 **Descripción**:
@@ -3117,6 +3150,14 @@ Las métricas deben ser accesibles y claras para identificar problemas rápidame
 
 ---
 
+---
+
+# Enhancements (HU-110 a HU-184)
+
+---
+
+## EP-001 Enhancements: Gestión Integral de Cotizaciones de Daños
+
 ## FT-001: Creación y Edición de Datos Generales de la Cotización
 
 ### HU-110: Crear Nueva Cotización
@@ -3134,7 +3175,7 @@ Para comenzar el proceso de registro de datos.
 
 **Estimación**: 3 puntos de historia
 
-**Dependencias**: HU-188 (Generación de Folios Alfanuméricos)
+**Dependencias**: FT-019 (Generación y Gestión de Folios Alfanuméricos), HU-086 (Generar Folio Alfanumérico Único)
 
 **Componentes Técnicos**: Frontend (Formulario de Creación), Backend (API de Cotizaciones), Servicio de Folios.
 
@@ -3182,7 +3223,7 @@ Para mantener la información de la cotización actualizada y precisa.
 
 **Estimación**: 3 puntos de historia
 
-**Dependencias**: HU-141 (Consumir Catálogos de Suscriptores, Agentes y Giros), HU-148 (Prevenir Sobrescritura con Versionado Optimista)
+**Dependencias**: HU-144 (Consumir Catálogos de Suscriptores, Agentes y Giros), HU-151 (Prevenir Sobrescritura con Versionado Optimista)
 
 **Componentes Técnicos**: Frontend (Formulario de Datos Generales), Backend (API de Edición de Cotizaciones).
 
@@ -4397,6 +4438,8 @@ Para facilitar la auditoría, mantenimiento y comprensión de la lógica del sis
 **Estado**: Backlog
 
 ---
+
+## EP-002 Enhancements: Motor de Cálculo y Reglas de Negocio
 
 ## FT-010: Configuración y Gestión de Parámetros de Cálculo
 

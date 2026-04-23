@@ -48,7 +48,7 @@
 - [ ] La información general y la configuración de layout se guardan de forma persistente.
 
 **Componentes Principales**: Interfaz de datos generales, API de cotizaciones, Integración con servicio de folios, Integración con catálogos básicos, Endpoints de layout de ubicaciones.
-**Historias de Usuario Estimadas**: 5-7 HUs
+**Historias de Usuario**: 10 HUs — Core: HU-001..HU-005 | Enhancements: HU-110..HU-114
 
 **Dependencias**: FT-007
 
@@ -83,7 +83,7 @@
 
 **Componentes Principales**: Interfaz de gestión de ubicaciones, API de cotizaciones (ubicaciones), Integración con catálogo de códigos postales, Endpoint de summary.
 
-**Historias de Usuario Estimadas**: 6-8 HUs
+**Historias de Usuario**: 11 HUs — Core: HU-006..HU-010 | Enhancements: HU-115..HU-120
 
 **Dependencias**: FT-001, FT-007, FT-009
 
@@ -115,7 +115,7 @@
 
 **Componentes Principales**: Interfaz de selección de coberturas, API de cotizaciones (coberturas), Integración con catálogo de coberturas.
 
-**Historias de Usuario Estimadas**: 3-5 HUs
+**Historias de Usuario**: 8 HUs — Core: HU-011..HU-014 | Enhancements: HU-121..HU-124
 
 **Dependencias**: FT-002, FT-007
 
@@ -149,7 +149,7 @@
 
 **Componentes Principales**: Botón de cálculo, Backend del motor de cálculo (`POST /v1/quotes/{folio}/calculate`), API de persistencia.
 
-**Historias de Usuario Estimadas**: 4-6 HUs
+**Historias de Usuario**: 10 HUs — Core: HU-015..HU-019 | Enhancements: HU-125..HU-129
 **Dependencias**: FT-001, FT-002, FT-003, FT-007, FT-009
 
 **Prioridad en la Épica**: Alta
@@ -181,7 +181,7 @@
 
 **Componentes Principales**: Interfaz de visualización de resultados, API de consulta de cotizaciones, Ruta frontend `/quotes/{folio}/technical-info`.
 
-**Historias de Usuario Estimadas**: 4-6 HUs
+**Historias de Usuario**: 9 HUs — Core: HU-020..HU-023 | Enhancements: HU-130..HU-134
 **Dependencias**: FT-004
 
 **Prioridad en la Épica**: Media
@@ -218,7 +218,7 @@
 
 **Componentes Principales**: Backend de gestión de estados, API de actualización de estado, Interfaz de visualización de estado, Ruta frontend `/quotes/{folio}/terms-and-conditions`.
 
-**Historias de Usuario Estimadas**: 5-7 HUs
+**Historias de Usuario**: 14 HUs — Core: HU-024..HU-028 | Enhancements: HU-135..HU-143
 
 **Dependencias**: FT-001, FT-004, FT-009
 
@@ -250,7 +250,7 @@
 
 **Componentes Principales**: Capa de integración backend, Clientes API para `Plataforma-core-ohs`, Almacenamiento temporal de catálogos (opcional).
 
-**Historias de Usuario Estimadas**: 5-8 HUs
+**Historias de Usuario**: 11 HUs — Core: HU-029..HU-034 | Enhancements: HU-144..HU-148
 
 **Dependencias**: Ninguna (es una dependencia técnica transversal, pero esta feature agrupa su implementación).
 
@@ -282,7 +282,7 @@
 
 **Componentes Principales**: Capa de persistencia backend, Diseño de esquema de base de datos, Lógica de control de concurrencia.
 
-**Historias de Usuario Estimadas**: 3-5 HUs
+**Historias de Usuario**: 9 HUs — Core: HU-035..HU-038 | Enhancements: HU-149..HU-153
 **Dependencias**: Todas las features que modifican datos de cotización (FT-001, FT-002, FT-003, FT-004, FT-006)
 
 **Prioridad en la Épica**: Media
@@ -313,7 +313,7 @@
 
 **Componentes Principales**: Módulo de validación backend, Módulo de reglas de negocio, Lógica de aplicación de factores técnicos.
 
-**Historias de Usuario Estimadas**: 4-6 HUs
+**Historias de Usuario**: 10 HUs — Core: HU-039..HU-043 | Enhancements: HU-154..HU-158
 
 **Dependencias**: FT-001, FT-002, FT-003, FT-004
 
@@ -347,7 +347,7 @@
 
 **Componentes Principales**: Adaptadores de integración (`Plataforma-core-ohs`), Repositorios de parámetros, Mapeadores de datos.
 
-**Historias de Usuario Estimadas**: 4-6 HUs
+**Historias de Usuario**: 11 HUs — Core: HU-044..HU-048 | Enhancements: HU-159..HU-164
 
 **Dependencias**: `Plataforma-core-ohs` (simulación o real).
 
@@ -379,7 +379,7 @@
 
 **Componentes Principales**: Módulo de reglas de validación, Servicio de consulta de catálogos (CP), Componente de reporte de errores.
 
-**Historias de Usuario Estimadas**: 3-5 HUs
+**Historias de Usuario**: 10 HUs — Core: HU-049..HU-053 | Enhancements: HU-165..HU-169
 
 **Dependencias**: FT-010 (para acceso a catálogos como `catalogo_cp_zonas`).
 
@@ -412,7 +412,7 @@
 
 **Componentes Principales**: Algoritmos de cálculo de prima por componente, Servicio de aplicación de factores, Consolidación de primas.
 
-**Historias de Usuario Estimadas**: 6-9 HUs
+**Historias de Usuario**: 12 HUs — Core: HU-054..HU-059 | Enhancements: HU-170..HU-175
 
 **Dependencias**: FT-010 (para acceso a parámetros y tarifas), FT-011 (las validaciones deben pasarse antes del cálculo).
 
@@ -442,7 +442,7 @@
 - [ ] El sistema registra un snapshot de parámetros de entrada relevantes, identificadores de tarifas/factores utilizados, valores numéricos aplicados y metadatos de ejecución para trazabilidad.
 
 **Componentes Principales**: Repositorio de cotizaciones, Módulo de persistencia de resultados, Componente de auditoría/logging de cálculo.
-**Historias de Usuario Estimadas**: 3-5 HUs
+**Historias de Usuario**: 8 HUs — Core: HU-060..HU-063 | Enhancements: HU-176..HU-179
 
 **Dependencias**: FT-012 (necesita los resultados del cálculo), FT-014 (trabaja en conjunto con la gestión de versionado).
 
@@ -474,7 +474,7 @@
 
 **Componentes Principales**: Lógica de control de versión, Manejador de errores de concurrencia, Sistema de notificación al usuario (backend).
 
-**Historias de Usuario Estimadas**: 3-4 HUs
+**Historias de Usuario**: 9 HUs — Core: HU-064..HU-067 | Enhancements: HU-180..HU-184
 
 **Dependencias**: FT-013 (la persistencia debe integrar el control de versión).
 
@@ -505,7 +505,7 @@
 
 **Componentes Principales**: Cliente API REST, capa de mapeo de datos, repositorio de catálogos.
 
-**Historias de Usuario Estimadas**: 4-6 HUs
+**Historias de Usuario**: 6 HUs — Core: HU-068..HU-073
 
 **Dependencias**: FT-020 (Simulación de Servicio Plataforma-core-ohs)
 
@@ -535,7 +535,7 @@
 
 **Componentes Principales**: Cliente API REST, módulo de validación y consulta de CP, repositorio de CP y zonas.
 
-**Historias de Usuario Estimadas**: 3-5 HUs
+**Historias de Usuario**: 3 HUs — Core: HU-074..HU-076
 
 **Dependencias**: FT-020 (Simulación de Servicio Plataforma-core-ohs)
 **Prioridad en la Épica**: Alta
@@ -564,7 +564,7 @@
 
 **Componentes Principales**: Cliente API REST, capa de mapeo de catálogos específicos.
 
-**Historias de Usuario Estimadas**: 3-5 HUs
+**Historias de Usuario**: 3 HUs — Core: HU-077..HU-079
 
 **Dependencias**: FT-020 (Simulación de Servicio Plataforma-core-ohs)
 **Prioridad en la Épica**: Media
@@ -593,7 +593,7 @@
 
 **Componentes Principales**: Cliente API REST, módulo de adaptación de tarifas, repositorio de tarifas.
 
-**Historias de Usuario Estimadas**: 4-7 HUs
+**Historias de Usuario**: 6 HUs — Core: HU-080..HU-085
 
 **Dependencias**: FT-020 (Simulación de Servicio Plataforma-core-ohs)
 
@@ -624,7 +624,7 @@
 
 **Componentes Principales**: Servicio de generación de folios, módulo de secuencia numérica, servicio de notificación de errores.
 
-**Historias de Usuario Estimadas**: 5-7 HUs
+**Historias de Usuario**: 6 HUs — Core: HU-086..HU-091
 
 **Dependencias**: Ninguna
 
@@ -656,7 +656,7 @@
 
 **Componentes Principales**: Framework de mock server (ej. WireMock, Mountebank), MongoDB, Flyway, scripts de datos de prueba.
 
-**Historias de Usuario Estimadas**: 6-8 HUs
+**Historias de Usuario**: 8 HUs — Core: HU-092..HU-099
 
 **Dependencias**: Ninguna (es una dependencia crítica para el desarrollo del resto de las features de integración)
 
@@ -687,7 +687,7 @@
 
 **Componentes Principales**: Módulo de validación de datos, servicio de logging, servicio de notificación, reglas de negocio para corrección.
 
-**Historias de Usuario Estimadas**: 4-6 HUs
+**Historias de Usuario**: 5 HUs — Core: HU-100..HU-104
 
 **Dependencias**: FT-015, FT-016, FT-017, FT-018
 
@@ -718,7 +718,7 @@
 
 **Componentes Principales**: Framework de caché (ej. Caffeine, Redis), módulo de sincronización de datos, scheduler de actualización.
 
-**Historias de Usuario Estimadas**: 3-5 HUs
+**Historias de Usuario**: 5 HUs — Core: HU-105..HU-109
 
 **Dependencias**: FT-015, FT-016, FT-017, FT-018
 

@@ -22,7 +22,7 @@ Implementa el backend para el feature especificado, siguiendo la spec aprobada.
 2. **Consulta el diseño de referencia** en `docs/`:
    - Lee `docs/02-analysis/FEATURES.md` para identificar el FT-XXX y EP-XXX del feature.
    - Lee `docs/03-design/epicas/{EP-XXX}/core/{FT-XXX}/` — los HU files contienen reglas de negocio y validaciones detalladas que complementan la spec.
-   - Lee `docs/00-context/DEPENDENCIAS.md` si el feature integra con `mock-core-ohs`.
+   - Lee `docs/00-context/DEPENDENCIAS.md` si el feature integra con `plataforma-core-ohs`.
 3. **Revisa el código existente** en `plataformas-danos-back/src/main/java/` para entender patrones actuales.
 4. **Implementa en orden**:
    - `model/entity/` — entidad con `@Document`

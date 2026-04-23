@@ -10,7 +10,7 @@
 |---|---|---|
 | Backend principal | `plataformas-danos-back/` | API REST, motor de cálculo, versionado optimista, auth |
 | Frontend | `cotizador-danos-web/` | SPA Next.js, rutas del reto, UI de cotización |
-| Simulador | `mock-core-ohs/` | Mock server de Plataforma-core-ohs para dev/test |
+| Simulador | `plataforma-core-ohs/` | Mock server de Plataforma-core-ohs para dev/test |
 
 ---
 
@@ -75,7 +75,7 @@
 
 ---
 
-## Simulador — `mock-core-ohs`
+## Simulador — `plataforma-core-ohs`
 
 **Runtime**: Node.js 20 LTS · **Build**: npm
 

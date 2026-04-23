@@ -26,12 +26,12 @@ jwt:
 resilience4j:
   circuitbreaker:
     instances:
-      mock-core-ohs:
+      plataforma-core-ohs:
         sliding-window-size: 10
         failure-rate-threshold: 50
         wait-duration-in-open-state: 10s
   retry:
     instances:
-      mock-core-ohs:
+      plataforma-core-ohs:
         max-attempts: 3
         wait-duration: 500ms

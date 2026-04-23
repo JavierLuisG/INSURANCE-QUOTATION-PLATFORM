@@ -17,12 +17,16 @@ Genera una especificación técnica completa en `.github/specs/` para el siguien
 
 ## Pasos a seguir:
 
-1. **Si el requerimiento no se proporcionó**, busca en `.github/requirements/${input:featureName}.md`. Si existe, úsalo como fuente.
-2. Lee el stack: `.github/instructions/backend.instructions.md`.
-3. Explora el código existente para identificar patrones, modelos y rutas relacionadas.
-4. Genera la spec usando la plantilla en `.github/skills/generate-spec/spec-template.md`.
-5. Guarda el archivo como `.github/specs/${input:featureName}.spec.md` con estado `DRAFT`.
-6. Confirma la creación con un resumen de la spec al usuario.
+1. **Si el requerimiento no se proporcionó**, busca en `.github/requirements/${input:featureName}.md`. Si existe, úsalo como contexto inicial.
+2. Lee el stack: `.github/instructions/backend.instructions.md` y `frontend.instructions.md`.
+3. **Consulta la documentación de diseño existente** (fuente primaria de criterios):
+   - Lee `docs/02-analysis/FEATURES.md` para localizar el feature (FT-XXX) y su épica (EP-XXX).
+   - Si existe, lee `docs/03-design/epicas/{EP-XXX}/core/{FT-XXX}/` — los HU files contienen criterios detallados que deben reflejarse en la spec.
+   - Lee `docs/01-requirements/RNF.md` para incorporar SLOs de performance como criterios de aceptación no funcionales.
+4. Explora el código existente para identificar patrones, modelos y rutas relacionadas.
+5. Genera la spec usando la plantilla en `.github/skills/generate-spec/spec-template.md`.
+6. Guarda el archivo como `.github/specs/${input:featureName}.spec.md` con estado `DRAFT`.
+7. Confirma la creación con un resumen de la spec al usuario.
 
 ## La spec debe cubrir:
 - Historias de usuario con criterios de aceptación en Gherkin

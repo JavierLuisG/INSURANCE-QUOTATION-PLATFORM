@@ -125,6 +125,29 @@ Términos canónicos a usar en specs, código y mensajes:
 
 ---
 
+## Mapa de Documentación del Proyecto
+
+La documentación de análisis y diseño vive en `docs/` (raíz del proyecto). **Consultar antes de generar specs o implementar** — es la fuente de verdad de dominio, diseño y restricciones de calidad.
+
+| Directorio | Contenido | Cuándo leer |
+|---|---|---|
+| `docs/00-context/` | Contexto estratégico, drivers arquitectónicos, dependencias entre módulos | Antes de diseñar arquitectura o resolver integración con `mock-core-ohs` |
+| `docs/01-requirements/` | RF (25+ requisitos funcionales), RNF (11 requisitos no funcionales), Matriz de riesgos | Para validar criterios de aceptación y SLOs de performance |
+| `docs/02-analysis/` | Épicas (`EPICAS.md`), Features (`FEATURES.md`), Historias de usuario (`HU.md`) | Antes de generar specs — identificar el FT-XXX, EP-XXX y HUs relacionadas |
+| `docs/03-design/` | Specs detalladas por épica/feature/HU (`03-design/epicas/{EP}/{FT}/{HU}`) | Fuente primaria para spec-generator e implementación |
+
+### Archivos de referencia críticos
+
+| Archivo | Propósito |
+|---|---|
+| `docs/00-context/DRIVERS_ARQUITECTURA.md` | Atributos de calidad QAS, escenarios arquitectónicos, restricciones técnicas |
+| `docs/00-context/DEPENDENCIAS.md` | Integración con `mock-core-ohs`, cascade scenarios, SLOs, anti-patterns resueltos |
+| `docs/01-requirements/RNF.md` | SLOs: UI <500ms · CRUD <1.5s · cálculo <3s · cobertura ≥80% global / ≥90% `calc-engine` |
+| `docs/02-analysis/FEATURES.md` | 22 features (FT-001..FT-022) mapeadas a épicas — usar para identificar el FT antes de generar |
+| `TECH_STACK.md` | **Versiones exactas** de todas las dependencias del proyecto (fuente de verdad para versiones) |
+
+---
+
 ## Project Overview
 
 > Ver `README.md` en la raíz del proyecto.

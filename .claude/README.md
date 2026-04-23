@@ -162,13 +162,13 @@ Inyectadas automáticamente en el contexto de Claude según el archivo activo:
 
 | Archivo activo | Rule aplicada |
 |---|---|
-| `backend/**` / `server/**` / `api/**` | `rules/backend.md` |
-| `frontend/**` | `rules/frontend.md` |
-| Cualquier archivo de modelo/DB | `rules/database.md` |
-| `backend/tests/**` / `frontend/src/__tests__/**` | `rules/testing.md` |
+| `plataformas-danos-back/**` | `rules/backend.md` |
+| `cotizador-danos-web/**` | `rules/frontend.md` |
+| `plataformas-danos-back/**/model/**` / `**/repository/**` | `rules/database.md` |
+| `plataformas-danos-back/**/test/**` / `cotizador-danos-web/**/*.{test,spec}.*` | `rules/testing.md` |
 | `.github/specs/**` | `rules/specs.md` |
 
-> Las rules son agnosticas de stack. Los detalles del stack real están en `.claude/rules/backend.md + frontend.md`.
+> Las reglas son agnósticas de stack. Los detalles del stack real están en `.claude/rules/backend.md` + `frontend.md`. Las versiones exactas de dependencias están en `TECH_STACK.md` (raíz del proyecto).
 
 ---
 
@@ -188,14 +188,24 @@ Ver `.claude/hooks/README.md` para documentación completa y cómo agregar hooks
 
 ## Lineamientos de referencia
 
-Cargados por los agentes desde `docs/` (proyecto):
-
 | Documento | Contenido |
 |---|---|
 | `.claude/docs/lineamientos/dev-guidelines.md` | Clean Code, SOLID, API REST, Seguridad, Observabilidad |
 | `.claude/docs/lineamientos/qa-guidelines.md` | Estrategia QA, Gherkin, Riesgos, Automatización, Performance |
-| `.claude/rules/backend.md + frontend.md` | Stack, herramientas aprobadas, versiones |
-| `.claude/rules/backend.md + frontend.md` | Capas, estructura, patrones del proyecto |
+| `.claude/rules/backend.md` | Stack backend, herramientas aprobadas, capas, patrones |
+| `.claude/rules/frontend.md` | Stack frontend, herramientas aprobadas, estructura, patrones |
+| `TECH_STACK.md` | **Versiones exactas** de todas las dependencias (Maven + npm) |
+
+## Documentación del Proyecto
+
+La documentación de análisis y diseño vive en `docs/` (raíz del proyecto). Consultar antes de generar specs o implementar:
+
+| Directorio | Contenido | Cuándo leer |
+|---|---|---|
+| `docs/00-context/` | Drivers arquitectónicos, dependencias entre módulos, restricciones | Antes de diseñar arquitectura o resolver integración |
+| `docs/01-requirements/` | RF, RNF (SLOs de performance y cobertura), Matriz de riesgos | Para validar criterios de aceptación |
+| `docs/02-analysis/` | Épicas, Features (FT-001..FT-022), Historias de usuario | Antes de generar specs — identificar FT-XXX y EP-XXX |
+| `docs/03-design/` | Specs detalladas por épica/feature/HU | Fuente primaria para spec-generator e implementación |
 
 ---
 
@@ -203,6 +213,13 @@ Cargados por los agentes desde `docs/` (proyecto):
 
 ```
 Project Root/
+│
+├── TECH_STACK.md                    ← versiones exactas de todas las dependencias
+├── docs/                            ← documentación de análisis y diseño del proyecto
+│   ├── 00-context/                  ← contexto estratégico, drivers arquitectónicos, dependencias
+│   ├── 01-requirements/             ← RF, RNF, Matriz de riesgos
+│   ├── 02-analysis/                 ← Épicas, Features, Historias de usuario
+│   └── 03-design/                   ← specs detalladas por épica/feature/HU
 │
 ├── docs/output/                     ← artefactos generados por los agentes
 │   ├── qa/                          ← Gherkin, riesgos, performance

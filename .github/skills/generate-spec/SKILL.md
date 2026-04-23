@@ -21,12 +21,16 @@ Si el requerimiento no cumple el DoR → listar las preguntas pendientes antes d
 
 ## Proceso
 
-1. Busca requerimiento en `.github/requirements/<feature>.md` (si existe, úsalo)
-2. Lee las instrucciones de stack: `.github/instructions/backend.instructions.md`, `frontend.instructions.md`
-3. Explora código existente — no duplicar modelos ni endpoints existentes
-4. Valida DoR (arriba) — si hay ambigüedades, lista preguntas antes de continuar
-5. Usa plantilla: `.github/skills/generate-spec/spec-template.md` EXACTAMENTE
-6. Guarda en `.github/specs/<nombre-en-kebab-case>.spec.md`
+1. Busca requerimiento en `.github/requirements/<feature>.md` (si existe, úsalo como contexto inicial)
+2. Lee el stack: `.github/instructions/backend.instructions.md`, `frontend.instructions.md`
+3. **Consulta la documentación de diseño existente** (fuente primaria):
+   - Lee `docs/02-analysis/FEATURES.md` — localiza el feature (FT-XXX) y su épica (EP-XXX)
+   - Lee `docs/03-design/epicas/{EP-XXX}/core/{FT-XXX}/` — specs detalladas por HU: son la fuente de criterios de aceptación
+   - Lee `docs/01-requirements/RNF.md` — incorpora los SLOs de performance como criterios de aceptación no funcionales
+4. Explora código existente — no duplicar modelos ni endpoints existentes
+5. Valida DoR (arriba) — si hay ambigüedades, lista preguntas antes de continuar
+6. Usa plantilla: `.github/skills/generate-spec/spec-template.md` EXACTAMENTE
+7. Guarda en `.github/specs/<nombre-en-kebab-case>.spec.md`
 
 ## Frontmatter obligatorio
 

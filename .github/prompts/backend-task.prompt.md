@@ -19,15 +19,19 @@ Implementa el backend para el feature especificado, siguiendo la spec aprobada.
 ## Pasos obligatorios:
 
 1. **Lee la spec** en `.github/specs/${input:featureName:nombre-feature}.spec.md` — si no existe, detente e informa al usuario.
-2. **Revisa el código existente** en `plataformas-danos-back/src/main/java/` para entender patrones actuales.
-3. **Implementa en orden**:
+2. **Consulta el diseño de referencia** en `docs/`:
+   - Lee `docs/02-analysis/FEATURES.md` para identificar el FT-XXX y EP-XXX del feature.
+   - Lee `docs/03-design/epicas/{EP-XXX}/core/{FT-XXX}/` — los HU files contienen reglas de negocio y validaciones detalladas que complementan la spec.
+   - Lee `docs/00-context/DEPENDENCIAS.md` si el feature integra con `mock-core-ohs`.
+3. **Revisa el código existente** en `plataformas-danos-back/src/main/java/` para entender patrones actuales.
+4. **Implementa en orden**:
    - `model/entity/` — entidad con `@Document`
    - `model/dto/` — Request y Response DTOs con Bean Validation
    - `repository/` — interfaz `MongoRepository`
    - `service/` — interfaz + implementación con lógica de negocio
    - `controller/` — `@RestController` con `@RequiredArgsConstructor`
-4. Spring detecta los `@Component` automáticamente — no hace falta registro manual.
-5. **Verifica compilación** ejecutando: `cd plataformas-danos-back && mvn compile -q`
+5. Spring detecta los `@Component` automáticamente — no hace falta registro manual.
+6. **Verifica compilación** ejecutando: `cd plataformas-danos-back && mvn compile -q`
 
 ## Restricciones:
 - Inyección por constructor con `@RequiredArgsConstructor` — NUNCA `@Autowired` en campo.

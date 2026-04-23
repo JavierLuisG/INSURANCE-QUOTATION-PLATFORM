@@ -75,4 +75,19 @@ Para agregar un nuevo endpoint:
 
 ---
 
+## Documentación de Referencia
+
+Consultar antes de implementar cualquier feature:
+
+| Documento | Propósito |
+|---|---|
+| `docs/02-analysis/FEATURES.md` | Localizar el feature (FT-XXX) y su épica (EP-XXX) antes de codificar |
+| `docs/03-design/epicas/{EP-XXX}/core/{FT-XXX}/` | Diseño detallado por HU — specs de implementación, reglas de negocio, validaciones |
+| `docs/00-context/DEPENDENCIAS.md` | Restricciones de integración con `mock-core-ohs`, SLOs, cascade scenarios, anti-patterns |
+| `docs/00-context/DRIVERS_ARQUITECTURA.md` | Atributos de calidad QAS, escenarios arquitectónicos, restricciones técnicas |
+| `docs/01-requirements/RNF.md` | SLOs: CRUD <1.5s · cálculo <3s · cobertura ≥80% global / ≥90% `calc-engine` |
+| `TECH_STACK.md` | Versiones exactas de dependencias Maven (fuente de verdad para versiones) |
+
+---
+
 > Para estándares de Clean Code, SOLID, API REST, seguridad y observabilidad, ver `.github/docs/lineamientos/dev-guidelines.md`.

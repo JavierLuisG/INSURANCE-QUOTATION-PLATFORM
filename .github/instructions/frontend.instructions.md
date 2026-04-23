@@ -89,4 +89,18 @@ Las rutas viven en `app/`. Para registrar una nueva ruta crear `app/<ruta>/page.
 
 ---
 
+## Documentación de Referencia
+
+Consultar antes de implementar cualquier feature:
+
+| Documento | Propósito |
+|---|---|
+| `docs/02-analysis/FEATURES.md` | Localizar el feature (FT-XXX) y su épica (EP-XXX) antes de codificar |
+| `docs/03-design/epicas/{EP-XXX}/core/{FT-XXX}/` | Diseño detallado por HU — flujos de usuario, estados UI, validaciones de formulario |
+| `docs/00-context/DRIVERS_ARQUITECTURA.md` | Atributos de calidad QAS que afectan el frontend (performance, usabilidad) |
+| `docs/01-requirements/RNF.md` | SLOs: UI <500ms · usabilidad SUS >80 · cobertura frontend ≥80% |
+| `TECH_STACK.md` | Versiones exactas de dependencias npm (fuente de verdad para versiones) |
+
+---
+
 > Para estándares de Clean Code, SOLID, seguridad y observabilidad, ver `.github/docs/lineamientos/dev-guidelines.md`.

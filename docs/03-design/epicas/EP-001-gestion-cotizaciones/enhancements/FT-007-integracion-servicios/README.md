@@ -1,5 +1,8 @@
 ## FT-007: Integración con Servicios de Referencia (Catálogos y Tarifas)
 
+**Épica Padre**: EP-001 — Gestión Integral de Cotizaciones de Daños
+**Capa**: enhancements
+
 ---
 
 ### 1. Descripción

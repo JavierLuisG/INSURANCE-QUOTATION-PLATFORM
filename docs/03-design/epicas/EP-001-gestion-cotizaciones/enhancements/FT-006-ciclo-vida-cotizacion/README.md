@@ -1,5 +1,8 @@
 ## FT-006: Gestión del Ciclo de Vida y Estados de la Cotización
 
+**Épica Padre**: EP-001 — Gestión Integral de Cotizaciones de Daños
+**Capa**: enhancements
+
 ---
 
 ### 1. Descripción

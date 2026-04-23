@@ -1,5 +1,8 @@
 ## FT-013: Persistencia y Trazabilidad de Resultados de Cálculo
 
+**Épica Padre**: EP-002 — Motor de Cálculo y Reglas de Negocio
+**Capa**: enhancements
+
 ---
 
 ### 1. Descripción

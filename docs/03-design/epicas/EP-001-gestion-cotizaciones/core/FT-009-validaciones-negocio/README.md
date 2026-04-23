@@ -1,5 +1,8 @@
 ## FT-009: Implementación de Reglas de Negocio y Validaciones
 
+**Épica Padre**: EP-001 — Gestión Integral de Cotizaciones de Daños
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature define e implementa las reglas de negocio y validaciones necesarias para garantizar la calidad, consistencia y precisión de la información en todo el flujo de la cotización, desde la captura de datos hasta el cálculo de primas.

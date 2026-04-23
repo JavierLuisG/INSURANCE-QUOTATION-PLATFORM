@@ -1,5 +1,8 @@
 ## FT-014: Gestión de Concurrencia y Versionado Optimista
 
+**Épica Padre**: EP-002 — Motor de Cálculo y Reglas de Negocio
+**Capa**: enhancements
+
 ---
 
 ### 1. Descripción

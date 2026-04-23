@@ -1,5 +1,8 @@
 ## FT-005: Visualización Detallada de Resultados Financieros
 
+**Épica Padre**: EP-001 — Gestión Integral de Cotizaciones de Daños
+**Capa**: enhancements
+
 ### 1. Descripción
 
 Esta feature habilita la visualización estructurada, clara y consistente de los resultados financieros derivados del cálculo de primas, incluyendo el resumen global, el desglose por ubicación, los componentes adicionales (impuestos/recargos) y una vista técnica detallada basada en la trazabilidad del cálculo.

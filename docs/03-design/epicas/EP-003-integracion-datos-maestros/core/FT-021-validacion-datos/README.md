@@ -1,5 +1,8 @@
 ## FT-021: Capa de Validación y Gestión de Inconsistencias de Datos Maestros
 
+**Épica Padre**: EP-003 — Integración y Gestión de Datos Maestros
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature implementa una capa transversal encargada de validar, detectar, registrar y gestionar inconsistencias en los datos maestros provenientes de servicios externos (`Plataforma-core-ohs` o su mock), asegurando su calidad antes de ser utilizados por el sistema.

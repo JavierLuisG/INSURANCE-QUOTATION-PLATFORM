@@ -1,5 +1,8 @@
 ## FT-017: Integración de Catálogos de Clasificación de Riesgo y Garantías
 
+**Épica Padre**: EP-003 — Integración y Gestión de Datos Maestros
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature permite la integración con servicios externos (`Plataforma-core-ohs` o su mock) para la obtención de catálogos de clasificación de riesgo y garantías, así como su transformación al modelo interno del cotizador para su uso en la configuración de coberturas.

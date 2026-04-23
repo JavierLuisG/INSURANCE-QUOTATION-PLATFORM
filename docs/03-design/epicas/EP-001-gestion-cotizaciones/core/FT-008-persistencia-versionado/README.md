@@ -1,5 +1,8 @@
 ## FT-008: Gestión de Persistencia Avanzada y Versionado Optimista
 
+**Épica Padre**: EP-001 — Gestión Integral de Cotizaciones de Daños
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature implementa mecanismos avanzados de persistencia para las cotizaciones, incluyendo control de versiones, auditoría de modificaciones, manejo de concurrencia mediante versionado optimista y soporte para actualizaciones parciales.

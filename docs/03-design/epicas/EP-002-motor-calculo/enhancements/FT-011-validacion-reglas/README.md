@@ -1,5 +1,8 @@
 ## FT-011: Motor de Validación de Reglas de Negocio
 
+**Épica Padre**: EP-002 — Motor de Cálculo y Reglas de Negocio
+**Capa**: enhancements
+
 ---
 
 ### 1. Descripción

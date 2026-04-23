@@ -1,5 +1,8 @@
 ## FT-010: Configuración y Gestión de Parámetros de Cálculo
 
+**Épica Padre**: EP-002 — Motor de Cálculo y Reglas de Negocio
+**Capa**: enhancements
+
 ---
 
 ### 1. Descripción

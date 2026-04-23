@@ -1,5 +1,8 @@
 ## FT-011: Motor de Validación de Reglas de Negocio
 
+**Épica Padre**: EP-002 — Motor de Cálculo y Reglas de Negocio
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature implementa un motor especializado en la validación de reglas de negocio sobre la cotización y sus ubicaciones, asegurando que los datos cumplan condiciones mínimas y restricciones antes de permitir el cálculo de primas.

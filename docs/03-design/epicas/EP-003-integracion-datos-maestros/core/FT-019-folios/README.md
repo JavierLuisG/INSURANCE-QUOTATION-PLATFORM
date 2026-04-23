@@ -1,5 +1,8 @@
 ## FT-019: Generación y Gestión de Folios Alfanuméricos
 
+**Épica Padre**: EP-003 — Integración y Gestión de Datos Maestros
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature permite la generación, gestión y control de folios alfanuméricos únicos para cada cotización, asegurando su unicidad, persistencia y consistencia incluso en escenarios de alta concurrencia.

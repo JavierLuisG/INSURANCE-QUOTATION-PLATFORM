@@ -1,5 +1,8 @@
 ## FT-020: Simulación de Servicio `Plataforma-core-ohs` (Mock Server)
 
+**Épica Padre**: EP-003 — Integración y Gestión de Datos Maestros
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature permite la construcción de un mock server que simula el comportamiento del servicio externo `Plataforma-core-ohs`, incluyendo catálogos, códigos postales, tarifas y factores técnicos, con el fin de desacoplar el desarrollo del cotizador y habilitar pruebas controladas.

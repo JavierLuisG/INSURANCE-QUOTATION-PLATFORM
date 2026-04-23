@@ -1,5 +1,8 @@
 ## FT-007: Integración con Servicios de Referencia (Catálogos y Tarifas)
 
+**Épica Padre**: EP-001 — Gestión Integral de Cotizaciones de Daños
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature permite la integración con servicios externos para obtener información de referencia crítica, como catálogos, códigos postales, zonas de riesgo, tarifas y factores técnicos necesarios para la operación del cotizador.

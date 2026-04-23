@@ -1,5 +1,8 @@
 ## FT-012: Motor Central de Cálculo de Primas
 
+**Épica Padre**: EP-002 — Motor de Cálculo y Reglas de Negocio
+**Capa**: enhancements
+
 ---
 
 ### 1. Descripción

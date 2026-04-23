@@ -1,5 +1,8 @@
 ## FT-012: Motor Central de Cálculo de Primas
 
+**Épica Padre**: EP-002 — Motor de Cálculo y Reglas de Negocio
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature implementa el motor central encargado de calcular las primas de la cotización, tanto a nivel de ubicación como a nivel total, aplicando tarifas, factores técnicos y reglas comerciales.

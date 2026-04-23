@@ -1,5 +1,8 @@
 ## FT-002: Gestión Dinámica de Ubicaciones de Riesgo
 
+**Épica Padre**: EP-001 — Gestión Integral de Cotizaciones de Daños
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature permite la creación, edición, gestión y control del ciclo de vida de las ubicaciones de riesgo dentro de una cotización, asegurando que cada ubicación contenga información completa, válida y estructurada para su uso en validaciones y cálculos posteriores.

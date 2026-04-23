@@ -1,5 +1,8 @@
 ## FT-003: Configuración y Selección de Coberturas por Ubicación
 
+**Épica Padre**: EP-001 — Gestión Integral de Cotizaciones de Daños
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature permite la visualización, selección y configuración de coberturas asociadas a cada ubicación de riesgo dentro de una cotización, incluyendo la parametrización de valores como suma asegurada y deducibles, así como la visualización de un resumen de coberturas activas.

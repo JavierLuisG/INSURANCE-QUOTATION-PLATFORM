@@ -1,5 +1,8 @@
 ## FT-013: Persistencia y Trazabilidad de Resultados de Cálculo
 
+**Épica Padre**: EP-002 — Motor de Cálculo y Reglas de Negocio
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature se encarga de almacenar de forma persistente los resultados del cálculo de primas dentro de la cotización, garantizando consistencia, atomicidad y trazabilidad de los datos financieros generados.

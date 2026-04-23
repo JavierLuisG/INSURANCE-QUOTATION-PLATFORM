@@ -1,5 +1,8 @@
 ## FT-016: Integración de Catálogo de Códigos Postales y Zonas
 
+**Épica Padre**: EP-003 — Integración y Gestión de Datos Maestros
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature permite la consulta, validación y mapeo de códigos postales hacia su correspondiente información de zona (CAT y nivel técnico), mediante la integración con servicios externos (`Plataforma-core-ohs` o su mock). Esta información es clave para la correcta clasificación del riesgo por ubicación.

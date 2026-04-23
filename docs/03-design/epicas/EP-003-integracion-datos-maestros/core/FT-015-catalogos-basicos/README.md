@@ -1,5 +1,8 @@
 ## FT-015: Conectividad y Consumo de Catálogos Básicos (Suscriptores, Agentes, Giros)
 
+**Épica Padre**: EP-003 — Integración y Gestión de Datos Maestros
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature permite la integración con servicios externos de catálogos básicos para obtener y transformar información de suscriptores, agentes y giros, asegurando su disponibilidad para el proceso de cotización.

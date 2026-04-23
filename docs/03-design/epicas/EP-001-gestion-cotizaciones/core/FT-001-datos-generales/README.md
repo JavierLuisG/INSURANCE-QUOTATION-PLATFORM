@@ -1,4 +1,7 @@
-## FT-001: Captura y Validación de Datos Generales de la Cotización
+## FT-001: Creación y Edición de Datos Generales de la Cotización
+
+**Épica Padre**: EP-001 — Gestión Integral de Cotizaciones de Daños
+**Capa**: core
 
 ### 1. Descripción
 Esta feature permite la creación, carga y edición de los datos generales de una cotización, incluyendo la asignación de folio, datos del asegurado, selección de catálogos y vigencia.

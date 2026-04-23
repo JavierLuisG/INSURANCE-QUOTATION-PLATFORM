@@ -1,5 +1,8 @@
 ## FT-010: Configuración y Gestión de Parámetros de Cálculo
 
+**Épica Padre**: EP-002 — Motor de Cálculo y Reglas de Negocio
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature gestiona la ingestión, almacenamiento y disponibilidad de parámetros técnicos (tarifas, factores, catálogos) necesarios para el cálculo de primas, asegurando que el motor de cálculo opere con información actualizada y consistente.

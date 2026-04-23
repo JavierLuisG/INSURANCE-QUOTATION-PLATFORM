@@ -1,5 +1,8 @@
 ## FT-008: Gestión de Persistencia Avanzada y Versionado Optimista
 
+**Épica Padre**: EP-001 — Gestión Integral de Cotizaciones de Daños
+**Capa**: enhancements
+
 ---
 
 ### 1. Descripción

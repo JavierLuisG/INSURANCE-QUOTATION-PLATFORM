@@ -1,3 +1,8 @@
+## FT-014: Gestión de Concurrencia y Versionado Optimista
+
+**Épica Padre**: EP-002 — Motor de Cálculo y Reglas de Negocio
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature gestiona el control de concurrencia sobre las cotizaciones mediante un mecanismo de versionado optimista, permitiendo detectar y manejar conflictos cuando múltiples usuarios modifican la misma información.

@@ -1,5 +1,8 @@
 ## FT-018: Conectividad y Consumo de Tarifas y Factores Técnicos
 
+**Épica Padre**: EP-003 — Integración y Gestión de Datos Maestros
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature permite la integración con servicios externos (`Plataforma-core-ohs` o su mock) para la consulta, recuperación y transformación de tarifas y factores técnicos (incendio, CAT, FHM y equipo electrónico), necesarios para el cálculo de primas.

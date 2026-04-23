@@ -1,5 +1,8 @@
 ## FT-004: Ejecución y Persistencia del Cálculo de Primas
 
+**Épica Padre**: EP-001 — Gestión Integral de Cotizaciones de Daños
+**Capa**: enhancements
+
 ### 1. Descripción
 
 Esta feature orquesta el proceso completo de cálculo de primas dentro de una cotización, desde la iniciación del cálculo por parte del usuario, pasando por el cálculo individual por ubicación, la consolidación de resultados (prima neta y comercial), la aplicación de reglas de negocio y factores técnicos, hasta la persistencia final de los resultados de forma consistente.

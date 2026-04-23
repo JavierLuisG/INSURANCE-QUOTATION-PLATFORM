@@ -1,5 +1,8 @@
 ## FT-009: Implementación de Reglas de Negocio y Validaciones
 
+**Épica Padre**: EP-001 — Gestión Integral de Cotizaciones de Daños
+**Capa**: enhancements
+
 ---
 
 ### 1. Descripción

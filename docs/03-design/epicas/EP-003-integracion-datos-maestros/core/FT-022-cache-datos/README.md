@@ -1,5 +1,8 @@
 ## FT-022: Gestión de Caché y Estrategia de Actualización de Datos Maestros
 
+**Épica Padre**: EP-003 — Integración y Gestión de Datos Maestros
+**Capa**: core
+
 ### 1. Descripción
 
 Esta feature implementa una capa de caché para datos maestros (catálogos, tarifas y factores técnicos), junto con estrategias de invalidación y actualización, con el objetivo de optimizar el rendimiento, reducir la latencia y minimizar la dependencia directa de servicios externos.

@@ -1,14 +1,14 @@
 ---
-description: Reglas de backend para este proyecto (Java 21 + Spring Boot 4.0.4 + MongoDB). Se aplica automáticamente a archivos backend.
+description: Reglas de backend para este proyecto (Java 21 + Spring Boot 4.0.5 + MongoDB). Se aplica automáticamente a archivos backend.
 paths:
   - "plataformas-danos-back/**"
 ---
 
-# Reglas de Backend — Java 21 + Spring Boot 4.0.4
+# Reglas de Backend — Java 21 + Spring Boot 4.0.5
 
 ## Stack aprobado
 
-- **Java 21 LTS** + **Spring Boot 4.0.4** (Maven, JAR)
+- **Java 21 LTS** + **Spring Boot 4.0.5** (Maven, JAR)
 - **Spring Data MongoDB** — repositorios NoSQL de documentos
 - **Spring Security** + **JJWT 0.12.6** — autenticación y autorización JWT
 - **Resilience4j 2.3.0** — Circuit Breaker y Retry

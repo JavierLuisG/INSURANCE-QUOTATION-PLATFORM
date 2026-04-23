@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: plataformas-danos-back
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/plataformas_danos}
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=3600s
+
+server:
+  port: ${PORT:8080}
+
+logging:
+  pattern:
+    console: '{"timestamp":"%d","level":"%p","correlation-id":"%X{correlationId}","logger":"%logger","message":"%m"}%n'
+  level:
+    root: INFO
+    com.plataformas_danos_back: DEBUG
+
+jwt:
+  secret: ${JWT_SECRET:changeme-use-env-var-in-production}
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      mock-core-ohs:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+  retry:
+    instances:
+      mock-core-ohs:
+        max-attempts: 3
+        wait-duration: 500ms

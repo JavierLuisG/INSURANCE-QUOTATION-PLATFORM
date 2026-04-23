@@ -21,7 +21,7 @@
 
 | Dependencia | Versión | Uso |
 |---|---|---|
-| `spring-boot-starter-parent` | `4.0.4` | BOM y gestión de dependencias |
+| `spring-boot-starter-parent` | `4.0.5` | BOM y gestión de dependencias |
 | `spring-boot-starter-web` | (BOM) | API REST |
 | `spring-boot-starter-data-mongodb` | (BOM) | Repositorios NoSQL de documentos |
 | `spring-boot-starter-security` | (BOM) | Autenticación y autorización |

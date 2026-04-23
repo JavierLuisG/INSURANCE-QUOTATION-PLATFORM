@@ -2,7 +2,7 @@
 applyTo: "plataformas-danos-back/src/main/java/**/*.java"
 ---
 
-> **Scope**: Se aplica al módulo `plataformas-danos-back`. Stack: Java 21 + Spring Boot 4.0.4 + Spring Data MongoDB + Spring Security + JJWT.
+> **Scope**: Se aplica al módulo `plataformas-danos-back`. Stack: Java 21 + Spring Boot 4.0.5 + Spring Data MongoDB + Spring Security + JJWT.
 
 # Instrucciones para Archivos de Backend (Java / Spring Boot)
 

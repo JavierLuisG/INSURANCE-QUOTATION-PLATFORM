@@ -1,6 +1,6 @@
 ---
 name: backend-task
-description: Implementa una funcionalidad en el backend FastAPI basada en una spec ASDD aprobada.
+description: Implementa una funcionalidad en el backend Java/Spring Boot basada en una spec ASDD aprobada.
 argument-hint: "<nombre-feature> (debe existir .github/specs/<nombre-feature>.spec.md)"
 agent: Backend Developer
 tools:
@@ -19,16 +19,19 @@ Implementa el backend para el feature especificado, siguiendo la spec aprobada.
 ## Pasos obligatorios:
 
 1. **Lee la spec** en `.github/specs/${input:featureName:nombre-feature}.spec.md` — si no existe, detente e informa al usuario.
-2. **Revisa el código existente** en `backend/app/` para entender patrones actuales.
+2. **Revisa el código existente** en `plataformas-danos-back/src/main/java/` para entender patrones actuales.
 3. **Implementa en orden**:
-   - `backend/app/models/` — modelo Pydantic
-   - `backend/app/repositories/` — repositorio con Motor
-   - `backend/app/services/` — servicio con lógica de negocio
-   - `backend/app/routes/` — router FastAPI
-4. **Registra el router** en `backend/app/main.py`.
-5. **Verifica sintaxis** ejecutando: `cd backend && poetry run python -m py_compile app/main.py`
+   - `model/entity/` — entidad con `@Document`
+   - `model/dto/` — Request y Response DTOs con Bean Validation
+   - `repository/` — interfaz `MongoRepository`
+   - `service/` — interfaz + implementación con lógica de negocio
+   - `controller/` — `@RestController` con `@RequiredArgsConstructor`
+4. Spring detecta los `@Component` automáticamente — no hace falta registro manual.
+5. **Verifica compilación** ejecutando: `cd plataformas-danos-back && mvn compile -q`
 
 ## Restricciones:
-- Sigue el patrón de wiring: `db = get_db()` → `repo = XRepository(db)` → `service = XService(repo)` en el router.
-- NO inyectar `get_db()` en servicios.
-- Todas las operaciones de DB deben ser `async`/`await`.
+- Inyección por constructor con `@RequiredArgsConstructor` — NUNCA `@Autowired` en campo.
+- NO inyectar repositorios directamente en controllers — siempre a través del service.
+- Folio de cotización: formato `COT-AAAA-NNNNNN`.
+- Valores válidos `estadoValidacion`: `COMPLETA` | `INCOMPLETA` | `INACTIVA`.
+- Timestamps: `Instant.now()` en la app, nunca en el cliente.

@@ -1,67 +1,92 @@
 ---
-applyTo: "frontend/src/**/*.{js,jsx}"
+applyTo: "cotizador-danos-web/**/*.{ts,tsx}"
 ---
 
-> **Scope**: Se aplica a proyectos con capa frontend. Si el proyecto es backend-only, este archivo no tiene efecto. Si el frontend usa otro framework (Vue, Angular, Svelte, etc.), adaptar las convenciones de componentes, rutas y estado al stack real.
+> **Scope**: Se aplica al módulo `cotizador-danos-web`. Stack: Next.js 14 App Router + TypeScript 5 + Tailwind CSS + Zustand + Zod + Axios.
 
-# Instrucciones para Archivos de Frontend (React/Vite)
+# Instrucciones para Archivos de Frontend (Next.js 14 + TypeScript + Tailwind)
 
 ## Convenciones Obligatorias
 
-- **CSS**: SIEMPRE usar CSS Modules (`*.module.css`) — NUNCA clases CSS globales ni frameworks como Tailwind/Bootstrap.
-- **Nombres**: PascalCase para componentes y páginas (`.jsx`), camelCase para hooks (`.js`) y servicios (`.js`).
-- **Auth state**: SIEMPRE consumir de `useAuth` — nunca crear estado de autenticación paralelo.
-- **Env vars**: SIEMPRE con prefijo `VITE_` para que Vite las exponga.
+- **CSS**: SIEMPRE Tailwind CSS — NUNCA CSS Modules, styled-components, clases globales ad-hoc ni estilos inline.
+- **Tipos**: TypeScript estricto en todo el proyecto. Prohibido `any`.
+- **Estado global**: Zustand store — nunca duplicar estado de cotización.
+- **Validación**: Zod para todo schema de formulario y respuesta de API.
+- **Env vars**: Prefijo `NEXT_PUBLIC_` para variables accesibles en cliente (ej. `NEXT_PUBLIC_API_URL`).
+- **Server vs Client Components**: marcar `'use client'` solo cuando el componente usa hooks, estado o eventos de usuario.
 
 ## Estructura de Archivos
 
 ```
-src/
-  config/firebase.js      ← init Firebase (solo aquí)
-  hooks/useAuth.js        ← fuente única de verdad para auth
-  services/authService.js ← Firebase signIn + POST backend
-  components/ProtectedRoute.jsx
-  pages/                  ← PageName.jsx + PageName.module.css
+cotizador-danos-web/
+  app/                      ← App Router (páginas y layouts)
+    (ruta)/page.tsx
+    (ruta)/layout.tsx
+  components/               ← Componentes reutilizables (.tsx)
+  hooks/                    ← Custom hooks (use*.ts)
+  lib/services/             ← Llamadas HTTP via Axios
+  store/                    ← Zustand stores
+  lib/schemas/              ← Zod schemas
+  types/                    ← Interfaces y tipos TypeScript
 ```
 
 ## Llamadas a la API Backend
 
-Usar siempre **Axios** (no `fetch`). Las llamadas van en `services/`, nunca directamente en componentes o páginas.
+Usar siempre **Axios** (no `fetch`). Las llamadas van en `lib/services/`, nunca directamente en componentes o páginas.
 
-```js
-// services/featureService.js
+```typescript
+// lib/services/quotationService.ts
 import axios from 'axios';
-const API_BASE = import.meta.env.VITE_API_URL;
 
-export async function getFeatures(token) {
-  const res = await axios.get(`${API_BASE}/api/v1/features`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return res.data;
-}
+const api = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL });
 
-export async function createFeature(data, token) {
-  const res = await axios.post(`${API_BASE}/api/v1/features`, data, {
-    headers: { Authorization: `Bearer ${token}` }
+export async function createQuotation(data: QuotationRequest, token: string) {
+  const res = await api.post<QuotationResponse>('/api/v1/quotations', data, {
+    headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;
 }
 ```
 
-El token se obtiene siempre desde `useAuth()`:
-```js
-const { token } = useAuth();
+## Estado Global con Zustand
+
+```typescript
+// store/quotationStore.ts
+import { create } from 'zustand';
+
+interface QuotationStore {
+  folio: string | null;
+  setFolio: (folio: string) => void;
+}
+
+export const useQuotationStore = create<QuotationStore>((set) => ({
+  folio: null,
+  setFolio: (folio) => set({ folio }),
+}));
 ```
 
-## Rutas (React Router v6)
+## Navegación (App Router)
 
-Las rutas se registran en `src/App.jsx`:
-```jsx
-<Route path="/nueva-ruta" element={<ProtectedRoute><NuevaPagina /></ProtectedRoute>} />
+Usar `useRouter` de `next/navigation` o `<Link>` de `next/link`. NUNCA React Router.
+
+```typescript
+import { useRouter } from 'next/navigation';
+const router = useRouter();
+router.push('/cotizacion/coberturas');
 ```
 
 ## Componentes
 
-- Un componente por archivo.
-- Props tipadas con JSDoc si son complejas.
-- No lógica de negocio en los componentes — delegar a hooks o servicios.
+- Un componente por archivo (`.tsx`).
+- PascalCase para el nombre del componente y del archivo.
+- Props tipadas con interface explícita — sin JSDoc, usar TypeScript directamente.
+- `'use client'` obligatorio si el componente usa `useState`, `useEffect` o event handlers.
+- No lógica de negocio en componentes — delegar a hooks o store.
+
+## Rutas (App Router)
+
+Las rutas viven en `app/`. Para registrar una nueva ruta crear `app/<ruta>/page.tsx`. Para rutas protegidas, usar middleware o un wrapper en el layout.
+
+---
+
+> Para estándares de Clean Code, SOLID, seguridad y observabilidad, ver `.github/docs/lineamientos/dev-guidelines.md`.

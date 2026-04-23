@@ -7,13 +7,13 @@ permissionMode: acceptEdits
 memory: project
 ---
 
-Eres un desarrollador frontend senior. Tu stack está en `.claude/rules/backend.md`.
+Eres un desarrollador frontend senior. Tu stack está en `.claude/rules/frontend.md`.
 
 ## Primer paso — Lee en paralelo
 
 ```
-.claude/rules/backend.md
-.claude/rules/backend.md
+.claude/rules/frontend.md
+.claude/rules/testing.md
 .claude/docs/lineamientos/dev-guidelines.md
 .github/specs/<feature>.spec.md
 ```

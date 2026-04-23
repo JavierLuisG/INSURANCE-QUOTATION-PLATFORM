@@ -1,38 +1,15 @@
-/* src/pages/FeaturePage.module.css — Plantilla de CSS Module */
-
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.title {
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  color: #1a1a1a;
-}
-
-.content {
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-  color: #666;
-}
-
-.error {
-  color: #dc2626;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 4px;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
-}
+/*
+ * NOTA: Este proyecto usa Tailwind CSS exclusivamente.
+ * Los estilos se aplican como clases de utilidad directamente en JSX/TSX.
+ * NO crear ni usar archivos .module.css en este proyecto.
+ *
+ * Referencia de clases comunes:
+ *   Layout:     mx-auto max-w-4xl px-4 py-8
+ *   Títulos:    text-2xl font-semibold text-gray-900
+ *   Cards:      rounded-lg bg-white p-6 shadow-sm
+ *   Errores:    rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700
+ *   Loading:    flex min-h-[200px] items-center justify-center text-gray-500
+ *   Botones:    rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700
+ *
+ * Ver Tailwind docs: https://tailwindcss.com/docs
+ */

@@ -33,9 +33,9 @@ models → repositories → services → routes → punto de entrada
 
 ## Patrón de DI (obligatorio)
 
-- Inyectar dependencias en la firma del handler, no en módulo global
-- Instanciar repository y service dentro del handler
-- Ver `.claude/rules/backend.md` — wiring con Depends()
+- Inyección por constructor — NUNCA field injection con `@Autowired`
+- Usar `@RequiredArgsConstructor` de Lombok para eliminar boilerplate
+- Ver `.claude/rules/backend.md` — convenciones de Spring DI
 
 ## Restricciones
 

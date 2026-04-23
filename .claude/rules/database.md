@@ -1,70 +1,79 @@
 ---
-description: Reglas de acceso a datos para este proyecto (MongoDB + Motor async + Pydantic v2).
+description: Reglas de acceso a datos para este proyecto (MongoDB + Spring Data MongoDB).
 paths:
-  - "**/models/**"
+  - "**/model/entity/**"
+  - "**/repository/**"
   - "**/repositories/**"
+  - "**/entity/**"
   - "**/entities/**"
-  - "**/schemas/**"
-  - "**/migrations/**"
+  - "**/migration/**"
 ---
 
-# Reglas de Base de Datos — MongoDB + Motor async
+# Reglas de Base de Datos — MongoDB + Spring Data MongoDB
 
 ## Stack aprobado
 
 - **MongoDB** — base de datos principal (única, sin persistencia relacional)
-- **Motor async** (`motor.motor_asyncio`) — ÚNICO cliente aprobado, siempre async
-- **Pydantic v2** — schemas de modelos (request/response/documento interno)
+- **Spring Data MongoDB** (`spring-boot-starter-data-mongodb`) — ÚNICO cliente aprobado
+- **MongoRepository** — interfaz base para operaciones CRUD
+- **Testcontainers MongoDB** — tests de integración con BD real
 
-**Prohibido:** PyMongo síncrono, SQLAlchemy, Django ORM, bases de datos relacionales (PostgreSQL, MySQL, SQLite).
+**Prohibido:** PyMongo, Motor async, Pydantic, SQLAlchemy, bases de datos relacionales (PostgreSQL, MySQL, SQLite), acceso directo al driver de MongoDB fuera de repositorios.
 
 ## Convenciones de MongoDB
 
-- Colecciones en snake_case plural: `users`, `faqs`
-- IDs de usuario: `uid` string de Firebase (no usar `_id` de MongoDB en respuestas API)
-- Timestamps: `created_at` / `updated_at` generados en la app con `datetime.utcnow()`
-- Paginación via `skip` / `limit` en queries
-- Acceso asíncrono exclusivamente: todas las operaciones usan `async def` + `await`
+- Anotación `@Document(collection = "<nombre>")` en toda entidad
+- Nombres de colecciones en camelCase o kebab-case (definidos explícitamente en `@Document`)
+- Campo `@Id` de tipo `String` — exponer un ID de negocio explícito en la API, nunca el `_id` raw
+- Timestamps: `Instant createdAt` / `Instant updatedAt` gestionados en la app
+- Versionado optimista: campo `@Version Long version` cuando aplique
+- Paginación via `Pageable` de Spring Data
 
 ## Separación de Modelos (obligatorio)
 
 | Modelo | Propósito | Contiene |
 |--------|-----------|----------|
-| **Create / Input** | Datos que el cliente envía para crear | Solo campos que el cliente provee |
-| **Update / Patch** | Datos para actualizar | Todos los campos opcionales |
-| **Response / Output** | Lo que la API retorna | Campos seguros para exponer (sin `_id`) |
-| **Document / Entity** | Documento interno de MongoDB | Campos internos + `uid` + timestamps |
-
-## Reglas de Diseño
-
-- **IDs como strings** — exponer `uid` (Firebase) en contratos API, nunca `_id` de Mongo
-- **Timestamps UTC** — `created_at` / `updated_at` en la app, nunca en el cliente
-- **Índices justificados** — solo crear índices con un caso de uso documentado
-- **Sin datos sensibles en texto plano** — nunca almacenar passwords sin hash
-- **Repositorio como única puerta de acceso a MongoDB** — services no tocan Motor directamente
+| **Entidad** (`model/entity/`) | Documento interno de MongoDB | `@Document`, `@Id`, todos los campos, timestamps |
+| **Request DTO** (`model/dto/`) | Datos que el cliente envía | Solo campos que el cliente provee, `@Valid` |
+| **Response DTO** (`model/dto/`) | Lo que la API retorna | Campos seguros para exponer (sin IDs internos) |
 
 ## Patrón de Repositorio (obligatorio)
 
-```python
-# repositories/faq_repository.py
-class FaqRepository:
-    def __init__(self, db):
-        self.collection = db["faqs"]
+```java
+// repository/QuotationRepository.java
+public interface QuotationRepository extends MongoRepository<Quotation, String> {
 
-    async def find_all(self) -> list[dict]:
-        return await self.collection.find({}).to_list(None)
+    Optional<Quotation> findByFolio(String folio);
 
-    async def insert(self, doc: dict) -> dict:
-        result = await self.collection.insert_one(doc)
-        return {**doc, "uid": str(result.inserted_id)}
+    List<Quotation> findByClientIdAndEstadoValidacion(String clientId, EstadoValidacion estado);
+}
 ```
+
+- Usar métodos derivados de Spring Data cuando sea posible
+- Para queries complejas, usar `@Query` con expresiones MongoDB (no concatenación de strings)
+- `MongoTemplate` solo para operaciones que no soporta `MongoRepository`
+
+## Reglas de Diseño
+
+- **IDs de negocio como strings** — exponer folio (`COT-AAAA-NNNNNN`) u otro ID explícito en API, nunca `_id` de Mongo
+- **Timestamps UTC** — `Instant.now()` en la capa de service, nunca en el cliente
+- **Índices justificados** — solo crear con `@Indexed` o `@CompoundIndex` si hay un caso de uso documentado en spec
+- **Sin datos sensibles en texto plano** — cifrado AES-256 para campos sensibles en reposo
+- **Repositorio como única puerta de acceso a MongoDB** — services no tocan `MongoTemplate` directamente
+- **Versionado optimista** — campo `@Version` en entidades sujetas a actualizaciones concurrentes
+
+## Migraciones
+
+- Cambios estructurales de datos documentados en scripts de migración versionados
+- Toda migración debe ser reversible (UP + DOWN)
+- No eliminar campos sin período de deprecación
 
 ## Anti-patrones Prohibidos
 
-- PyMongo síncrono en contexto async (bloquea el event loop)
-- Queries N+1 (iterar llamadas a DB en un bucle)
+- Queries MongoDB en services (van en repositorios)
 - Lógica de negocio en repositorios
-- Acceso directo a Motor desde services (siempre via repository)
 - `_id` de MongoDB en respuestas API
-- Concatenación de strings en queries (NoSQL injection)
+- Concatenación de strings en `@Query` (NoSQL injection)
 - Estado de conexión global mutable
+- Acceso directo a `MongoTemplate` desde controllers o services sin pasar por repository
+- Queries N+1 (iterar llamadas a DB en un bucle — usar `$in` o `findAll`)

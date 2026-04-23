@@ -9,23 +9,23 @@ argument-hint: "<nombre-feature>"
 ## Prerequisitos
 1. Leer spec: `.github/specs/<feature>.spec.md` — sección 2 (modelos, endpoints)
 2. Leer stack: `.github/instructions/backend.instructions.md`
-3. Leer arquitectura: `.github/instructions/backend.instructions.md`
+3. Leer patrones de referencia: `.github/skills/implement-backend/patterns.java`
 
 ## Orden de implementación
 ```
-models → repositories → services → routes → registrar en punto de entrada
+entity → repository → service → controller → registrar en Spring context
 ```
 
 | Capa | Responsabilidad |
 |------|-----------------|
-| **Models / Schemas** | Validación de tipos e input/output (Create, Update, Response, Document) |
-| **Repositories** | Acceso a DB — queries CRUD sin lógica de negocio |
-| **Services** | Lógica de negocio pura — orquesta repositorios |
-| **Routes / Controllers** | Parsing HTTP + DI + delegar al service |
+| **Entity / DTOs** | `@Document` MongoDB + Request/Response DTOs con Bean Validation |
+| **Repository** | `MongoRepository` — queries CRUD sin lógica de negocio |
+| **Service** | Lógica de negocio pura — orquesta repositorios |
+| **Controller** | `@RestController` — parsing HTTP + delegar al service |
 
-## Patrón de DI (obligatorio en routes)
-- Inyectar dependencias en la firma del handler (no instanciar inline en el cuerpo)
-- El service recibe el repo por parámetro; el router instancia ambos
+## Patrón de DI (obligatorio)
+- Inyección por constructor con `@RequiredArgsConstructor` — NUNCA `@Autowired` en campo
+- Spring detecta automáticamente el `@RestController` — no hace falta registro manual
 
 Ver patrones específicos del stack en `.github/instructions/backend.instructions.md`.
 

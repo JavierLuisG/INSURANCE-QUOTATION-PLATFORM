@@ -37,23 +37,23 @@ Usa **`/unit-testing`** para generar la suite completa de tests.
 ## Suite de Tests a Generar
 
 ```
-backend/tests/
-├── routes/test_<feature>_router.py      ← integración con cliente HTTP
-├── services/test_<feature>_service.py   ← unitarios con mocks de repo
-└── repositories/test_<feature>_repo.py  ← unitarios con mock de DB
+plataformas-danos-back/src/test/java/
+├── controller/<Feature>ControllerTest.java   ← MockMvc: HTTP codes, request/response
+├── service/<Feature>ServiceTest.java         ← unitarios con @Mock + @InjectMocks
+└── repository/<Feature>RepositoryIT.java     ← integración con Testcontainers MongoDB
 ```
 
 ## Cobertura Mínima
 
 | Capa | Escenarios obligatorios |
 |------|------------------------|
-| **Routes** | 200/201 happy path, 400 datos inválidos, 401 sin auth, 404 not found |
-| **Services** | Lógica happy path, errores de negocio, casos edge |
-| **Repositories** | Insert/find/update/delete con DB mockeada |
+| **Controller** | 200/201 happy path, 400 datos inválidos, 401 sin auth, 404 not found |
+| **Service** | Lógica happy path, errores de negocio, casos edge |
+| **Repository** | Queries CRUD con Testcontainers MongoDB real |
 
 ## Restricciones
 
-- SÓLO en `backend/tests/` — nunca tocar código fuente.
-- NO conectar a DB real — siempre usar mocks.
-- NO modificar `conftest.py` sin verificar impacto.
-- Cobertura mínima ≥ 80% en lógica de negocio.
+- SÓLO en `src/test/java/` — nunca tocar código fuente.
+- Tests unitarios (Service): NO conectar a DB real — siempre Mockito mocks.
+- Tests de integración (Repository): usar Testcontainers con MongoDB real.
+- Cobertura mínima ≥ 80% global; ≥ 90% en módulo `calc-engine`.

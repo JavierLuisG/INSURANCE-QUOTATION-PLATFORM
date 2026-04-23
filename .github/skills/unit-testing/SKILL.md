@@ -17,47 +17,54 @@ argument-hint: "<nombre-feature> [backend|frontend|ambos]"
 
 ```
 .github/specs/<feature>.spec.md        (criterios de aceptación)
-código implementado en backend/ y/o frontend/
-.github/instructions/backend.instructions.md   (pytest + pytest-asyncio)
-.github/instructions/frontend.instructions.md  (Vitest + Testing Library)
+código implementado en plataformas-danos-back/ y/o cotizador-danos-web/
+.github/instructions/tests.instructions.md   (JUnit 5 + Mockito + Vitest + Testing Library)
 ```
 
 ## Output por scope
 
-### Backend → `backend/tests/`
+### Backend → `plataformas-danos-back/src/test/java/`
 
 | Archivo | Cubre |
 |---------|-------|
-| `routes/test_<feature>_router.py` | Endpoints: 200/201, 400, 401, 404, 422 |
-| `services/test_<feature>_service.py` | Lógica: happy path + errores de negocio |
-| `repositories/test_<feature>_repository.py` | Queries: parámetros y retornos correctos |
+| `controller/<Feature>ControllerTest.java` | Endpoints: 200/201, 400, 401, 404 via MockMvc |
+| `service/<Feature>ServiceTest.java` | Lógica: happy path + errores de negocio con Mockito |
+| `repository/<Feature>RepositoryIT.java` | Queries con Testcontainers MongoDB real |
 
-### Frontend → `frontend/src/__tests__/`
+### Frontend → `cotizador-danos-web/__tests__/`
 
 | Archivo | Cubre |
 |---------|-------|
-| `components/<Feature>.test.jsx` | Render + interacciones (click, submit) |
-| `hooks/use<Feature>.test.js` | Estado inicial + respuesta API + error handling |
-| `pages/<Feature>Page.test.jsx` | Render completo con providers |
+| `components/<Feature>.test.tsx` | Render + interacciones (click, submit) |
+| `hooks/use<Feature>.test.ts` | Estado inicial + respuesta API + error handling |
+| `pages/<Feature>Page.test.tsx` | Render completo con providers |
 
 ## Patrones core
 
-```python
-# Backend — AAA con AsyncMock (pytest-asyncio)
-@pytest.mark.asyncio
-async def test_create_success():
-    repo = AsyncMock()
-    repo.find_by_name.return_value = None
-    repo.insert.return_value = {"uid": "abc", "name": "test"}
-    result = await FeatureService(repo).create(FeatureCreate(name="test"))
-    assert result["uid"] == "abc"
+```java
+// Backend — AAA con JUnit 5 + Mockito
+@ExtendWith(MockitoExtension.class)
+class QuotationServiceTest {
+    @Mock QuotationRepository repository;
+    @InjectMocks QuotationServiceImpl service;
+
+    @Test
+    void create_validRequest_returnsSavedQuotation() {
+        // GIVEN
+        when(repository.save(any())).thenReturn(new Quotation());
+        // WHEN
+        var result = service.create(new QuotationRequest());
+        // THEN
+        assertThat(result.getFolio()).startsWith("COT-");
+    }
+}
 ```
 
-```js
+```typescript
 // Frontend — mock service + renderHook (Vitest + Testing Library)
-vi.mock('../../services/featureService');
-getFeatures.mockResolvedValue([{ uid: '1' }]);
-const { result } = renderHook(() => useFeature());
+vi.mock('../../lib/services/quotationService');
+vi.mocked(getQuotations).mockResolvedValue([{ folio: 'COT-2026-000001' }]);
+const { result } = renderHook(() => useQuotation());
 await waitFor(() => expect(result.current.data).toHaveLength(1));
 ```
 

@@ -52,8 +52,8 @@ models → repositories → services → routes → punto de entrada
 | **Routes / Controllers** | HTTP parsing + DI + delegar | Lógica de negocio |
 
 ## Patrón de DI (obligatorio)
-- Inyectar dependencias en la firma del handler, no en módulo global
-- Ver `.github/instructions/backend.instructions.md` — wiring con Depends()
+- Inyección por constructor con `@RequiredArgsConstructor` — NUNCA field injection con `@Autowired`
+- Ver `.github/instructions/backend.instructions.md` — convenciones de Spring DI
 
 ## Proceso de Implementación
 

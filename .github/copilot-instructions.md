@@ -65,16 +65,16 @@ Este repositorio sigue el flujo **ASDD**: toda funcionalidad nueva se ejecuta en
 ### Instructions (path-scoped)
 | Scope | Ruta | Se aplica a |
 |---|---|---|
-| Backend | `.github/instructions/backend.instructions.md` | `backend/**/*.py` |
-| Frontend | `.github/instructions/frontend.instructions.md` | `frontend/src/**/*.{js,jsx}` |
-| Tests | `.github/instructions/tests.instructions.md` | `backend/tests/**` · `frontend/src/__tests__/**` |
+| Backend | `.github/instructions/backend.instructions.md` | `plataformas-danos-back/src/main/java/**/*.java` |
+| Frontend | `.github/instructions/frontend.instructions.md` | `cotizador-danos-web/**/*.{ts,tsx}` |
+| Tests | `.github/instructions/tests.instructions.md` | `plataformas-danos-back/src/test/java/**/*.java` · `cotizador-danos-web/**/*.{test,spec}.{ts,tsx}` |
 
 ### Lineamientos y Contexto
 | Documento | Ruta |
 |---|---|
 | Lineamientos de Desarrollo | `.github/docs/lineamientos/dev-guidelines.md` |
 | Lineamientos QA | `.github/docs/lineamientos/qa-guidelines.md` |
-| Stack + Arquitectura + Naming | `.github/instructions/backend.instructions.md` |
+| Stack Backend + Arquitectura + Naming | `.github/instructions/backend.instructions.md` |
 | Stack Frontend + Naming | `.github/instructions/frontend.instructions.md` |
 
 ### Lineamientos generales para todos los agentes
@@ -109,20 +109,19 @@ Términos canónicos a usar en specs, código y mensajes:
 
 | Término | Definición | Sinónimos rechazados |
 |---------|-----------|---------------------|
-| **Usuario** (`user`) | Persona autenticada mediante Firebase | Persona, cliente |
-| **Perfil** (`profile`) | Datos personales y configuración del Usuario | Cuenta, ficha |
-| **UID** (`uid`) | Identificador único provisto por Firebase Auth | ID técnico, `_id` |
-| **Pregunta Frecuente** (`faq`) | Par pregunta-respuesta publicado para consulta | Artículo de ayuda |
-| **Pregunta** (`question`) | Texto de la pregunta dentro de una FAQ | Título |
-| **Respuesta** (`answer`) | Texto de la respuesta dentro de una FAQ | Descripción, contenido |
-| **Dashboard** | Pantalla principal con métricas (solo lectura) | Inicio |
-| **Modo Oscuro** (`dark mode`) | Tema visual alternativo con colores oscuros | Modo noche |
-| **Token** (`idToken`) | Token Firebase en header `Authorization: Bearer` | Contraseña, sesión |
-| **Administrador** | Rol con permisos completos | Superusuario |
-| `created_at` | Timestamp de creación en UTC | Fecha alta |
-| `updated_at` | Timestamp de última actualización en UTC | Fecha modificación |
+| **Cotización** (`quotation`) | Solicitud formal de precio para una póliza de seguro de daños | Presupuesto, oferta, propuesta |
+| **Folio** (`folio`) | Identificador único de cotización con formato `COT-AAAA-NNNNNN` | ID, número, código, `_id` |
+| **Cobertura** (`coverage`) | Garantía específica incluida en la cotización | Protección, garantía, amparo |
+| **Prima** (`premium`) | Monto a pagar por la póliza de seguro | Costo, precio, tarifa |
+| **Riesgo** (`risk`) | Bien o situación objeto de aseguramiento | Activo, objeto, propiedad |
+| **Cliente** (`client`) | Persona o empresa que solicita la cotización | Persona, tomador, asegurado |
+| **Estado de validación** (`estadoValidacion`) | Estado del proceso: `COMPLETA` \| `INCOMPLETA` \| `INACTIVA` | Estado, status, etapa |
+| **Token JWT** (`token`) | Token de autenticación en header `Authorization: Bearer` | Contraseña, sesión, idToken |
+| **Simulador** (`mock-core-ohs`) | Mock server de Plataforma-core-ohs para dev/test | Mock, stub, fake API |
+| `createdAt` | Timestamp de creación en UTC (camelCase Java/JSON) | `created_at`, fecha alta |
+| `updatedAt` | Timestamp de última actualización en UTC | `updated_at`, fecha modificación |
 
-**Reglas:** `uid` siempre de Firebase. `FAQ` = par completo. Timestamps en snake_case. `Dashboard` es solo lectura.
+**Reglas:** `folio` = identificador de negocio público (nunca exponer `_id` de MongoDB). `estadoValidacion` solo acepta los 3 valores definidos. Timestamps en camelCase (Java). Auth siempre via JWT Bearer.
 
 ---
 

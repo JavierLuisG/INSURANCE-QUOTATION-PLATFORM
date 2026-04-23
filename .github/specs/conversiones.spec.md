@@ -52,7 +52,7 @@ Capa:        Frontend
 CRITERIO-1.1: Navegación desde tarjeta Conversiones
   Dado que:  el Usuario autenticado está en /dashboard y visualiza la tarjeta KPI Conversiones
   Cuando:    hace clic sobre la tarjeta Conversiones
-  Entonces:  el sistema navega a /conversiones usando React Router sin recargar la página
+  Entonces:  el sistema navega a /conversiones usando Next.js App Router sin recargar la página
   Y:         la tarjeta mantiene su apariencia (valor, tendencia, ícono, color)
 ```
 
@@ -147,7 +147,7 @@ CRITERIO-3.1: Paginación básica de 10 registros
 CRITERIO-3.2: Parámetros inválidos de paginación
   Dado que:  un cliente envía page < 1 o limit fuera de rango permitido
   Cuando:    el backend valida parámetros de consulta
-  Entonces:  responde HTTP 422 por validación de FastAPI
+  Entonces:  responde HTTP 400 por validación de Spring Boot (Bean Validation)
   Y:         no ejecuta consulta en la colección
 ```
 
@@ -202,12 +202,12 @@ CRITERIO-4.3: Fase 2 deshabilitada
 ```
 
 ### Reglas de Negocio
-1. Solo Usuario autenticado puede acceder al módulo de Conversiones y consumir endpoints protegidos con `Authorization: Bearer <idToken>`.
+1. Solo Usuario autenticado puede acceder al módulo de Conversiones y consumir endpoints protegidos con `Authorization: Bearer <token>` (JWT).
 2. Los estados permitidos para una conversión son `completada`, `pendiente` y `cancelada`.
 3. `Dashboard` permanece como vista de resumen; la exploración detallada ocurre en `/conversiones`.
 4. Paginación estándar de conversiones recientes: `limit=10` por defecto y `page` inicia en 1.
-5. Timestamps del dominio deben mantenerse en `snake_case`: `created_at` y `updated_at`.
-6. El atributo `uid` corresponde al UID de Firebase del Usuario asociado a la conversión.
+5. Timestamps del dominio en camelCase: `createdAt` y `updatedAt`.
+6. El atributo `clientId` identifica al Usuario asociado a la conversión (ID de negocio, no `_id` de MongoDB).
 7. La distribución por tipo de conversión es opcional y queda explícitamente fuera del entregable obligatorio de fase 1.
 
 ---
@@ -225,14 +225,14 @@ CRITERIO-4.3: Fase 2 deshabilitada
 #### Campos del modelo
 | Campo | Tipo | Obligatorio | Validación | Descripción |
 |-------|------|-------------|------------|-------------|
-| `uid` | string | sí | UID válido Firebase | Identificador de la conversión (API) |
-| `user_uid` | string | sí | UID válido Firebase | Usuario relacionado a la conversión |
-| `conversion_type` | string | sí | max 100 chars | Tipo de conversión |
-| `status` | string | sí | `completada` \| `pendiente` \| `cancelada` | Estado de la conversión |
-| `value` | number | sí | `>= 0` | Valor monetario de la conversión |
-| `occurred_at` | datetime (UTC) | sí | ISO 8601 | Fecha/hora efectiva de la conversión |
-| `created_at` | datetime (UTC) | sí | auto-generado | Timestamp creación |
-| `updated_at` | datetime (UTC) | sí | auto-generado | Timestamp actualización |
+| `conversionId` | String | sí | ID de negocio único | Identificador de la conversión (API) — nunca exponer `_id` de MongoDB |
+| `clientId` | String | sí | @NotBlank | ID del cliente asociado a la conversión |
+| `conversionType` | String | sí | @Size(max=100) | Tipo de conversión |
+| `status` | String | sí | `completada` \| `pendiente` \| `cancelada` | Estado de la conversión |
+| `value` | BigDecimal | sí | @PositiveOrZero | Valor monetario de la conversión |
+| `occurredAt` | Instant (UTC) | sí | ISO 8601 | Fecha/hora efectiva de la conversión |
+| `createdAt` | Instant (UTC) | sí | auto-generado | Timestamp creación |
+| `updatedAt` | Instant (UTC) | sí | auto-generado | Timestamp actualización |
 
 #### Índices / Constraints
 - Índice compuesto `{ occurred_at: -1, status: 1 }` para optimizar tendencia y tabla reciente.
@@ -243,7 +243,7 @@ CRITERIO-4.3: Fase 2 deshabilitada
 
 #### GET /api/v1/conversiones/summary
 - **Descripción**: Obtiene KPIs resumen del módulo de Conversiones.
-- **Auth requerida**: sí (`idToken` Firebase).
+- **Auth requerida**: sí (JWT `Authorization: Bearer`).
 - **Request Query**:
   - `from` (opcional, ISO date)
   - `to` (opcional, ISO date)
@@ -261,7 +261,7 @@ CRITERIO-4.3: Fase 2 deshabilitada
 
 #### GET /api/v1/conversiones/trend
 - **Descripción**: Devuelve serie temporal de conversiones para los últimos 30 días (default).
-- **Auth requerida**: sí.
+- **Auth requerida**: sí (JWT `Authorization: Bearer`).
 - **Request Query**:
   - `days` (opcional, default `30`, rango `1..90`)
 - **Response 200**:
@@ -287,12 +287,12 @@ CRITERIO-4.3: Fase 2 deshabilitada
   {
     "data": [
       {
-        "uid": "conv_001",
-        "user_uid": "firebase_uid_123",
-        "conversion_type": "suscripcion",
+        "conversionId": "conv_001",
+        "clientId": "client_123",
+        "conversionType": "suscripcion",
         "value": 120.0,
         "status": "completada",
-        "occurred_at": "2026-03-12T18:20:00Z"
+        "occurredAt": "2026-03-12T18:20:00Z"
       }
     ],
     "pagination": {
@@ -326,39 +326,39 @@ CRITERIO-4.3: Fase 2 deshabilitada
 #### Componentes nuevos
 | Componente | Archivo | Props principales | Descripción |
 |------------|---------|------------------|-------------|
-| `ConversionesRecentTable` | `frontend/src/components/ConversionesRecentTable.jsx` | `rows, pagination, onPageChange, loading` | Tabla de conversiones recientes con paginación |
-| `ConversionesTrendChart` | `frontend/src/components/charts/ConversionesTrendChart.jsx` | `data, loading` | Gráfico de línea para tendencia diaria |
-| `ConversionesDistributionChart` *(fase 2)* | `frontend/src/components/charts/ConversionesDistributionChart.jsx` | `data, loading` | Gráfico de distribución por tipo |
+| `ConversionesRecentTable` | `cotizador-danos-web/src/components/ConversionesRecentTable.tsx` | `rows, pagination, onPageChange, loading` | Tabla de conversiones recientes con paginación |
+| `ConversionesTrendChart` | `cotizador-danos-web/src/components/charts/ConversionesTrendChart.tsx` | `data, loading` | Gráfico de línea para tendencia diaria |
+| `ConversionesDistributionChart` *(fase 2)* | `cotizador-danos-web/src/components/charts/ConversionesDistributionChart.tsx` | `data, loading` | Gráfico de distribución por tipo |
 
 #### Páginas nuevas
 | Página | Archivo | Ruta | Protegida |
 |--------|---------|------|-----------|
-| `ConversionesPage` | `frontend/src/pages/ConversionesPage.jsx` | `/conversiones` | sí |
+| `ConversionesPage` | `cotizador-danos-web/src/app/conversiones/page.tsx` | `/conversiones` | sí |
 
 #### Hooks y State
 | Hook | Archivo | Retorna | Descripción |
 |------|---------|---------|-------------|
-| `useConversiones` | `frontend/src/hooks/useConversiones.js` | `{ summary, trend, recent, pagination, loading, error, loadPage }` | Orquesta carga de datos del módulo de Conversiones |
+| `useConversiones` | `cotizador-danos-web/src/hooks/useConversiones.ts` | `{ summary, trend, recent, pagination, loading, error, loadPage }` | Orquesta carga de datos del módulo de Conversiones |
 
 #### Services (llamadas API)
 | Función | Archivo | Endpoint |
 |---------|---------|---------|
-| `getConversionesSummary(token, params)` | `frontend/src/services/conversionesService.js` | `GET /api/v1/conversiones/summary` |
-| `getConversionesTrend(token, params)` | `frontend/src/services/conversionesService.js` | `GET /api/v1/conversiones/trend` |
-| `getConversionesRecent(token, params)` | `frontend/src/services/conversionesService.js` | `GET /api/v1/conversiones/recent` |
-| `getConversionesDistribution(token)` *(fase 2)* | `frontend/src/services/conversionesService.js` | `GET /api/v1/conversiones/distribution` |
+| `getConversionesSummary(token, params)` | `cotizador-danos-web/src/lib/services/conversionesService.ts` | `GET /api/v1/conversiones/summary` |
+| `getConversionesTrend(token, params)` | `cotizador-danos-web/src/lib/services/conversionesService.ts` | `GET /api/v1/conversiones/trend` |
+| `getConversionesRecent(token, params)` | `cotizador-danos-web/src/lib/services/conversionesService.ts` | `GET /api/v1/conversiones/recent` |
+| `getConversionesDistribution(token)` *(fase 2)* | `cotizador-danos-web/src/lib/services/conversionesService.ts` | `GET /api/v1/conversiones/distribution` |
 
 #### Ajustes sobre componentes existentes
 - Extender `StatCard` para aceptar `onClick` opcional y atributos de accesibilidad de elemento interactivo.
 - En `DashboardPage`, habilitar interacción únicamente para KPI con `id = "conversiones"`.
-- Registrar ruta protegida `/conversiones` en `App.jsx` con `ProtectedRoute`.
+- Registrar ruta protegida `/conversiones` en App Router (`cotizador-danos-web/src/app/conversiones/page.tsx`).
 
 ### Arquitectura y Dependencias
-- Paquetes nuevos requeridos: ninguno obligatorio para fase 1 (se reutilizan React 19, React Router, CSS Modules y librería de gráficas existente).
-- Servicios externos: Firebase Auth para validar `idToken` y proteger endpoints backend.
+- Paquetes nuevos requeridos: ninguno obligatorio para fase 1 (se reutilizan Next.js 14, Tailwind CSS, Zustand y librería de gráficas existente).
+- Autenticación: JWT gestionado por Spring Security — filtro valida el Bearer token en cada request protegido.
 - Impacto en punto de entrada:
-  - Backend: registrar `conversiones_router` en `backend/app/main.py`.
-  - Frontend: registrar ruta `/conversiones` en `frontend/src/App.jsx`.
+  - Backend: Spring detecta `ConversionesController` automáticamente como `@RestController`.
+  - Frontend: crear `cotizador-danos-web/src/app/conversiones/page.tsx` en App Router.
 
 ### Notas de Implementación
 - Fase 1 permite uso de datos mock en frontend mientras backend se desarrolla en paralelo.
@@ -375,11 +375,11 @@ CRITERIO-4.3: Fase 2 deshabilitada
 ### Backend
 
 #### Implementación
-- [ ] Crear `conversiones_model.py` con schemas `ConversionSummaryResponse`, `ConversionTrendResponse`, `ConversionRecentResponse` y documento de conversión
-- [ ] Crear `conversiones_repository.py` con consultas agregadas para resumen, tendencia y recientes paginados
-- [ ] Crear `conversiones_service.py` con reglas de negocio y validaciones de parámetros
-- [ ] Crear `conversiones_router.py` con endpoints `/api/v1/conversiones/summary`, `/trend`, `/recent`
-- [ ] Registrar router en `backend/app/main.py`
+- [ ] Crear entidad `Conversion.java` en `model/entity/` con `@Document(collection = "conversiones")`
+- [ ] Crear DTOs `ConversionSummaryResponse`, `ConversionTrendResponse`, `ConversionRecentResponse` en `model/dto/`
+- [ ] Crear `ConversionRepository.java` con queries agregadas para resumen, tendencia y recientes paginados
+- [ ] Crear `ConversionService.java` (interfaz) + `ConversionServiceImpl.java` con reglas de negocio
+- [ ] Crear `ConversionController.java` con endpoints `/api/v1/conversiones/summary`, `/trend`, `/recent`
 - [ ] Implementar endpoint `/api/v1/conversiones/distribution` como alcance opcional de fase 2
 
 #### Tests Backend
@@ -393,13 +393,13 @@ CRITERIO-4.3: Fase 2 deshabilitada
 ### Frontend
 
 #### Implementación
-- [ ] Extender `StatCard` para modo interactivo sin romper KPIs existentes
-- [ ] Actualizar `DashboardPage` para navegación a `/conversiones` desde KPI Conversiones
-- [ ] Crear `conversionesService.js` para consumo de endpoints de conversiones
-- [ ] Crear `useConversiones.js` para estado, carga y paginación
-- [ ] Crear `ConversionesPage.jsx` + `ConversionesPage.module.css` con layout consistente con Dashboard
-- [ ] Crear componentes de tabla y gráfico de tendencia para módulo Conversiones
-- [ ] Registrar ruta protegida `/conversiones` en `frontend/src/App.jsx`
+- [ ] Extender `StatCard.tsx` para modo interactivo sin romper KPIs existentes (Tailwind hover/cursor)
+- [ ] Actualizar `DashboardPage` para navegación a `/conversiones` desde KPI Conversiones (`useRouter`)
+- [ ] Crear `cotizador-danos-web/src/lib/services/conversionesService.ts` para consumo de endpoints
+- [ ] Crear `cotizador-danos-web/src/hooks/useConversiones.ts` para estado, carga y paginación
+- [ ] Crear `cotizador-danos-web/src/app/conversiones/page.tsx` con layout Tailwind consistente con Dashboard
+- [ ] Crear componentes de tabla y gráfico de tendencia (`.tsx`) para módulo Conversiones
+- [ ] Proteger ruta `/conversiones` vía middleware de Next.js o wrapper de autenticación
 - [ ] Implementar distribución por tipo como bloque opcional de fase 2
 
 #### Tests Frontend

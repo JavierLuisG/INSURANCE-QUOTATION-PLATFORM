@@ -16,7 +16,7 @@ La tarjeta KPI `Conversiones` del `DashboardPage` debe comportarse como un botó
 
 - La tarjeta debe mantener su apariencia visual actual (valor, tendencia, ícono, color).
 - Debe tener cursor pointer y un indicador visual sutil (hover/borde) que indique que es interactiva.
-- La navegación debe usar `React Router` (`useNavigate`) sin recargar la página.
+- La navegación debe usar Next.js App Router (`useRouter` de `next/navigation`) sin recargar la página.
 
 ### 2. Página de Conversiones (`/conversiones`)
 
@@ -51,11 +51,11 @@ Cuatro métricas clave en tarjetas:
 
 ## Contexto Técnico
 
-- **Frontend:** React 19 + Vite + CSS Modules + React Router v6.
-- **Ruta nueva:** `/conversiones` (protegida con `ProtectedRoute`).
-- **Componente StatCard existente:** `frontend/src/components/StatCard.jsx` — se debe extender para soporte de `onClick`/`href` sin romper los otros 3 KPIs.
-- **Datos:** Inicialmente pueden ser datos mock en el servicio `dashboardService.js` o un nuevo `conversionesService.js`. El backend puede implementarse en paralelo.
-- **Auth:** Token `idToken` en header `Authorization: Bearer` para llamadas al backend.
+- **Frontend:** Next.js 14 + TypeScript 5 + Tailwind CSS (App Router).
+- **Ruta nueva:** `/conversiones` (protegida con middleware de autenticación).
+- **Componente StatCard existente:** `cotizador-danos-web/src/components/StatCard.tsx` — se debe extender para soporte de `onClick`/`href` sin romper los otros 3 KPIs.
+- **Datos:** Inicialmente pueden ser datos mock en el servicio `dashboardService.ts` o un nuevo `conversionesService.ts`. El backend puede implementarse en paralelo.
+- **Auth:** Token JWT en header `Authorization: Bearer` para llamadas al backend.
 
 ## Criterios de Aceptación (Alto Nivel)
 
@@ -65,7 +65,7 @@ Cuatro métricas clave en tarjetas:
 4. La página incluye el gráfico de tendencia de los últimos 30 días.
 5. La tabla de conversiones recientes muestra al menos 10 registros con paginación.
 6. El botón `← Volver al Dashboard` regresa a `/dashboard`.
-7. La UI es consistente con el diseño del Dashboard existente (mismo layout, CSS Modules, soporte dark mode).
+7. La UI es consistente con el diseño del Dashboard existente (mismo layout con Tailwind CSS).
 
 ## Restricciones
 

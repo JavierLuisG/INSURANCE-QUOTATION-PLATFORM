@@ -1,83 +1,102 @@
 ---
-description: Reglas de backend para este proyecto (FastAPI + MongoDB + Motor async). Se aplica automáticamente a archivos backend.
+description: Reglas de backend para este proyecto (Java 21 + Spring Boot 4.0.4 + MongoDB). Se aplica automáticamente a archivos backend.
 paths:
-  - "backend/**"
-  - "server/**"
-  - "api/**"
-  - "app/**"
+  - "plataformas-danos-back/**"
 ---
 
-# Reglas de Backend — FastAPI + MongoDB
+# Reglas de Backend — Java 21 + Spring Boot 4.0.4
 
 ## Stack aprobado
 
-- **Python 3.12** + **FastAPI** (async REST)
-- **Motor** (`motor.motor_asyncio.AsyncIOMotorClient`) — acceso async a MongoDB
-- **Pydantic v2** — validación de schemas
-- **Firebase Admin SDK** — verificación de `idToken` en cada request protegido
-- **Uvicorn** — servidor ASGI
+- **Java 21 LTS** + **Spring Boot 4.0.4** (Maven, JAR)
+- **Spring Data MongoDB** — repositorios NoSQL de documentos
+- **Spring Security** + **JJWT 0.12.6** — autenticación y autorización JWT
+- **Resilience4j 2.3.0** — Circuit Breaker y Retry
+- **Caffeine 3.2.0** — caché en memoria con TTL configurable (`spring-boot-starter-cache`)
+- **Spring AOP** — resiliencia y auditoría transversal
+- **Lombok** — reducción de boilerplate
+- **Bean Validation** — validaciones de entrada (`@Valid`, `@NotNull`, etc.)
 
-**Prohibido:** PyMongo síncrono, SQLAlchemy, Django, Flask, bases de datos relacionales.
+**Prohibido:** FastAPI, Python, PyMongo, SQLAlchemy, bases de datos relacionales (PostgreSQL, MySQL, SQLite), Firebase Admin SDK.
 
 ## Arquitectura en Capas
 
 ```
-routes → services → repositories → MongoDB
+Controller → Service → Repository → MongoDB
 ```
 
 | Capa | Responsabilidad | Prohibido |
 |------|----------------|-----------|
-| `routes/` | Parsear HTTP, instanciar deps con `Depends()`, delegar al service | Lógica de negocio, queries MongoDB |
-| `services/` | Reglas de negocio, validaciones de dominio, orquestar repos | Queries MongoDB directas, imports de FastAPI |
-| `repositories/` | Queries MongoDB (find, insert, update, delete) via Motor | Lógica de negocio |
-| `models/` | Schemas Pydantic (request/response/documento interno) | Lógica de negocio, acceso a DB |
+| `controller/` | Parsear HTTP, delegar al service, manejar respuestas | Lógica de negocio, queries a MongoDB |
+| `service/` | Reglas de negocio, validaciones de dominio, orquestar repos | Queries MongoDB directas |
+| `repository/` | Queries MongoDB via Spring Data (`MongoRepository`) | Lógica de negocio |
+| `model/entity/` | Documentos MongoDB (`@Document`) | Lógica de negocio, acceso a DB |
+| `model/dto/` | Request / Response DTOs (Lombok + Bean Validation) | Lógica de negocio, acceso a DB |
+| `config/` | Beans de configuración (caché, seguridad, Resilience4j) | Lógica de negocio |
+| `security/` | Filtros JWT, `UserDetailsService`, `SecurityFilterChain` | Lógica de negocio |
 
-## Wiring de Dependencias (patrón obligatorio)
+## Inyección de Dependencias (patrón obligatorio)
 
-```python
-# Correcto — Depends() en la firma del endpoint
-@router.post("/")
-async def create_item(body: ItemCreate, db=Depends(get_db)):
-    repo = ItemRepository(db)
-    service = ItemService(repo)
-    return await service.create(body)
+Usar **inyección por constructor** — es la única forma aprobada. Lombok `@RequiredArgsConstructor` simplifica el boilerplate.
+
+```java
+// Correcto — constructor injection con Lombok
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/quotations")
+public class QuotationController {
+
+    private final QuotationService quotationService;
+
+    @PostMapping
+    public ResponseEntity<QuotationResponse> create(@Valid @RequestBody QuotationRequest request) {
+        return ResponseEntity.ok(quotationService.create(request));
+    }
+}
 ```
 
-NUNCA inyectar `get_db()` fuera de `Depends()`. NUNCA instanciar repos/services fuera del router.
+NUNCA usar `@Autowired` en campo (field injection). NUNCA instanciar services/repositories con `new` fuera del contexto de Spring.
 
 ## Convenciones de Código
 
-- Todas las funciones que tocan DB son `async def` + `await`
-- `snake_case` para módulos, funciones y variables
-- `uid` de Firebase como clave única en MongoDB (no usar `_id` en respuestas API)
-- Colecciones MongoDB en snake_case plural: `users`, `faqs`
-- Timestamps: `created_at` / `updated_at` generados en la app con `datetime.utcnow()`
+- `PascalCase` para clases; `camelCase` para métodos, variables y campos
 - API versionada: `/api/v1/...`
-- Formato de error consistente: `{ "detail": "<mensaje>" }`
-- Configuración siempre desde `app.config.settings` o `app.config.database`
+- Colecciones MongoDB en camelCase o kebab-case según `@Document(collection = "...")`
+- Timestamps: `Instant createdAt` / `Instant updatedAt` gestionados en la app
+- Folio de cotización: formato `COT-AAAA-NNNNNN`
+- Valores válidos `estadoValidacion`: `COMPLETA` | `INCOMPLETA` | `INACTIVA`
+- Formato de log: JSON estructurado con `correlation-id`
+- Formato de error consistente: `{ "message": "<mensaje>", "code": "<código>" }`
 
 ## Nomenclatura de Archivos
 
 | Artefacto | Convención | Ejemplo |
 |-----------|-----------|---------|
-| Router | `<feature>_router.py` | `faq_router.py` |
-| Service | `<feature>_service.py` | `faq_service.py` |
-| Repository | `<feature>_repository.py` | `faq_repository.py` |
-| Model | `<feature>_model.py` | `faq_model.py` |
-| Test | `test_<feature>_<layer>.py` | `test_faq_service.py` |
+| Controller | `<Feature>Controller.java` | `QuotationController.java` |
+| Service (interfaz) | `<Feature>Service.java` | `QuotationService.java` |
+| Service (impl) | `<Feature>ServiceImpl.java` | `QuotationServiceImpl.java` |
+| Repository | `<Feature>Repository.java` | `QuotationRepository.java` |
+| Entidad | `<Feature>.java` en `model/entity/` | `Quotation.java` |
+| DTO Request | `<Feature>Request.java` | `QuotationRequest.java` |
+| DTO Response | `<Feature>Response.java` | `QuotationResponse.java` |
+| Test | `<Feature><Layer>Test.java` | `QuotationServiceTest.java` |
 
-- Máximo 4 archivos nuevos por feature (router + service + repository + model)
-- No crear carpetas fuera de la convención de capas sin revisión arquitectónica
+## Cobertura y Tests
+
+- **JUnit 5** + **Mockito** + **AssertJ** — tests unitarios
+- **Testcontainers** (`testcontainers-bom:1.20.4` + `mongodb`) — tests de integración con MongoDB real
+- **JaCoCo** — quality gate: ≥ 80% global, ≥ 90% módulo `calc-engine`
 
 ## Anti-patrones Prohibidos
 
-- Lógica de negocio en routers
+- Lógica de negocio en controllers
 - Queries MongoDB en services (van en repositories)
-- Acceso síncrono a MongoDB (PyMongo bloqueante — prohibido en contexto async)
+- Field injection con `@Autowired`
 - Singletons globales con estado mutable
-- Exposición de errores internos en respuestas públicas (`detail` descriptivo, sin stack trace)
-- `_id` de MongoDB en respuestas API (mapear a `uid` u otro campo explícito)
+- Exposición de stack traces en respuestas públicas
+- IDs internos de MongoDB (`_id`) en respuestas API (mapear a campo explícito)
 - Credenciales hardcodeadas en código
+- Acceso síncrono bloqueante en contextos reactivos
 
 ## Lineamientos completos
 

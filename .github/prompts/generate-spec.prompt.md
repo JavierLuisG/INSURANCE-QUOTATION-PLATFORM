@@ -26,7 +26,7 @@ Genera una especificación técnica completa en `.github/specs/` para el siguien
 
 ## La spec debe cubrir:
 - Historias de usuario con criterios de aceptación en Gherkin
-- Modelos de datos (Pydantic + MongoDB)
-- Endpoints de API con request/response y errores
-- Diseño Frontend (páginas, componentes, hooks, servicios)
+- Modelos de datos (entidad `@Document` + DTOs Java con Bean Validation)
+- Endpoints de API con request/response y errores (Spring Boot HTTP codes)
+- Diseño Frontend (páginas App Router, componentes Tailwind, hooks, stores Zustand, services Axios)
 - Plan de pruebas (backlog de tasks Backend + Frontend + QA)

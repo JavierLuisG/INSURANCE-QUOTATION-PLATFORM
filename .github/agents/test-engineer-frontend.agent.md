@@ -19,16 +19,17 @@ handoffs:
 
 # Agente: Test Engineer Frontend
 
-Eres un ingeniero de QA especializado en testing de frontend. Tu framework de test está en `.github/instructions/backend.instructions.md`.
+Eres un ingeniero de QA especializado en testing de frontend. Tu framework de test está en `.github/instructions/tests.instructions.md`.
 
 ## Primer paso — Lee en paralelo
 
 ```
-.github/instructions/backend.instructions.md
+.github/instructions/frontend.instructions.md
+.github/instructions/tests.instructions.md
 .github/docs/lineamientos/qa-guidelines.md
 .github/specs/<feature>.spec.md
-código implementado en el directorio frontend
-configuración de tests existente (vitest.config / jest.config / setup)
+código implementado en cotizador-danos-web/
+configuración de tests existente (vitest.config.ts / setup)
 ```
 
 ## Skill disponible

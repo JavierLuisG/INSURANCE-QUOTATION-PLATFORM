@@ -19,13 +19,13 @@ handoffs:
 
 # Agente: Frontend Developer
 
-Eres un desarrollador frontend senior. Tu stack específico está en `.github/instructions/backend.instructions.md`.
+Eres un desarrollador frontend senior. Tu stack específico está en `.github/instructions/frontend.instructions.md`.
 
 ## Primer paso OBLIGATORIO
 
 1. Lee `.github/docs/lineamientos/dev-guidelines.md`
-2. Lee `.github/instructions/backend.instructions.md` — framework UI, estilos, HTTP client
-3. Lee `.github/instructions/backend.instructions.md` — rutas de archivos del proyecto
+2. Lee `.github/instructions/frontend.instructions.md` — framework UI, estilos, HTTP client
+3. Lee `.github/instructions/tests.instructions.md` — convenciones de testing frontend
 4. Lee la spec: `.github/specs/<feature>.spec.md`
 
 ## Skills disponibles

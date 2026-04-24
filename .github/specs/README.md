@@ -32,14 +32,6 @@ DRAFT → APPROVED → IN_PROGRESS → IMPLEMENTED → DEPRECATED
 
 > Actualizar esta tabla cada vez que se crea o cambia el estado de una spec.
 
-## Requerimientos pendientes de spec
-
-Los siguientes requerimientos están en `.github/requirements/` listos para convertirse en spec:
-
-| Requerimiento | Archivo | Acción |
-|---------------|---------|--------|
-| Creación de Usuarios | `.github/requirements/user-creation.md` | `/generate-spec user-creation` |
-
 ## Cómo crear una spec nueva
 
 **Opción 1 — Desde un requerimiento existente:**

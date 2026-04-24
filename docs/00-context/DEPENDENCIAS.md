@@ -2,7 +2,7 @@
 
 **Tabla de clasificación evolutiva de dependencias**: Dependencias del sistema extendidas con patrones de resiliencia específicos, SLAs requeridos y estrategias de mitigación configuradas.
 
-> **Decisión de diseño**: El `Cotizador Web SPA` nunca llama directamente al `Motor de Cálculo de Primas`. El endpoint `POST /v1/quotes/{folio}/calculate` está expuesto por el `Cotización Service`, que internamente delega al motor de cálculo. Esto evita que la UI tenga que conocer la topología interna del backend.
+> **Decisión de diseño**: El `Cotizador Web SPA` nunca llama directamente al `Motor de Cálculo de Primas`. El endpoint `POST /api/v1/quotes/{folio}/calculate` está expuesto por el `Cotización Service`, que internamente delega al motor de cálculo. Esto evita que la UI tenga que conocer la topología interna del backend.
 
 | id | origen | nombre_origen | destino | nombre_destino | coupling | pattern | criticality | protocol_tech | required_sla | proposed_resilience |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -258,14 +258,14 @@ stateDiagram-v2
 
 **Tabla de contratos de API y versionado**: Definición de contratos de API con estrategias de versionado y políticas de breaking changes para garantizar compatibilidad evolutiva.
 
-> **Nota**: El `Motor de Cálculo de Primas` es un componente interno invocado únicamente por el `Cotización Service`. El `Cotizador Web SPA` accede al cálculo a través del endpoint `POST /v1/quotes/{folio}/calculate` expuesto por el `Cotización Service`, no directamente al motor.
+> **Nota**: El `Motor de Cálculo de Primas` es un componente interno invocado únicamente por el `Cotización Service`. El `Cotizador Web SPA` accede al cálculo a través del endpoint `POST /api/v1/quotes/{folio}/calculate` expuesto por el `Cotización Service`, no directamente al motor.
 
 | api_contract | owner | consumers | protocol | versioning_strategy | breaking_changes_policy |
 |---|---|---|---|---|---|
-| Cotizacion API v1 | Cotización Service | Cotizador Web SPA | REST JSON HTTPS | URL versioning (`/v1/quotes/...`) | Deprecation 6 meses, coexistencia v1/v2, changelog y docs detallados. Incluye todos los endpoints mínimos del reto: general-info, locations/layout, locations, state, coverage-options, calculate. |
-| Auth API v1 | Módulo de Autenticación | Cotizador Web SPA | REST JSON HTTPS | URL versioning (`/v1/auth/...`) | Deprecation 6 meses, coexistencia v1/v2, changelog y docs detallados. |
-| Folio API v1 | Módulo de Folios | Cotización Service (interno) | HTTP interno REST JSON | URL versioning (`/v1/folios/...`) | Deprecation 3 meses (contrato interno), coexistencia v1/v2, changelog interno. |
-| External Data API v1 | API Gateway de Integración | Cotización Service, Motor de Cálculo de Primas | REST JSON HTTPS | URL versioning (`/v1/external-data/...`) | Deprecation 6 meses, coexistencia v1/v2, changelog y docs detallados. |
+| Cotizacion API v1 | Cotización Service | Cotizador Web SPA | REST JSON HTTPS | URL versioning (`/api/v1/quotes/...`) | Deprecation 6 meses, coexistencia v1/v2, changelog y docs detallados. Incluye todos los endpoints mínimos del reto: general-info, locations/layout, locations, state, coverage-options, calculate. |
+| Auth API v1 | Módulo de Autenticación | Cotizador Web SPA | REST JSON HTTPS | URL versioning (`/api/v1/auth/...`) | Deprecation 6 meses, coexistencia v1/v2, changelog y docs detallados. |
+| Folio API v1 | Módulo de Folios | Cotización Service (interno) | HTTP interno REST JSON | URL versioning (`/api/v1/folios/...`) | Deprecation 3 meses (contrato interno), coexistencia v1/v2, changelog interno. |
+| External Data API v1 | API Gateway de Integración | Cotización Service, Motor de Cálculo de Primas | REST JSON HTTPS | URL versioning (`/api/v1/external-data/...`) | Deprecation 6 meses, coexistencia v1/v2, changelog y docs detallados. |
 | Plataforma Core OHS API | Plataforma Core OHS (Externo) | API Gateway de Integración | REST JSON HTTPS | Headers (`Accept-version`) o URL versioning según contrato del servicio | Sin control directo sobre cambios. Monitorear cambios de contrato y adaptar el API Gateway y el Simulador. El Simulador debe versionarse con Flyway ante cambios de contrato. |
 
 ---

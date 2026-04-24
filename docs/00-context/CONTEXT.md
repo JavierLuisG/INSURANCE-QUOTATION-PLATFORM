@@ -67,7 +67,7 @@ El proyecto busca desarrollar un cotizador de seguros de daños integral, compue
 **Funcionalidades Principales**:
 - Crear folios con idempotencia.
 - Consultar, guardar y editar datos generales de cotizaciones.
-- Gestionar la configuración de layout de ubicaciones (`GET/PUT /v1/quotes/{folio}/locations/layout`).
+- Gestionar la configuración de layout de ubicaciones (`GET/PUT /api/v1/quotes/{folio}/locations/layout`).
 - Registrar, consultar, editar y resumir ubicaciones.
 - Marcar ubicaciones como inactivas (no eliminarlas).
 - Consultar el estado y opciones de cobertura de una cotización.
@@ -77,17 +77,19 @@ El proyecto busca desarrollar un cotizador de seguros de daños integral, compue
 - Aplicar reglas de negocio: validar que cada ubicación tenga CP válido, `giro.claveIncendio` y garantías tarifables para ser calculable.
 - Integración con el servicio `Plataforma-core-ohs` para obtener datos de referencia.
 **Endpoints mínimos**:
-- `PUT /v1/quotes/{folio}/general-info`
-- `GET /v1/quotes/{folio}/locations/layout`
-- `PUT /v1/quotes/{folio}/locations/layout`
-- `GET /v1/quotes/{folio}/locations`
-- `PUT /v1/quotes/{folio}/locations`
-- `PATCH /v1/quotes/{folio}/locations/{índice}`
-- `GET /v1/quotes/{folio}/locations/summary`
-- `GET /v1/quotes/{folio}/state`
-- `GET /v1/quotes/{folio}/coverage-options`
-- `PUT /v1/quotes/{folio}/coverage-options`
-- `POST /v1/quotes/{folio}/calculate`
+- `POST /api/v1/quotes` — crear cotización y generar folio
+- `GET /api/v1/quotes/{folio}` — consultar datos generales
+- `PUT /api/v1/quotes/{folio}/general-info`
+- `GET /api/v1/quotes/{folio}/locations/layout`
+- `PUT /api/v1/quotes/{folio}/locations/layout`
+- `GET /api/v1/quotes/{folio}/locations`
+- `POST /api/v1/quotes/{folio}/locations`
+- `PATCH /api/v1/quotes/{folio}/locations/{indice}`
+- `GET /api/v1/quotes/{folio}/locations/summary`
+- `GET /api/v1/quotes/{folio}/state`
+- `GET /api/v1/quotes/{folio}/coverage-options`
+- `PUT /api/v1/quotes/{folio}/coverage-options`
+- `POST /api/v1/quotes/{folio}/calculate`
 **Estimación**: ~[35] RF, ~[10] RNF
 
 ### Módulo: Plataforma-core-ohs (Servicio de Referencia)
@@ -114,7 +116,7 @@ El proyecto busca desarrollar un cotizador de seguros de daños integral, compue
 
 ### Cotización
 - `numeroFolio`
-- `estadoCotizacion` (Borrador | Pendiente de Cálculo | Calculada | Aprobada | Rechazada | Emitida)
+- `estadoCotizacion` (Borrador | Pendiente de Cálculo | Calculada | Aprobada | Rechazada | Emitida | Cancelada)
 - `datosAsegurado`
 - `datosConduccion.codigoAgente`
 - `clasificacionRiesgo`

@@ -65,4 +65,41 @@ describe('GET /v1/folios', () => {
     expect(res1.body.folio).toBe(`COT-${year}-000001`);
     expect(res2.body.folio).toBe(`COT-${year}-000002`);
   });
+
+  it('test_folio_db_error_returns_500', async () => {
+    // GIVEN
+    mongoose._findOneAndUpdateMock.mockRejectedValue(new Error('MongoDB connection lost'));
+
+    // WHEN
+    const res = await request(app).get('/v1/folios');
+
+    // THEN
+    expect(res.status).toBe(500);
+    expect(res.body.code).toBe('INTERNAL_ERROR');
+    expect(res.body.message).toBe('Error interno del servidor');
+  });
+
+  it('test_folio_padding_single_digit', async () => {
+    // GIVEN
+    mongoose._findOneAndUpdateMock.mockResolvedValue({ _id: `cotizacion-${year}`, seq: 5 });
+
+    // WHEN
+    const res = await request(app).get('/v1/folios');
+
+    // THEN
+    expect(res.status).toBe(200);
+    expect(res.body.folio).toBe(`COT-${year}-000005`);
+  });
+
+  it('test_folio_padding_large_number', async () => {
+    // GIVEN
+    mongoose._findOneAndUpdateMock.mockResolvedValue({ _id: `cotizacion-${year}`, seq: 123456 });
+
+    // WHEN
+    const res = await request(app).get('/v1/folios');
+
+    // THEN
+    expect(res.status).toBe(200);
+    expect(res.body.folio).toBe(`COT-${year}-123456`);
+  });
 });

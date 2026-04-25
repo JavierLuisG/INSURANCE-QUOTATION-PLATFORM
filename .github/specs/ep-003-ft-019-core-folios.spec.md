@@ -190,9 +190,9 @@ No aplica — este feature es exclusivamente de backend (API interna entre servi
 
 - [x] `test_folio_generation_sequential` — happy path, formato válido `/^COT-\d{4}-\d{6}$/`
 - [x] `test_folio_increments_on_second_call` — folios distintos en llamadas consecutivas, valores `COT-YEAR-000001` y `COT-YEAR-000002`
-- [ ] `test_folio_db_error_returns_500` — cuando MongoDB falla, responde 500 con `INTERNAL_ERROR`
-- [ ] `test_folio_padding_single_digit` — seq=5 produce `000005`
-- [ ] `test_folio_padding_large_number` — seq=123456 produce `123456`
+- [x] `test_folio_db_error_returns_500` — cuando MongoDB falla, responde 500 con `INTERNAL_ERROR`
+- [x] `test_folio_padding_single_digit` — seq=5 produce `000005`
+- [x] `test_folio_padding_large_number` — seq=123456 produce `123456`
 
 ### Frontend
 

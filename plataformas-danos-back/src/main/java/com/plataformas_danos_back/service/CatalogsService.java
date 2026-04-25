@@ -1,0 +1,13 @@
+package com.plataformas_danos_back.service;
+
+import com.plataformas_danos_back.model.dto.AgentDto;
+import com.plataformas_danos_back.model.dto.BusinessLineDto;
+import com.plataformas_danos_back.model.dto.SubscriberDto;
+
+import java.util.List;
+
+public interface CatalogsService {
+    List<SubscriberDto> getSubscribers();
+    List<AgentDto> getAgents();
+    List<BusinessLineDto> getBusinessLines();
+}

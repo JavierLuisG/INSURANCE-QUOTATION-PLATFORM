@@ -23,6 +23,10 @@ jwt:
   secret: ${JWT_SECRET:changeme-use-env-var-in-production}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}
 
+plataforma-core-ohs:
+  url: ${PLATAFORMA_CORE_OHS_URL:http://localhost:3001}
+  timeout-ms: ${PLATAFORMA_CORE_OHS_TIMEOUT_MS:5000}
+
 resilience4j:
   circuitbreaker:
     instances:
@@ -34,4 +38,10 @@ resilience4j:
     instances:
       plataforma-core-ohs:
         max-attempts: 3
-        wait-duration: 500ms
+        wait-duration: 1000ms
+        exponential-backoff-multiplier: 2.0
+        retry-exceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - org.springframework.web.client.ResourceAccessException
+        ignore-exceptions:
+          - org.springframework.web.client.HttpClientErrorException

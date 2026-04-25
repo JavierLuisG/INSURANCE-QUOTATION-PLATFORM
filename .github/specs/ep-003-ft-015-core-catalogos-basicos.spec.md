@@ -1,6 +1,6 @@
 ---
 id: SPEC-003
-status: IN_PROGRESS
+status: IMPLEMENTED
 feature: ep-003-ft-015-core-catalogos-basicos
 created: 2026-04-25
 updated: 2026-04-25
@@ -430,18 +430,18 @@ No aplica a esta spec — la integración con el frontend de Next.js es responsa
 
 #### Tests Backend
 
-- [ ] `test_get_subscribers_returns_200_with_list` — happy path, lista no vacía
-- [ ] `test_get_subscribers_empty_list_returns_200` — lista vacía es respuesta válida
-- [ ] `test_get_subscribers_service_unavailable_returns_503` — fallo del servicio externo tras reintentos
-- [ ] `test_get_agents_returns_200_with_list` — happy path agentes
-- [ ] `test_get_agents_service_unavailable_returns_503` — fallo agentes
-- [ ] `test_get_business_lines_returns_200_with_list` — happy path giros
-- [ ] `test_get_business_lines_service_unavailable_returns_503` — fallo giros
-- [ ] `test_retry_succeeds_on_second_attempt` — reintento exitoso en segundo intento
-- [ ] `test_retry_exhausted_throws_service_exception` — reintentos agotados → excepción
-- [ ] `test_4xx_error_not_retried` — HTTP 400/404 NO activan reintentos
-- [ ] `test_mapping_drops_invalid_record_missing_id` — registro sin `id` se descarta (log WARNING)
-- [ ] `test_catalogs_service_impl_maps_all_fields` — transformación completa de campos
+- [x] `test_get_subscribers_returns_200_with_list` — happy path, lista no vacía
+- [x] `test_get_subscribers_empty_list_returns_200` — lista vacía es respuesta válida
+- [x] `test_get_subscribers_service_unavailable_returns_503` — fallo del servicio externo tras reintentos
+- [x] `test_get_agents_returns_200_with_list` — happy path agentes
+- [x] `test_get_agents_service_unavailable_returns_503` — fallo agentes
+- [x] `test_get_business_lines_returns_200_with_list` — happy path giros
+- [x] `test_get_business_lines_service_unavailable_returns_503` — fallo giros
+- [x] `test_retry_succeeds_on_second_attempt` — reintento exitoso en segundo intento
+- [x] `test_retry_exhausted_throws_service_exception` — reintentos agotados → excepción
+- [x] `test_4xx_error_not_retried` — HTTP 400/404 NO activan reintentos
+- [x] `test_mapping_drops_invalid_record_missing_id` — registro sin `id` se descarta (log WARNING)
+- [x] `test_catalogs_service_impl_maps_all_fields` — transformación completa de campos
 
 ### Frontend
 

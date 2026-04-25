@@ -1,6 +1,6 @@
 ---
 id: SPEC-003
-status: APPROVED
+status: IN_PROGRESS
 feature: ep-003-ft-015-core-catalogos-basicos
 created: 2026-04-25
 updated: 2026-04-25
@@ -416,16 +416,17 @@ No aplica a esta spec — la integración con el frontend de Next.js es responsa
 
 #### Implementación
 
-- [ ] Crear `model/dto/SubscriberDto.java` — campos `id`, `nombre`, `clave`, `activo` (Lombok `@Data`)
-- [ ] Crear `model/dto/AgentDto.java` — campos `id`, `nombre`, `clave`, `activo`
-- [ ] Crear `model/dto/BusinessLineDto.java` — campos `id`, `descripcion`, `claveIncendio`, `activo`
-- [ ] Crear `config/CatalogsClientConfig.java` — bean `RestTemplate` con `baseUrl` y `connectionTimeout`
-- [ ] Crear `config/Resilience4jCatalogsConfig.java` — configuración `RetryConfig` (3 intentos, backoff exponencial, solo errores recuperables)
-- [ ] Crear `client/CatalogsClient.java` (interfaz) + `CatalogsClientImpl.java` — llamadas HTTP a `/v1/subscribers`, `/v1/agents`, `/v1/business-lines`
-- [ ] Crear `service/CatalogsService.java` (interfaz) + `CatalogsServiceImpl.java` — orquesta cliente + mapeo + retry + manejo de errores
-- [ ] Crear `controller/CatalogsController.java` — `GET /api/v1/catalogs/subscribers`, `GET /api/v1/catalogs/agents`, `GET /api/v1/catalogs/business-lines`
-- [ ] Agregar `PLATAFORMA_CORE_OHS_URL` a `application.yml` y `.env.example`
-- [ ] Registrar `CatalogsController` en el contexto de Spring (autowired vía `@RestController`)
+- [x] Crear `model/dto/SubscriberDto.java` — campos `id`, `nombre`, `clave`, `activo` (Lombok `@Data`)
+- [x] Crear `model/dto/AgentDto.java` — campos `id`, `nombre`, `clave`, `activo`
+- [x] Crear `model/dto/BusinessLineDto.java` — campos `id`, `descripcion`, `claveIncendio`, `activo`
+- [x] Crear `config/CatalogsClientConfig.java` — bean `RestTemplate` con `baseUrl` y `connectionTimeout`
+- [x] Crear `config/SecurityConfig.java` — `SecurityFilterChain` stateless, CSRF desactivado (JWT pendiente feature auth)
+- [x] Crear `client/CatalogsClient.java` (interfaz) + `CatalogsClientImpl.java` — llamadas HTTP a `/v1/subscribers`, `/v1/agents`, `/v1/business-lines`
+- [x] Crear `service/CatalogsService.java` (interfaz) + `CatalogsServiceImpl.java` — orquesta cliente + mapeo + retry + manejo de errores
+- [x] Crear `exception/CatalogServiceUnavailableException.java` + `GlobalExceptionHandler.java`
+- [x] Crear `controller/CatalogsController.java` — `GET /api/v1/catalogs/subscribers`, `GET /api/v1/catalogs/agents`, `GET /api/v1/catalogs/business-lines`
+- [x] Agregar `plataforma-core-ohs.url` a `application.yaml` con retry config completo (exponential backoff, retry/ignore exceptions)
+- [x] Registrar `CatalogsController` en el contexto de Spring (autowired vía `@RestController`)
 
 #### Tests Backend
 

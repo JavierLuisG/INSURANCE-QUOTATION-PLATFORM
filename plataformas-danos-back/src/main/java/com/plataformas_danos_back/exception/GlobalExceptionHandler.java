@@ -23,6 +23,12 @@ public class GlobalExceptionHandler {
                 .body(Map.of("message", ex.getMessage(), "code", "ZIP_NOT_FOUND"));
     }
 
+    @ExceptionHandler(TariffNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleTariffNotFound(TariffNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", ex.getMessage(), "code", "TARIFF_NOT_FOUND"));
+    }
+
     @ExceptionHandler(InvalidZipCodeFormatException.class)
     public ResponseEntity<Map<String, String>> handleInvalidZipCodeFormat(InvalidZipCodeFormatException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)

@@ -4,6 +4,8 @@ import com.plataformas_danos_back.client.CatalogsClient;
 import com.plataformas_danos_back.exception.CatalogServiceUnavailableException;
 import com.plataformas_danos_back.model.dto.AgentDto;
 import com.plataformas_danos_back.model.dto.BusinessLineDto;
+import com.plataformas_danos_back.model.dto.GuaranteeDto;
+import com.plataformas_danos_back.model.dto.RiskClassificationDto;
 import com.plataformas_danos_back.model.dto.SubscriberDto;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +54,28 @@ public class CatalogsServiceImpl implements CatalogsService {
         throw new CatalogServiceUnavailableException("Servicio de catálogos no disponible", ex);
     }
 
+    @Override
+    @Retry(name = "plataforma-core-ohs", fallbackMethod = "riskClassificationsFallback")
+    public List<RiskClassificationDto> getRiskClassifications() {
+        return filterValidRiskClassifications(catalogsClient.getRiskClassifications());
+    }
+
+    @Override
+    @Retry(name = "plataforma-core-ohs", fallbackMethod = "guaranteesFallback")
+    public List<GuaranteeDto> getGuarantees() {
+        return filterValidGuarantees(catalogsClient.getGuarantees());
+    }
+
+    public List<RiskClassificationDto> riskClassificationsFallback(Exception ex) {
+        log.error("CRITICAL: Catalog service unavailable after retries — risk-classifications. Error: {}", ex.getMessage());
+        throw new CatalogServiceUnavailableException("Servicio de catálogos no disponible", ex);
+    }
+
+    public List<GuaranteeDto> guaranteesFallback(Exception ex) {
+        log.error("CRITICAL: Catalog service unavailable after retries — guarantees. Error: {}", ex.getMessage());
+        throw new CatalogServiceUnavailableException("Servicio de catálogos no disponible", ex);
+    }
+
     private List<SubscriberDto> filterValidSubscribers(List<SubscriberDto> list) {
         if (list == null) return List.of();
         return list.stream()
@@ -96,6 +120,40 @@ public class CatalogsServiceImpl implements CatalogsService {
                     }
                     if (b.getDescripcion() == null || b.getDescripcion().isBlank()) {
                         log.warn("BusinessLine record dropped: missing required field 'descripcion', id={}", b.getId());
+                        return false;
+                    }
+                    return true;
+                })
+                .toList();
+    }
+
+    private List<RiskClassificationDto> filterValidRiskClassifications(List<RiskClassificationDto> list) {
+        if (list == null) return List.of();
+        return list.stream()
+                .filter(r -> {
+                    if (r.getId() == null || r.getId().isBlank()) {
+                        log.warn("RiskClassification record dropped: missing required field 'id'");
+                        return false;
+                    }
+                    if (r.getNombre() == null || r.getNombre().isBlank()) {
+                        log.warn("RiskClassification record dropped: missing required field 'nombre', id={}", r.getId());
+                        return false;
+                    }
+                    return true;
+                })
+                .toList();
+    }
+
+    private List<GuaranteeDto> filterValidGuarantees(List<GuaranteeDto> list) {
+        if (list == null) return List.of();
+        return list.stream()
+                .filter(g -> {
+                    if (g.getId() == null || g.getId().isBlank()) {
+                        log.warn("Guarantee record dropped: missing required field 'id'");
+                        return false;
+                    }
+                    if (g.getNombre() == null || g.getNombre().isBlank()) {
+                        log.warn("Guarantee record dropped: missing required field 'nombre', id={}", g.getId());
                         return false;
                     }
                     return true;

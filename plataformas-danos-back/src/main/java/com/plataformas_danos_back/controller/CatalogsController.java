@@ -2,6 +2,8 @@ package com.plataformas_danos_back.controller;
 
 import com.plataformas_danos_back.model.dto.AgentDto;
 import com.plataformas_danos_back.model.dto.BusinessLineDto;
+import com.plataformas_danos_back.model.dto.GuaranteeDto;
+import com.plataformas_danos_back.model.dto.RiskClassificationDto;
 import com.plataformas_danos_back.model.dto.SubscriberDto;
 import com.plataformas_danos_back.service.CatalogsService;
 import lombok.RequiredArgsConstructor;
@@ -32,5 +34,15 @@ public class CatalogsController {
     @GetMapping("/business-lines")
     public ResponseEntity<List<BusinessLineDto>> getBusinessLines() {
         return ResponseEntity.ok(catalogsService.getBusinessLines());
+    }
+
+    @GetMapping("/risk-classifications")
+    public ResponseEntity<List<RiskClassificationDto>> getRiskClassifications() {
+        return ResponseEntity.ok(catalogsService.getRiskClassifications());
+    }
+
+    @GetMapping("/guarantees")
+    public ResponseEntity<List<GuaranteeDto>> getGuarantees() {
+        return ResponseEntity.ok(catalogsService.getGuarantees());
     }
 }

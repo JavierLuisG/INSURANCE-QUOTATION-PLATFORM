@@ -17,6 +17,18 @@ public class GlobalExceptionHandler {
                 .body(Map.of("message", ex.getMessage(), "code", "CATALOG_SERVICE_UNAVAILABLE"));
     }
 
+    @ExceptionHandler(ZipCodeNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleZipCodeNotFound(ZipCodeNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", ex.getMessage(), "code", "ZIP_NOT_FOUND"));
+    }
+
+    @ExceptionHandler(InvalidZipCodeFormatException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidZipCodeFormat(InvalidZipCodeFormatException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("message", ex.getMessage(), "code", "INVALID_ZIP_FORMAT"));
+    }
+
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<Map<String, String>> handleHttpClientError(HttpClientErrorException ex) {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY)

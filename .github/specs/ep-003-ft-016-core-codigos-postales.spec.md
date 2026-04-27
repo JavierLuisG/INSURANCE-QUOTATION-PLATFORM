@@ -1,6 +1,6 @@
 ---
 id: SPEC-004
-status: APPROVED
+status: IN_PROGRESS
 feature: ep-003-ft-016-core-codigos-postales
 created: 2026-04-27
 updated: 2026-04-27
@@ -299,14 +299,14 @@ No aplica a esta spec — la integración con el frontend de Next.js es responsa
 
 #### Implementación
 
-- [ ] Crear `model/dto/ZipCodeDto.java` — campos `codigoPostal`, `zonaCAT`, `nivelTecnico`, `estado`, `municipio`, `ciudad` (Lombok `@Data`)
-- [ ] Crear `exception/ZipCodeNotFoundException.java` — `extends RuntimeException`
-- [ ] Crear `exception/InvalidZipCodeFormatException.java` — `extends RuntimeException`
-- [ ] Actualizar `exception/GlobalExceptionHandler.java` — agregar `@ExceptionHandler` para `ZipCodeNotFoundException` → 404 y `InvalidZipCodeFormatException` → 400
-- [ ] Crear `client/ZipCodeClient.java` (interfaz) + `ZipCodeClientImpl.java` — llamada a `/v1/zip-codes/{zipCode}`, constructor manual con `@Qualifier("catalogsRestTemplate")`
-- [ ] Crear `service/ZipCodeService.java` (interfaz) + `ZipCodeServiceImpl.java` — validación de formato + `@Retry` + mapeo + valores por defecto + fallback
-- [ ] Crear `controller/ZipCodeController.java` — `GET /api/v1/postal-codes/{codigoPostal}`
-- [ ] Verificar que `application.yaml` ya tiene la instancia retry `plataforma-core-ohs` configurada (no requiere cambios)
+- [x] Crear `model/dto/ZipCodeDto.java` — campos `codigoPostal`, `zonaCAT`, `nivelTecnico`, `estado`, `municipio`, `ciudad` (Lombok `@Data`)
+- [x] Crear `exception/ZipCodeNotFoundException.java` — `extends RuntimeException`
+- [x] Crear `exception/InvalidZipCodeFormatException.java` — `extends RuntimeException`
+- [x] Actualizar `exception/GlobalExceptionHandler.java` — agregar `@ExceptionHandler` para `ZipCodeNotFoundException` → 404 y `InvalidZipCodeFormatException` → 400
+- [x] Crear `client/ZipCodeClient.java` (interfaz) + `ZipCodeClientImpl.java` — llamada a `/v1/zip-codes/{zipCode}`, constructor manual con `@Qualifier("catalogsRestTemplate")`
+- [x] Crear `service/ZipCodeService.java` (interfaz) + `ZipCodeServiceImpl.java` — validación de formato + `@Retry` + mapeo + valores por defecto + fallback
+- [x] Crear `controller/ZipCodeController.java` — `GET /api/v1/postal-codes/{codigoPostal}`
+- [x] Verificar que `application.yaml` ya tiene la instancia retry `plataforma-core-ohs` configurada (no requiere cambios)
 
 #### Tests Backend
 

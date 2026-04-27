@@ -1,6 +1,6 @@
 ---
 id: SPEC-004
-status: IN_PROGRESS
+status: IMPLEMENTED
 feature: ep-003-ft-016-core-codigos-postales
 created: 2026-04-27
 updated: 2026-04-27
@@ -310,18 +310,18 @@ No aplica a esta spec — la integración con el frontend de Next.js es responsa
 
 #### Tests Backend
 
-- [ ] `test_get_postal_code_valid_returns_200` — happy path, CP existente
-- [ ] `test_get_postal_code_invalid_format_returns_400` — "ABCDE" → no llama cliente, lanza excepción
-- [ ] `test_get_postal_code_not_found_returns_404` — cliente lanza HttpClientErrorException 404 → ZipCodeNotFoundException
-- [ ] `test_get_postal_code_service_unavailable_returns_503` — fallback activa CatalogServiceUnavailableException
-- [ ] `test_zip_code_service_maps_all_fields` — todos los campos del DTO mapeados correctamente
-- [ ] `test_zip_code_service_applies_default_zona_when_null` — zonaCAT null → "ZONA_INDEFINIDA" + log.warn
-- [ ] `test_zip_code_service_applies_default_nivel_when_null` — nivelTecnico null → "NIVEL_INDEFINIDO" + log.warn
-- [ ] `test_zip_code_service_validates_format_before_calling_client` — formato inválido → cliente no es invocado
-- [ ] `test_zip_code_fallback_throws_catalog_service_unavailable` — zipCodeFallback → CatalogServiceUnavailableException
-- [ ] `test_zip_code_controller_returns_200_with_dto` — controller delega al service y retorna ResponseEntity OK
-- [ ] `test_zip_code_controller_propagates_not_found_exception` — service lanza ZipCodeNotFoundException → propagada
-- [ ] `test_zip_code_controller_propagates_invalid_format_exception` — service lanza InvalidZipCodeFormatException → propagada
+- [x] `test_get_postal_code_valid_returns_200` — happy path, CP existente
+- [x] `test_get_postal_code_invalid_format_returns_400` — "ABCDE" → no llama cliente, lanza excepción
+- [x] `test_get_postal_code_not_found_returns_404` — cliente lanza HttpClientErrorException 404 → ZipCodeNotFoundException
+- [x] `test_get_postal_code_service_unavailable_returns_503` — fallback activa CatalogServiceUnavailableException
+- [x] `test_zip_code_service_maps_all_fields` — todos los campos del DTO mapeados correctamente
+- [x] `test_zip_code_service_applies_default_zona_when_null` — zonaCAT null → "ZONA_INDEFINIDA" + log.warn
+- [x] `test_zip_code_service_applies_default_nivel_when_null` — nivelTecnico null → "NIVEL_INDEFINIDO" + log.warn
+- [x] `test_zip_code_service_validates_format_before_calling_client` — formato inválido → cliente no es invocado
+- [x] `test_zip_code_fallback_throws_catalog_service_unavailable` — zipCodeFallback → CatalogServiceUnavailableException
+- [x] `test_zip_code_controller_returns_200_with_dto` — controller delega al service y retorna ResponseEntity OK
+- [x] `test_zip_code_controller_propagates_not_found_exception` — service lanza ZipCodeNotFoundException → propagada
+- [x] `test_zip_code_controller_propagates_invalid_format_exception` — service lanza InvalidZipCodeFormatException → propagada
 
 ### Frontend
 

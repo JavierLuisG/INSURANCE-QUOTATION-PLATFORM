@@ -1,6 +1,6 @@
 ---
 id: SPEC-006
-status: IN_PROGRESS
+status: IMPLEMENTED
 feature: ep-003-ft-018-core-tarifas-factores
 created: 2026-04-27
 updated: 2026-04-27
@@ -435,27 +435,27 @@ No aplica a esta spec — la integración con el frontend de Next.js es responsa
 
 #### Tests Backend
 
-- [ ] `getTariffsFire_validList_returns200WithList` — happy path, lista con datos
-- [ ] `getTariffsFire_emptyList_returnsEmptyList` — lista vacía retornada correctamente
-- [ ] `tariffFireFallback_whenCalled_throwsCatalogServiceUnavailableException` — fallback directo
-- [ ] `getTariffsFire_recordMissingZonaRiesgo_isDropped` — registro sin zonaRiesgo descartado + log.warn
-- [ ] `getTariffsFire_mapsAllFields` — zonaRiesgo, tipoConstructivo, tasaBase, factorRecargo preservados
-- [ ] `getTariffCat_validZona_returnsDto` — happy path, objeto único con factorTEV y factorFHM
-- [ ] `getTariffCat_zonaNotFound_throwsTariffNotFoundException` — mock devuelve 404 → TariffNotFoundException
-- [ ] `tariffCatFallback_whenCalled_throwsCatalogServiceUnavailableException` — fallback directo con parámetro zona
-- [ ] `getTariffCat_mapsAllFields` — zona, factorTEV, factorFHM preservados
-- [ ] `getTariffsElectronicEquipment_validList_returns200WithList` — happy path, lista con datos
-- [ ] `getTariffsElectronicEquipment_emptyList_returnsEmptyList` — lista vacía retornada correctamente
-- [ ] `tariffElectronicEquipmentFallback_whenCalled_throwsCatalogServiceUnavailableException` — fallback directo
-- [ ] `getTariffsElectronicEquipment_recordMissingClase_isDropped` — registro con clase vacía descartado + log.warn
-- [ ] `getTariffsElectronicEquipment_mapsAllFields` — clase, nivelZona, factor preservados
-- [ ] `getTariffsController_getFire_returns200WithList` — controller delega al service, retorna 200
-- [ ] `getTariffsController_getCat_returns200WithDto` — controller delega al service, retorna 200 con objeto único
-- [ ] `getTariffsController_getCat_tariffNotFound_propagatesException` — TariffNotFoundException propagada
-- [ ] `getTariffsController_getElectronicEquipment_returns200WithList` — controller delega al service, retorna 200
-- [ ] `getTariffsController_getFire_serviceUnavailable_propagatesException` — CatalogServiceUnavailableException propagada
-- [ ] `getTariffsController_getCat_serviceUnavailable_propagatesException` — CatalogServiceUnavailableException propagada
-- [ ] `getTariffsController_getElectronicEquipment_serviceUnavailable_propagatesException` — CatalogServiceUnavailableException propagada
+- [x] `getTariffsFire_validList_returns200WithList` — happy path, lista con datos
+- [x] `getTariffsFire_emptyList_returnsEmptyList` — lista vacía retornada correctamente
+- [x] `tariffFireFallback_whenCalled_throwsCatalogServiceUnavailableException` — fallback directo
+- [x] `getTariffsFire_recordMissingZonaRiesgo_isDropped` — registro sin zonaRiesgo descartado + log.warn
+- [x] `getTariffsFire_mapsAllFields` — zonaRiesgo, tipoConstructivo, tasaBase, factorRecargo preservados
+- [x] `getTariffCat_validZona_returnsDto` — happy path, objeto único con factorTEV y factorFHM
+- [x] `getTariffCat_zonaNotFound_throwsTariffNotFoundException` — mock devuelve 404 → TariffNotFoundException
+- [x] `tariffCatFallback_whenCalled_throwsCatalogServiceUnavailableException` — fallback directo con parámetro zona
+- [x] `getTariffCat_mapsAllFields` — zona, factorTEV, factorFHM preservados
+- [x] `getTariffsElectronicEquipment_validList_returns200WithList` — happy path, lista con datos
+- [x] `getTariffsElectronicEquipment_emptyList_returnsEmptyList` — lista vacía retornada correctamente
+- [x] `tariffElectronicEquipmentFallback_whenCalled_throwsCatalogServiceUnavailableException` — fallback directo
+- [x] `getTariffsElectronicEquipment_recordMissingClase_isDropped` — registro con clase vacía descartado + log.warn
+- [x] `getTariffsElectronicEquipment_mapsAllFields` — clase, nivelZona, factor preservados
+- [x] `getTariffsController_getFire_returns200WithList` — controller delega al service, retorna 200
+- [x] `getTariffsController_getCat_returns200WithDto` — controller delega al service, retorna 200 con objeto único
+- [x] `getTariffsController_getCat_tariffNotFound_propagatesException` — TariffNotFoundException propagada
+- [x] `getTariffsController_getElectronicEquipment_returns200WithList` — controller delega al service, retorna 200
+- [x] `getTariffsController_getFire_serviceUnavailable_propagatesException` — CatalogServiceUnavailableException propagada
+- [x] `getTariffsController_getCat_serviceUnavailable_propagatesException` — CatalogServiceUnavailableException propagada
+- [x] `getTariffsController_getElectronicEquipment_serviceUnavailable_propagatesException` — CatalogServiceUnavailableException propagada
 
 ### Frontend
 

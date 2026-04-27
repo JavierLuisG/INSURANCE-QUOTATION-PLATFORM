@@ -3,6 +3,8 @@ package com.plataformas_danos_back.controller;
 import com.plataformas_danos_back.exception.CatalogServiceUnavailableException;
 import com.plataformas_danos_back.model.dto.AgentDto;
 import com.plataformas_danos_back.model.dto.BusinessLineDto;
+import com.plataformas_danos_back.model.dto.GuaranteeDto;
+import com.plataformas_danos_back.model.dto.RiskClassificationDto;
 import com.plataformas_danos_back.model.dto.SubscriberDto;
 import com.plataformas_danos_back.service.CatalogsService;
 import org.junit.jupiter.api.Test;
@@ -129,5 +131,74 @@ class CatalogsControllerTest {
         // WHEN / THEN
         assertThatThrownBy(() -> controller.getBusinessLines())
                 .isInstanceOf(CatalogServiceUnavailableException.class);
+    }
+
+    // ── Risk Classifications ─────────────────────────────────────────────────
+
+    @Test
+    void getCatalogsController_getRiskClassifications_returns200WithList() {
+        // GIVEN
+        var classifications = List.of(
+                new RiskClassificationDto("RC-001", "Riesgo Bajo", "Clasificación para riesgos con baja probabilidad."),
+                new RiskClassificationDto("RC-002", "Riesgo Medio", "Clasificación para riesgos con probabilidad media.")
+        );
+        when(catalogsService.getRiskClassifications()).thenReturn(classifications);
+
+        // WHEN
+        var response = controller.getRiskClassifications();
+
+        // THEN
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).hasSize(2);
+        assertThat(response.getBody().get(0).getId()).isEqualTo("RC-001");
+        assertThat(response.getBody().get(0).getNombre()).isEqualTo("Riesgo Bajo");
+    }
+
+    @Test
+    void getCatalogsController_getRiskClassifications_serviceUnavailable_propagatesException() {
+        // GIVEN — GlobalExceptionHandler transforma la excepción en 503 en el contexto HTTP;
+        // aquí verificamos que el controlador no la suprime
+        when(catalogsService.getRiskClassifications())
+                .thenThrow(new CatalogServiceUnavailableException("Servicio de catálogos no disponible"));
+
+        // WHEN / THEN
+        assertThatThrownBy(() -> controller.getRiskClassifications())
+                .isInstanceOf(CatalogServiceUnavailableException.class)
+                .hasMessage("Servicio de catálogos no disponible");
+    }
+
+    // ── Guarantees ──────────────────────────────────────────────────────────
+
+    @Test
+    void getCatalogsController_getGuarantees_returns200WithList() {
+        // GIVEN
+        var guarantees = List.of(
+                new GuaranteeDto("GUA-001", "Robo con Violencia", "RV", true),
+                new GuaranteeDto("GUA-002", "Daños por Agua", "DA", false)
+        );
+        when(catalogsService.getGuarantees()).thenReturn(guarantees);
+
+        // WHEN
+        var response = controller.getGuarantees();
+
+        // THEN
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).hasSize(2);
+        assertThat(response.getBody().get(0).getId()).isEqualTo("GUA-001");
+        assertThat(response.getBody().get(0).getClaveIncendio()).isEqualTo("RV");
+        assertThat(response.getBody().get(0).getTarifable()).isTrue();
+    }
+
+    @Test
+    void getCatalogsController_getGuarantees_serviceUnavailable_propagatesException() {
+        // GIVEN — GlobalExceptionHandler transforma la excepción en 503 en el contexto HTTP;
+        // aquí verificamos que el controlador no la suprime
+        when(catalogsService.getGuarantees())
+                .thenThrow(new CatalogServiceUnavailableException("Servicio de catálogos no disponible"));
+
+        // WHEN / THEN
+        assertThatThrownBy(() -> controller.getGuarantees())
+                .isInstanceOf(CatalogServiceUnavailableException.class)
+                .hasMessage("Servicio de catálogos no disponible");
     }
 }

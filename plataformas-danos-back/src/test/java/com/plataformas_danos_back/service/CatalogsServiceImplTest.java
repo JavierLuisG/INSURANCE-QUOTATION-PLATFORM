@@ -4,6 +4,8 @@ import com.plataformas_danos_back.client.CatalogsClient;
 import com.plataformas_danos_back.exception.CatalogServiceUnavailableException;
 import com.plataformas_danos_back.model.dto.AgentDto;
 import com.plataformas_danos_back.model.dto.BusinessLineDto;
+import com.plataformas_danos_back.model.dto.GuaranteeDto;
+import com.plataformas_danos_back.model.dto.RiskClassificationDto;
 import com.plataformas_danos_back.model.dto.SubscriberDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -194,5 +196,146 @@ class CatalogsServiceImplTest {
         // THEN
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo("BL-001");
+    }
+
+    // ── Risk Classifications ─────────────────────────────────────────────────
+
+    @Test
+    void getRiskClassifications_validList_returns200WithList() {
+        // GIVEN
+        var rc = new RiskClassificationDto("RC-001", "Riesgo Bajo", "Clasificación para riesgos con baja probabilidad.");
+        when(catalogsClient.getRiskClassifications()).thenReturn(List.of(rc));
+
+        // WHEN
+        var result = service.getRiskClassifications();
+
+        // THEN
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo("RC-001");
+    }
+
+    @Test
+    void getRiskClassifications_emptyList_returnsEmptyList() {
+        // GIVEN
+        when(catalogsClient.getRiskClassifications()).thenReturn(List.of());
+
+        // WHEN
+        var result = service.getRiskClassifications();
+
+        // THEN
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void riskClassificationsFallback_whenCalled_throwsCatalogServiceUnavailableException() {
+        // GIVEN
+        var cause = new RuntimeException("Connection refused");
+
+        // WHEN / THEN
+        assertThatThrownBy(() -> service.riskClassificationsFallback(cause))
+                .isInstanceOf(CatalogServiceUnavailableException.class)
+                .hasMessage("Servicio de catálogos no disponible");
+    }
+
+    @Test
+    void getRiskClassifications_recordMissingId_isDropped() {
+        // GIVEN
+        var valid = new RiskClassificationDto("RC-001", "Riesgo Bajo", "Descripción");
+        var missingId = new RiskClassificationDto(null, "Sin ID", "Descripción");
+        when(catalogsClient.getRiskClassifications()).thenReturn(List.of(valid, missingId));
+
+        // WHEN
+        var result = service.getRiskClassifications();
+
+        // THEN — solo el registro válido se retorna
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo("RC-001");
+    }
+
+    @Test
+    void getRiskClassifications_mapsAllFields() {
+        // GIVEN
+        var rc = new RiskClassificationDto("RC-001", "Riesgo Bajo", "Clasificación para riesgos con baja probabilidad.");
+        when(catalogsClient.getRiskClassifications()).thenReturn(List.of(rc));
+
+        // WHEN
+        var result = service.getRiskClassifications();
+
+        // THEN
+        var dto = result.get(0);
+        assertThat(dto.getId()).isEqualTo("RC-001");
+        assertThat(dto.getNombre()).isEqualTo("Riesgo Bajo");
+        assertThat(dto.getDescripcion()).isEqualTo("Clasificación para riesgos con baja probabilidad.");
+    }
+
+    // ── Guarantees ──────────────────────────────────────────────────────────
+
+    @Test
+    void getGuarantees_validList_returns200WithList() {
+        // GIVEN
+        var guarantee = new GuaranteeDto("GUA-001", "Robo con Violencia", "RV", true);
+        when(catalogsClient.getGuarantees()).thenReturn(List.of(guarantee));
+
+        // WHEN
+        var result = service.getGuarantees();
+
+        // THEN
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo("GUA-001");
+    }
+
+    @Test
+    void getGuarantees_emptyList_returnsEmptyList() {
+        // GIVEN
+        when(catalogsClient.getGuarantees()).thenReturn(List.of());
+
+        // WHEN
+        var result = service.getGuarantees();
+
+        // THEN
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void guaranteesFallback_whenCalled_throwsCatalogServiceUnavailableException() {
+        // GIVEN
+        var cause = new RuntimeException("Timeout");
+
+        // WHEN / THEN
+        assertThatThrownBy(() -> service.guaranteesFallback(cause))
+                .isInstanceOf(CatalogServiceUnavailableException.class)
+                .hasMessage("Servicio de catálogos no disponible");
+    }
+
+    @Test
+    void getGuarantees_recordMissingNombre_isDropped() {
+        // GIVEN
+        var valid = new GuaranteeDto("GUA-001", "Robo con Violencia", "RV", true);
+        var missingNombre = new GuaranteeDto("GUA-002", "", "DA", false);
+        when(catalogsClient.getGuarantees()).thenReturn(List.of(valid, missingNombre));
+
+        // WHEN
+        var result = service.getGuarantees();
+
+        // THEN
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo("GUA-001");
+    }
+
+    @Test
+    void getGuarantees_mapsAllFields() {
+        // GIVEN
+        var guarantee = new GuaranteeDto("GUA-001", "Robo con Violencia", "RV", true);
+        when(catalogsClient.getGuarantees()).thenReturn(List.of(guarantee));
+
+        // WHEN
+        var result = service.getGuarantees();
+
+        // THEN
+        var dto = result.get(0);
+        assertThat(dto.getId()).isEqualTo("GUA-001");
+        assertThat(dto.getNombre()).isEqualTo("Robo con Violencia");
+        assertThat(dto.getClaveIncendio()).isEqualTo("RV");
+        assertThat(dto.getTarifable()).isTrue();
     }
 }

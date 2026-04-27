@@ -1,6 +1,6 @@
 ---
 id: SPEC-005
-status: IN_PROGRESS
+status: IMPLEMENTED
 feature: ep-003-ft-017-core-clasificacion-riesgo
 created: 2026-04-27
 updated: 2026-04-27
@@ -328,20 +328,20 @@ No aplica a esta spec — la integración con el frontend de Next.js es responsa
 
 #### Tests Backend
 
-- [ ] `getRiskClassifications_validList_returns200WithList` — happy path, lista con datos
-- [ ] `getRiskClassifications_emptyList_returnsEmptyList` — lista vacía retornada correctamente
-- [ ] `riskClassificationsFallback_whenCalled_throwsCatalogServiceUnavailableException` — fallback directo
-- [ ] `getRiskClassifications_recordMissingId_isDropped` — registro sin id descartado + log.warn
-- [ ] `getRiskClassifications_mapsAllFields` — id, nombre, descripcion preservados
-- [ ] `getGuarantees_validList_returns200WithList` — happy path, lista con datos
-- [ ] `getGuarantees_emptyList_returnsEmptyList` — lista vacía retornada correctamente
-- [ ] `guaranteesFallback_whenCalled_throwsCatalogServiceUnavailableException` — fallback directo
-- [ ] `getGuarantees_recordMissingNombre_isDropped` — registro con nombre vacío descartado + log.warn
-- [ ] `getGuarantees_mapsAllFields` — id, nombre, claveIncendio, tarifable preservados
-- [ ] `getCatalogsController_getRiskClassifications_returns200WithList` — controller delega al service, retorna 200
-- [ ] `getCatalogsController_getGuarantees_returns200WithList` — controller delega al service, retorna 200
-- [ ] `getCatalogsController_getRiskClassifications_serviceUnavailable_propagatesException` — excepción propagada
-- [ ] `getCatalogsController_getGuarantees_serviceUnavailable_propagatesException` — excepción propagada
+- [x] `getRiskClassifications_validList_returns200WithList` — happy path, lista con datos
+- [x] `getRiskClassifications_emptyList_returnsEmptyList` — lista vacía retornada correctamente
+- [x] `riskClassificationsFallback_whenCalled_throwsCatalogServiceUnavailableException` — fallback directo
+- [x] `getRiskClassifications_recordMissingId_isDropped` — registro sin id descartado + log.warn
+- [x] `getRiskClassifications_mapsAllFields` — id, nombre, descripcion preservados
+- [x] `getGuarantees_validList_returns200WithList` — happy path, lista con datos
+- [x] `getGuarantees_emptyList_returnsEmptyList` — lista vacía retornada correctamente
+- [x] `guaranteesFallback_whenCalled_throwsCatalogServiceUnavailableException` — fallback directo
+- [x] `getGuarantees_recordMissingNombre_isDropped` — registro con nombre vacío descartado + log.warn
+- [x] `getGuarantees_mapsAllFields` — id, nombre, claveIncendio, tarifable preservados
+- [x] `getCatalogsController_getRiskClassifications_returns200WithList` — controller delega al service, retorna 200
+- [x] `getCatalogsController_getGuarantees_returns200WithList` — controller delega al service, retorna 200
+- [x] `getCatalogsController_getRiskClassifications_serviceUnavailable_propagatesException` — excepción propagada
+- [x] `getCatalogsController_getGuarantees_serviceUnavailable_propagatesException` — excepción propagada
 
 ### Frontend
 

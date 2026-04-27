@@ -1,6 +1,6 @@
 ---
 id: SPEC-006
-status: APPROVED
+status: IN_PROGRESS
 feature: ep-003-ft-018-core-tarifas-factores
 created: 2026-04-27
 updated: 2026-04-27
@@ -404,7 +404,7 @@ No aplica a esta spec — la integración con el frontend de Next.js es responsa
 
 ### Notas de Implementación
 
-- `TariffsClientImpl` usa `@Qualifier("catalogsRestTemplate")` e inyección por constructor — igual que `CatalogsClientImpl`. Los métodos `getTariffsFire()` y `getTariffsElectronicEquipment()` usan `exchange()` con `ParameterizedTypeReference<List<...>>`. El método `getTariffCat(String zona)` usa `getForObject()` con `TariffCatDto.class` y construye la URL con `UriComponentsBuilder` para el query param `zona`.
+- `TariffsClientImpl` usa `@Qualifier("catalogsRestTemplate")` e inyección por constructor — igual que `CatalogsClientImpl`. Los métodos `getTariffsFire()` y `getTariffsElectronicEquipment()` usan `exchange()` con `ParameterizedTypeReference<List<...>>`. El método `getTariffCat(String zona)` usa `getForObject()` con `TariffCatDto.class` y construye la URL con `UriComponentsBuilder.fromUriString()` (Spring 6+ — `fromHttpUrl` fue eliminado) para el query param `zona`.
 - `TariffsServiceImpl.getTariffCat(String zona)` maneja la excepción `HttpClientErrorException` con `HttpStatus.NOT_FOUND` → lanza `TariffNotFoundException`. Esto es consistente con `ZipCodeServiceImpl` (FT-016). Los errores 4xx no activan reintentos (ya configurado en `ignore-exceptions`).
 - Los fallbacks se nombran `tariffFireFallback(Exception ex)`, `tariffCatFallback(String zona, Exception ex)` y `tariffElectronicEquipmentFallback(Exception ex)`. Nota: `tariffCatFallback` necesita el parámetro `zona` porque `getTariffCat` lo recibe — misma regla Resilience4j de FT-016.
 - `TariffsController` usa `@RequestParam(required = true) String zona` en el endpoint CAT. Si `zona` es null/ausente, Spring retorna automáticamente 400 antes de llegar al service.
@@ -421,17 +421,17 @@ No aplica a esta spec — la integración con el frontend de Next.js es responsa
 
 #### Implementación
 
-- [ ] Crear `model/dto/TariffFireDto.java` — campos `zonaRiesgo`, `tipoConstructivo`, `tasaBase`, `factorRecargo` (Lombok `@Data`)
-- [ ] Crear `model/dto/TariffCatDto.java` — campos `zona`, `factorTEV`, `factorFHM` (Lombok `@Data`)
-- [ ] Crear `model/dto/TariffElectronicEquipmentDto.java` — campos `clase`, `nivelZona`, `factor` (Lombok `@Data`)
-- [ ] Crear `exception/TariffNotFoundException.java` — excepción unchecked para zona CAT no encontrada
-- [ ] Crear `client/TariffsClient.java` — interfaz con `getTariffsFire()`, `getTariffCat(String zona)`, `getTariffsElectronicEquipment()`
-- [ ] Crear `client/TariffsClientImpl.java` — implementar las 3 llamadas con `@Qualifier("catalogsRestTemplate")`, `ParameterizedTypeReference` para listas y `UriComponentsBuilder` para query param de CAT
-- [ ] Crear `service/TariffsService.java` — interfaz con `getTariffsFire()`, `getTariffCat(String zona)`, `getTariffsElectronicEquipment()`
-- [ ] Crear `service/TariffsServiceImpl.java` — implementar con `@Retry(name="plataforma-core-ohs", fallbackMethod=...)`, filtros de registros inválidos (zonaRiesgo, clase), manejo de 404 para CAT, y fallbacks
-- [ ] Crear `controller/TariffsController.java` — agregar `GET /api/v1/tariffs/fire`, `GET /api/v1/tariffs/cat`, `GET /api/v1/tariffs/electronic-equipment`
-- [ ] Actualizar `exception/GlobalExceptionHandler.java` — agregar `@ExceptionHandler(TariffNotFoundException.class)` → 404 con `{ message, code: "TARIFF_NOT_FOUND" }`
-- [ ] Verificar que `application.yaml` ya tiene retry `plataforma-core-ohs` configurado (no requiere cambios)
+- [x] Crear `model/dto/TariffFireDto.java` — campos `zonaRiesgo`, `tipoConstructivo`, `tasaBase`, `factorRecargo` (Lombok `@Data`)
+- [x] Crear `model/dto/TariffCatDto.java` — campos `zona`, `factorTEV`, `factorFHM` (Lombok `@Data`)
+- [x] Crear `model/dto/TariffElectronicEquipmentDto.java` — campos `clase`, `nivelZona`, `factor` (Lombok `@Data`)
+- [x] Crear `exception/TariffNotFoundException.java` — excepción unchecked para zona CAT no encontrada
+- [x] Crear `client/TariffsClient.java` — interfaz con `getTariffsFire()`, `getTariffCat(String zona)`, `getTariffsElectronicEquipment()`
+- [x] Crear `client/TariffsClientImpl.java` — implementar las 3 llamadas con `@Qualifier("catalogsRestTemplate")`, `ParameterizedTypeReference` para listas y `UriComponentsBuilder` para query param de CAT
+- [x] Crear `service/TariffsService.java` — interfaz con `getTariffsFire()`, `getTariffCat(String zona)`, `getTariffsElectronicEquipment()`
+- [x] Crear `service/TariffsServiceImpl.java` — implementar con `@Retry(name="plataforma-core-ohs", fallbackMethod=...)`, filtros de registros inválidos (zonaRiesgo, clase), manejo de 404 para CAT, y fallbacks
+- [x] Crear `controller/TariffsController.java` — agregar `GET /api/v1/tariffs/fire`, `GET /api/v1/tariffs/cat`, `GET /api/v1/tariffs/electronic-equipment`
+- [x] Actualizar `exception/GlobalExceptionHandler.java` — agregar `@ExceptionHandler(TariffNotFoundException.class)` → 404 con `{ message, code: "TARIFF_NOT_FOUND" }`
+- [x] Verificar que `application.yaml` ya tiene retry `plataforma-core-ohs` configurado (no requiere cambios)
 
 #### Tests Backend
 

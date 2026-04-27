@@ -2,6 +2,8 @@ package com.plataformas_danos_back.client;
 
 import com.plataformas_danos_back.model.dto.AgentDto;
 import com.plataformas_danos_back.model.dto.BusinessLineDto;
+import com.plataformas_danos_back.model.dto.GuaranteeDto;
+import com.plataformas_danos_back.model.dto.RiskClassificationDto;
 import com.plataformas_danos_back.model.dto.SubscriberDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -54,6 +56,28 @@ public class CatalogsClientImpl implements CatalogsClient {
         String url = baseUrl + "/v1/business-lines";
         log.debug("Calling external service: GET {}", url);
         ResponseEntity<List<BusinessLineDto>> response = restTemplate.exchange(
+                url, HttpMethod.GET, null,
+                new ParameterizedTypeReference<>() {}
+        );
+        return response.getBody();
+    }
+
+    @Override
+    public List<RiskClassificationDto> getRiskClassifications() {
+        String url = baseUrl + "/v1/catalogs/risk-classification";
+        log.debug("Calling external service: GET {}", url);
+        ResponseEntity<List<RiskClassificationDto>> response = restTemplate.exchange(
+                url, HttpMethod.GET, null,
+                new ParameterizedTypeReference<>() {}
+        );
+        return response.getBody();
+    }
+
+    @Override
+    public List<GuaranteeDto> getGuarantees() {
+        String url = baseUrl + "/v1/catalogs/guarantees";
+        log.debug("Calling external service: GET {}", url);
+        ResponseEntity<List<GuaranteeDto>> response = restTemplate.exchange(
                 url, HttpMethod.GET, null,
                 new ParameterizedTypeReference<>() {}
         );

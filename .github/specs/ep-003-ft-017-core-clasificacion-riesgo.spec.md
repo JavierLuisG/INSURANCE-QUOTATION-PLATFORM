@@ -1,6 +1,6 @@
 ---
 id: SPEC-005
-status: APPROVED
+status: IN_PROGRESS
 feature: ep-003-ft-017-core-clasificacion-riesgo
 created: 2026-04-27
 updated: 2026-04-27
@@ -317,14 +317,14 @@ No aplica a esta spec — la integración con el frontend de Next.js es responsa
 
 #### Implementación
 
-- [ ] Crear `model/dto/RiskClassificationDto.java` — campos `id`, `nombre`, `descripcion` (Lombok `@Data`)
-- [ ] Crear `model/dto/GuaranteeDto.java` — campos `id`, `nombre`, `claveIncendio`, `tarifable` (Lombok `@Data`)
-- [ ] Actualizar `client/CatalogsClient.java` — agregar `getRiskClassifications()` y `getGuarantees()`
-- [ ] Actualizar `client/CatalogsClientImpl.java` — implementar llamadas a `/v1/catalogs/risk-classification` y `/v1/catalogs/guarantees` con `ParameterizedTypeReference`
-- [ ] Actualizar `service/CatalogsService.java` — agregar `getRiskClassifications()` y `getGuarantees()`
-- [ ] Actualizar `service/CatalogsServiceImpl.java` — implementar con `@Retry(name="plataforma-core-ohs", fallbackMethod=...)`, filtros de registros inválidos, y fallbacks `riskClassificationsFallback` y `guaranteesFallback`
-- [ ] Actualizar `controller/CatalogsController.java` — agregar `GET /risk-classifications` y `GET /guarantees`
-- [ ] Verificar que `application.yaml` ya tiene la instancia retry `plataforma-core-ohs` configurada (no requiere cambios)
+- [x] Crear `model/dto/RiskClassificationDto.java` — campos `id`, `nombre`, `descripcion` (Lombok `@Data`)
+- [x] Crear `model/dto/GuaranteeDto.java` — campos `id`, `nombre`, `claveIncendio`, `tarifable` (Lombok `@Data`)
+- [x] Actualizar `client/CatalogsClient.java` — agregar `getRiskClassifications()` y `getGuarantees()`
+- [x] Actualizar `client/CatalogsClientImpl.java` — implementar llamadas a `/v1/catalogs/risk-classification` y `/v1/catalogs/guarantees` con `ParameterizedTypeReference`
+- [x] Actualizar `service/CatalogsService.java` — agregar `getRiskClassifications()` y `getGuarantees()`
+- [x] Actualizar `service/CatalogsServiceImpl.java` — implementar con `@Retry(name="plataforma-core-ohs", fallbackMethod=...)`, filtros de registros inválidos, y fallbacks `riskClassificationsFallback` y `guaranteesFallback`
+- [x] Actualizar `controller/CatalogsController.java` — agregar `GET /risk-classifications` y `GET /guarantees`
+- [x] Verificar que `application.yaml` ya tiene la instancia retry `plataforma-core-ohs` configurada (no requiere cambios)
 
 #### Tests Backend
 

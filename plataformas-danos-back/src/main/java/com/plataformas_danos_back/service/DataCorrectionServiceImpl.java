@@ -5,6 +5,8 @@ import com.plataformas_danos_back.model.entity.CorrectionRule;
 import com.plataformas_danos_back.repository.CorrectionRuleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -15,11 +17,11 @@ import java.util.Optional;
 public class DataCorrectionServiceImpl implements DataCorrectionService {
 
     private final CorrectionRuleRepository correctionRuleRepository;
+    private final ApplicationContext applicationContext;
 
     @Override
     public CorrectionResult applyCorrection(String dataType, String fieldName, Object value) {
-        Optional<CorrectionRule> ruleOpt =
-                correctionRuleRepository.findByDataTypeAndFieldNameAndEnabled(dataType, fieldName, true);
+        Optional<CorrectionRule> ruleOpt = self().findCorrectionRule(dataType, fieldName);
 
         if (ruleOpt.isEmpty()) {
             return CorrectionResult.builder()
@@ -41,9 +43,17 @@ public class DataCorrectionServiceImpl implements DataCorrectionService {
 
     @Override
     public boolean hasCorrectionRule(String dataType, String fieldName) {
-        return correctionRuleRepository
-                .findByDataTypeAndFieldNameAndEnabled(dataType, fieldName, true)
-                .isPresent();
+        return self().findCorrectionRule(dataType, fieldName).isPresent();
+    }
+
+    @Override
+    @Cacheable(value = "correction-rules", key = "#dataType + ':' + #fieldName")
+    public Optional<CorrectionRule> findCorrectionRule(String dataType, String fieldName) {
+        return correctionRuleRepository.findByDataTypeAndFieldNameAndEnabled(dataType, fieldName, true);
+    }
+
+    private DataCorrectionService self() {
+        return applicationContext.getBean(DataCorrectionService.class);
     }
 
     private Object applyCorrectionType(CorrectionRule rule, Object value) {

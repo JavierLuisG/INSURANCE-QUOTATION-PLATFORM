@@ -11,8 +11,6 @@ spring:
       authentication-database: ${MONGODB_AUTH_DATABASE:admin}
   cache:
     type: caffeine
-    caffeine:
-      spec: maximumSize=500,expireAfterWrite=3600s
 
 server:
   port: ${PORT:8080}
@@ -34,6 +32,22 @@ plataforma-core-ohs:
 
 validation:
   inconsistency-threshold-percent: ${VALIDATION_INCONSISTENCY_THRESHOLD_PERCENT:10}
+
+cache:
+  ttl:
+    catalogs-subscribers: ${CACHE_TTL_CATALOGS_SUBSCRIBERS:43200}
+    catalogs-agents: ${CACHE_TTL_CATALOGS_AGENTS:43200}
+    catalogs-business-lines: ${CACHE_TTL_CATALOGS_BUSINESS_LINES:43200}
+    catalogs-risk-classifications: ${CACHE_TTL_CATALOGS_RISK_CLASSIFICATIONS:43200}
+    catalogs-guarantees: ${CACHE_TTL_CATALOGS_GUARANTEES:43200}
+    tariffs-fire: ${CACHE_TTL_TARIFFS_FIRE:21600}
+    tariffs-electronic-equipment: ${CACHE_TTL_TARIFFS_ELECTRONIC_EQUIPMENT:21600}
+    tariffs-cat: ${CACHE_TTL_TARIFFS_CAT:3600}
+    zip-codes: ${CACHE_TTL_ZIP_CODES:3600}
+    validation-rules: ${CACHE_TTL_VALIDATION_RULES:3600}
+    correction-rules: ${CACHE_TTL_CORRECTION_RULES:3600}
+  refresh:
+    cron: ${CACHE_REFRESH_CRON:0 0 */6 * * *}
 
 resilience4j:
   circuitbreaker:

@@ -3,7 +3,12 @@ spring:
     name: plataformas-danos-back
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/plataformas_danos}
+      host: ${MONGODB_HOST:localhost}
+      port: ${MONGODB_PORT:27017}
+      database: ${MONGODB_DATABASE:plataformas_danos}
+      username: ${MONGODB_USERNAME:admin}
+      password: ${MONGODB_PASSWORD:admin}
+      authentication-database: ${MONGODB_AUTH_DATABASE:admin}
   cache:
     type: caffeine
     caffeine:
@@ -26,6 +31,9 @@ jwt:
 plataforma-core-ohs:
   url: ${PLATAFORMA_CORE_OHS_URL:http://localhost:3001}
   timeout-ms: ${PLATAFORMA_CORE_OHS_TIMEOUT_MS:5000}
+
+validation:
+  inconsistency-threshold-percent: ${VALIDATION_INCONSISTENCY_THRESHOLD_PERCENT:10}
 
 resilience4j:
   circuitbreaker:

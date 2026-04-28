@@ -2,6 +2,9 @@ package com.plataformas_danos_back.service;
 
 import com.plataformas_danos_back.client.TariffsClient;
 import com.plataformas_danos_back.model.dto.TariffCatDto;
+import com.plataformas_danos_back.repository.CorrectionRuleRepository;
+import com.plataformas_danos_back.repository.DataInconsistencyRepository;
+import com.plataformas_danos_back.repository.ValidationRuleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +14,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,6 +29,15 @@ class TariffsServiceImplCacheTest {
     @MockitoBean
     private TariffsClient tariffsClient;
 
+    @MockitoBean
+    private ValidationRuleRepository validationRuleRepository;
+
+    @MockitoBean
+    private CorrectionRuleRepository correctionRuleRepository;
+
+    @MockitoBean
+    private DataInconsistencyRepository dataInconsistencyRepository;
+
     @Autowired
     private TariffsService tariffsService;
 
@@ -30,7 +45,10 @@ class TariffsServiceImplCacheTest {
     private CacheManager cacheManager;
 
     @BeforeEach
-    void clearCaches() {
+    void setUp() {
+        when(validationRuleRepository.findByDataTypeAndEnabled(any(), anyBoolean())).thenReturn(List.of());
+        when(correctionRuleRepository.findByDataTypeAndFieldNameAndEnabled(any(), any(), anyBoolean()))
+                .thenReturn(Optional.empty());
         Stream.of("tariffs-fire", "tariffs-cat", "tariffs-electronic-equipment")
                 .map(cacheManager::getCache)
                 .filter(Objects::nonNull)

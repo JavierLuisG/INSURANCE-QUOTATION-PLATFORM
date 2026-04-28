@@ -1,9 +1,9 @@
 ---
 id: SPEC-001
-status: IN_PROGRESS
+status: IMPLEMENTED
 feature: ep-003-ft-020-core-mock-plataforma-core
 created: 2026-04-24
-updated: 2026-04-24
+updated: 2026-04-28
 author: spec-generator
 version: "1.0"
 related-specs: []
@@ -768,66 +768,66 @@ NODE_ENV=development
 
 #### Implementación — Infraestructura base (HU-092)
 
-- [ ] Crear `src/config/database.js` con conexión Mongoose a MongoDB
-- [ ] Crear `src/index.js` con Express app, CORS, body-parser, ejecución de migraciones y arranque del servidor
-- [ ] Crear `.env.example` con variables `PORT`, `MONGODB_URI`, `NODE_ENV`
-- [ ] Configurar `src/migrations/migrate-mongo-config.js` apuntando a `MONGODB_URI`
-- [ ] Implementar `GET /health` con respuesta `{ status: "UP", service: "plataforma-core-ohs-mock" }`
-- [ ] Implementar `src/middleware/mockScenarioInterceptor.js` con lógica DELAY/HTTP_ERROR/MALFORMED_DATA
+- [x] Crear `src/config/database.js` con conexión Mongoose a MongoDB
+- [x] Crear `src/index.js` con Express app, CORS, body-parser, ejecución de migraciones y arranque del servidor
+- [x] Crear `.env.example` con variables `PORT`, `MONGODB_URI`, `NODE_ENV`
+- [x] Configurar `src/migrations/migrate-mongo-config.js` apuntando a `MONGODB_URI`
+- [x] Implementar `GET /health` con respuesta `{ status: "UP", service: "plataforma-core-ohs-mock" }`
+- [x] Implementar `src/middleware/mockScenarioInterceptor.js` con lógica DELAY/HTTP_ERROR/MALFORMED_DATA
 
 #### Implementación — Modelos MongoDB
 
-- [ ] Crear modelo `Subscriber.js` con campos: id, nombre, clave, activo
-- [ ] Crear modelo `Agent.js` con campos: id, nombre, clave, activo
-- [ ] Crear modelo `BusinessLine.js` con campos: id, descripcion, claveIncendio, activo
-- [ ] Crear modelo `ZipCode.js` con campos: codigoPostal, zonaCAT, nivelTecnico, estado, municipio, ciudad
-- [ ] Crear modelo `RiskClassification.js` con campos: id, nombre, descripcion
-- [ ] Crear modelo `Guarantee.js` con campos: id, nombre, claveIncendio, tarifable
-- [ ] Crear modelo `TariffFire.js` con campos: zonaRiesgo, tipoConstructivo, tasaBase, factorRecargo, vigenciaDesde, vigenciaHasta
-- [ ] Crear modelo `TariffCat.js` con campos: zona, factorTEV, factorFHM
-- [ ] Crear modelo `TariffElectronicEquipment.js` con campos: clase, nivelZona, factor
-- [ ] Crear modelo `MockScenario.js` con campos: endpointPath, scenarioType, delayMs, httpStatusCode, responseBody, activo
+- [x] Crear modelo `Subscriber.js` con campos: id, nombre, clave, activo
+- [x] Crear modelo `Agent.js` con campos: id, nombre, clave, activo
+- [x] Crear modelo `BusinessLine.js` con campos: id, descripcion, claveIncendio, activo
+- [x] Crear modelo `ZipCode.js` con campos: codigoPostal, zonaCAT, nivelTecnico, estado, municipio, ciudad
+- [x] Crear modelo `RiskClassification.js` con campos: id, nombre, descripcion
+- [x] Crear modelo `Guarantee.js` con campos: id, nombre, claveIncendio, tarifable
+- [x] Crear modelo `TariffFire.js` con campos: zonaRiesgo, tipoConstructivo, tasaBase, factorRecargo, vigenciaDesde, vigenciaHasta
+- [x] Crear modelo `TariffCat.js` con campos: zona, factorTEV, factorFHM
+- [x] Crear modelo `TariffElectronicEquipment.js` con campos: clase, nivelZona, factor
+- [x] Crear modelo `MockScenario.js` con campos: endpointPath, scenarioType, delayMs, httpStatusCode, responseBody, activo
 
 #### Implementación — Rutas
 
-- [ ] Crear `src/routes/subscribers.js` con `GET /v1/subscribers`
-- [ ] Crear `src/routes/agents.js` con `GET /v1/agents`
-- [ ] Crear `src/routes/businessLines.js` con `GET /v1/business-lines`
-- [ ] Crear `src/routes/zipCodes.js` con `GET /v1/zip-codes/:zipCode` y `POST /v1/zip-codes/validate` (con validación express-validator para formato de CP)
-- [ ] Crear `src/routes/catalogs.js` con `GET /v1/catalogs/risk-classification` y `GET /v1/catalogs/guarantees`
-- [ ] Crear `src/routes/tariffs.js` con `GET /v1/tariffs/fire`, `PUT /v1/tariffs/fire`, `GET /v1/tariffs/cat`, `GET /v1/tariffs/electronic-equipment`
-- [ ] Crear `src/routes/folios.js` con `GET /v1/folios` y lógica de secuencia atómica
-- [ ] Crear `src/routes/mockScenarios.js` con `POST /_mock/scenarios` y `DELETE /_mock/scenarios/:endpointPath`
-- [ ] Registrar todos los routers en `src/index.js`
+- [x] Crear `src/routes/subscribers.js` con `GET /v1/subscribers`
+- [x] Crear `src/routes/agents.js` con `GET /v1/agents`
+- [x] Crear `src/routes/businessLines.js` con `GET /v1/business-lines`
+- [x] Crear `src/routes/zipCodes.js` con `GET /v1/zip-codes/:zipCode` y `POST /v1/zip-codes/validate` (con validación express-validator para formato de CP)
+- [x] Crear `src/routes/catalogs.js` con `GET /v1/catalogs/risk-classification` y `GET /v1/catalogs/guarantees`
+- [x] Crear `src/routes/tariffs.js` con `GET /v1/tariffs/fire`, `PUT /v1/tariffs/fire`, `GET /v1/tariffs/cat`, `GET /v1/tariffs/electronic-equipment`
+- [x] Crear `src/routes/folios.js` con `GET /v1/folios` y lógica de secuencia atómica
+- [x] Crear `src/routes/mockScenarios.js` con `POST /_mock/scenarios` y `DELETE /_mock/scenarios/:endpointPath`
+- [x] Registrar todos los routers en `src/index.js`
 
 #### Implementación — Migraciones de datos
 
-- [ ] Crear migración `V1__initial_subscribers.js` con ≥5 suscriptores representativos (up + down)
-- [ ] Crear migración `V2__initial_agents.js` con ≥5 agentes representativos (up + down)
-- [ ] Crear migración `V3__initial_business_lines.js` con ≥10 giros con `claveIncendio` (up + down)
-- [ ] Crear migración `V4__initial_zip_codes.js` con ≥20 CPs de diferentes zonas (A, B, C, D) y estados (up + down)
-- [ ] Crear migración `V5__initial_risk_classifications.js` con ≥3 clasificaciones (up + down)
-- [ ] Crear migración `V6__initial_guarantees.js` con las 14 garantías del motor de cálculo (up + down)
-- [ ] Crear migración `V7__initial_tariffs_fire.js` con tarifas para todas las zonas y tipos constructivos (up + down)
-- [ ] Crear migración `V8__initial_tariffs_cat.js` con factores CAT para zonas A, B, C, D (up + down)
-- [ ] Crear migración `V9__initial_tariffs_electronic_equipment.js` con factores por clase y nivel (up + down)
+- [x] Crear migración `V1__initial_subscribers.js` con ≥5 suscriptores representativos (up + down)
+- [x] Crear migración `V2__initial_agents.js` con ≥5 agentes representativos (up + down)
+- [x] Crear migración `V3__initial_business_lines.js` con ≥10 giros con `claveIncendio` (up + down)
+- [x] Crear migración `V4__initial_zip_codes.js` con ≥20 CPs de diferentes zonas (A, B, C, D) y estados (up + down)
+- [x] Crear migración `V5__initial_risk_classifications.js` con ≥3 clasificaciones (up + down)
+- [x] Crear migración `V6__initial_guarantees.js` con las 14 garantías del motor de cálculo (up + down)
+- [x] Crear migración `V7__initial_tariffs_fire.js` con tarifas para todas las zonas y tipos constructivos (up + down)
+- [x] Crear migración `V8__initial_tariffs_cat.js` con factores CAT para zonas A, B, C, D (up + down)
+- [x] Crear migración `V9__initial_tariffs_electronic_equipment.js` con factores por clase y nivel (up + down)
 
 #### Tests Backend
 
-- [ ] `test_health_returns_200` — verifica que GET /health retorna 200
-- [ ] `test_subscribers_returns_list` — happy path lista de suscriptores
-- [ ] `test_agents_returns_empty_list` — catálogo vacío retorna 200 con []
-- [ ] `test_zip_code_valid_returns_zona` — GET /v1/zip-codes/06600 retorna zona correcta
-- [ ] `test_zip_code_not_found_returns_404` — GET /v1/zip-codes/99999 retorna 404
-- [ ] `test_zip_code_invalid_format_returns_400` — GET /v1/zip-codes/ABCDE retorna 400
-- [ ] `test_zip_codes_validate_batch` — POST /v1/zip-codes/validate con array mixto
-- [ ] `test_tariffs_fire_returns_list` — GET /v1/tariffs/fire retorna tarifas
-- [ ] `test_tariffs_cat_zone_not_found_returns_404` — zona inexistente retorna 404
-- [ ] `test_folio_generation_sequential` — GET /v1/folios retorna folio con patrón COT-AAAA-NNNNNN
-- [ ] `test_mock_scenario_delay_applied` — escenario DELAY retrasa la respuesta
-- [ ] `test_mock_scenario_http_error_applied` — escenario HTTP_ERROR retorna el código configurado
-- [ ] `test_mock_scenario_invalid_delay_returns_400` — delay negativo es rechazado
-- [ ] `test_migration_applies_on_empty_db` — base de datos vacía recibe migraciones correctamente
+- [x] `test_health_returns_200` — verifica que GET /health retorna 200
+- [x] `test_subscribers_returns_list` — happy path lista de suscriptores
+- [x] `test_agents_returns_empty_list` — catálogo vacío retorna 200 con []
+- [x] `test_zip_code_valid_returns_zona` — GET /v1/zip-codes/06600 retorna zona correcta
+- [x] `test_zip_code_not_found_returns_404` — GET /v1/zip-codes/99999 retorna 404
+- [x] `test_zip_code_invalid_format_returns_400` — GET /v1/zip-codes/ABCDE retorna 400
+- [x] `test_zip_codes_validate_batch` — POST /v1/zip-codes/validate con array mixto
+- [x] `test_tariffs_fire_returns_list` — GET /v1/tariffs/fire retorna tarifas
+- [x] `test_tariffs_cat_zone_not_found_returns_404` — zona inexistente retorna 404
+- [x] `test_folio_generation_sequential` — GET /v1/folios retorna folio con patrón COT-AAAA-NNNNNN
+- [x] `test_mock_scenario_delay_applied` — escenario DELAY retrasa la respuesta
+- [x] `test_mock_scenario_http_error_applied` — escenario HTTP_ERROR retorna el código configurado
+- [x] `test_mock_scenario_invalid_delay_returns_400` — delay negativo es rechazado
+- [x] `test_migration_applies_on_empty_db` — base de datos vacía recibe migraciones correctamente
 
 ### Frontend
 
@@ -835,11 +835,11 @@ _No aplica — esta feature es exclusivamente de backend/infraestructura. No gen
 
 ### QA
 
-- [ ] Ejecutar skill `/gherkin-case-generator` → criterios CRITERIO-1.1 a CRITERIO-8.3
-- [ ] Ejecutar skill `/risk-identifier` → clasificación ASD de riesgos (desactualización del contrato, performance, datos no representativos)
-- [ ] Validar prueba de carga con JMeter/Artillery a 100 RPS durante 60s → P95 < 150ms, error rate < 0.1%
-- [ ] Verificar que cada migración tiene función `up` y `down` funcionales
-- [ ] Validar que todos los campos de respuesta coinciden con los contratos esperados por el backend Spring Boot (FT-015 a FT-018)
-- [ ] Smoke test de integración: arrancar mock server y ejecutar una solicitud a cada endpoint principal
-- [ ] Revisar cobertura de tests contra criterios de aceptación
-- [ ] Actualizar estado spec: `status: IMPLEMENTED`
+- [x] Ejecutar skill `/gherkin-case-generator` → criterios CRITERIO-1.1 a CRITERIO-8.3
+- [x] Ejecutar skill `/risk-identifier` → clasificación ASD de riesgos (desactualización del contrato, performance, datos no representativos)
+- [x] Validar prueba de carga con JMeter/Artillery a 100 RPS durante 60s → P95 < 150ms, error rate < 0.1%
+- [x] Verificar que cada migración tiene función `up` y `down` funcionales
+- [x] Validar que todos los campos de respuesta coinciden con los contratos esperados por el backend Spring Boot (FT-015 a FT-018)
+- [x] Smoke test de integración: arrancar mock server y ejecutar una solicitud a cada endpoint principal
+- [x] Revisar cobertura de tests contra criterios de aceptación
+- [x] Actualizar estado spec: `status: IMPLEMENTED`

@@ -25,6 +25,9 @@ class ZipCodeServiceImplTest {
     @Mock
     private ZipCodeClient zipCodeClient;
 
+    @Mock
+    private DataValidationService dataValidationService;
+
     @InjectMocks
     private ZipCodeServiceImpl service;
 

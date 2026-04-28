@@ -27,6 +27,9 @@ class CatalogsServiceImplTest {
     @Mock
     private CatalogsClient catalogsClient;
 
+    @Mock
+    private DataValidationService dataValidationService;
+
     @InjectMocks
     private CatalogsServiceImpl service;
 

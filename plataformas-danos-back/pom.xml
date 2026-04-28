@@ -68,6 +68,12 @@
 			<artifactId>spring-boot-starter-cache</artifactId>
 		</dependency>
 
+		<!-- ── Actuator (métricas Micrometer / Caffeine stats) ──────── -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
 		<!-- ── AOP (auditoría y resiliencia transversal) ─────────────── -->
 		<dependency>
 			<groupId>org.aspectj</groupId>

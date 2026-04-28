@@ -1,6 +1,6 @@
 ---
 id: SPEC-008
-status: APPROVED
+status: IN_PROGRESS
 feature: ep-003-ft-022-core-cache-datos
 created: 2026-04-28
 updated: 2026-04-28
@@ -485,66 +485,66 @@ No aplica — feature exclusivamente backend.
 
 #### Implementación (HU-105 + HU-106)
 
-- [ ] Crear `config/CacheProperties.java` — `@ConfigurationProperties(prefix = "cache.ttl")` con campos configurables por caché
-- [ ] Crear `config/CacheConfig.java` — `@Configuration` + `@EnableCaching` + `CaffeineCacheManager` con 11 cachés nombradas, TTLs individuales y `recordStats()`
-- [ ] Agregar `@Cacheable(value = "catalogs-subscribers", key = "'all'")` en `CatalogsServiceImpl.getSubscribers()`
-- [ ] Agregar `@Cacheable(value = "catalogs-agents", key = "'all'")` en `CatalogsServiceImpl.getAgents()`
-- [ ] Agregar `@Cacheable(value = "catalogs-business-lines", key = "'all'")` en `CatalogsServiceImpl.getBusinessLines()`
-- [ ] Agregar `@Cacheable(value = "catalogs-risk-classifications", key = "'all'")` en `CatalogsServiceImpl.getRiskClassifications()`
-- [ ] Agregar `@Cacheable(value = "catalogs-guarantees", key = "'all'")` en `CatalogsServiceImpl.getGuarantees()`
-- [ ] Agregar `@Cacheable(value = "tariffs-fire", key = "'all'")` en `TariffsServiceImpl.getTariffsFire()`
-- [ ] Agregar `@Cacheable(value = "tariffs-cat", key = "#zona")` en `TariffsServiceImpl.getTariffCat(String zona)`
-- [ ] Agregar `@Cacheable(value = "tariffs-electronic-equipment", key = "'all'")` en `TariffsServiceImpl.getTariffsElectronicEquipment()`
-- [ ] Agregar `@Cacheable(value = "zip-codes", key = "#zipCode")` en `ZipCodeServiceImpl.getByZipCode(String zipCode)`
-- [ ] Agregar `@Cacheable(value = "validation-rules", key = "#dataType")` en `DataValidationEngineImpl.getRulesForDataType(String dataType)`
-- [ ] Agregar `@Cacheable(value = "correction-rules", key = "#dataType + ':' + #fieldName")` en `DataCorrectionServiceImpl` para consultas de reglas
-- [ ] Actualizar `application.yaml` — agregar sección `cache.ttl.*` con TTLs por caché y `cache.refresh.cron`
+- [x] Crear `config/CacheProperties.java` — `@ConfigurationProperties(prefix = "cache.ttl")` con campos configurables por caché
+- [x] Crear `config/CacheConfig.java` — `@Configuration` + `@EnableCaching` + `CaffeineCacheManager` con 11 cachés nombradas, TTLs individuales y `recordStats()`
+- [x] Agregar `@Cacheable(value = "catalogs-subscribers", key = "'all'")` en `CatalogsServiceImpl.getSubscribers()`
+- [x] Agregar `@Cacheable(value = "catalogs-agents", key = "'all'")` en `CatalogsServiceImpl.getAgents()`
+- [x] Agregar `@Cacheable(value = "catalogs-business-lines", key = "'all'")` en `CatalogsServiceImpl.getBusinessLines()`
+- [x] Agregar `@Cacheable(value = "catalogs-risk-classifications", key = "'all'")` en `CatalogsServiceImpl.getRiskClassifications()`
+- [x] Agregar `@Cacheable(value = "catalogs-guarantees", key = "'all'")` en `CatalogsServiceImpl.getGuarantees()`
+- [x] Agregar `@Cacheable(value = "tariffs-fire", key = "'all'")` en `TariffsServiceImpl.getTariffsFire()`
+- [x] Agregar `@Cacheable(value = "tariffs-cat", key = "#zona")` en `TariffsServiceImpl.getTariffCat(String zona)`
+- [x] Agregar `@Cacheable(value = "tariffs-electronic-equipment", key = "'all'")` en `TariffsServiceImpl.getTariffsElectronicEquipment()`
+- [x] Agregar `@Cacheable(value = "zip-codes", key = "#zipCode")` en `ZipCodeServiceImpl.getByZipCode(String zipCode)`
+- [x] Agregar `@Cacheable(value = "validation-rules", key = "#dataType")` en `DataValidationEngineImpl.getRulesForDataType(String dataType)`
+- [x] Agregar `@Cacheable(value = "correction-rules", key = "#dataType + ':' + #fieldName")` en `DataCorrectionServiceImpl` para consultas de reglas
+- [x] Actualizar `application.yaml` — agregar sección `cache.ttl.*` con TTLs por caché y `cache.refresh.cron`
 
 #### Implementación (HU-107 — Scheduler)
 
-- [ ] Agregar `@EnableScheduling` en `PlataformasDanosBackApplication.java` o `CacheConfig.java`
-- [ ] Crear `service/CacheRefreshService.java` — `@Scheduled(cron = "${cache.refresh.cron:0 0 */6 * * *}")` que refresca catálogos estáticos via `@CacheEvict` + llamada a clientes HTTP; maneja excepciones sin propagar; notifica en fallo (log ERROR)
-- [ ] Registrar en logs el estado final de cada ejecución (SUCCESS / FAILED) con detalles
+- [x] Agregar `@EnableScheduling` en `PlataformasDanosBackApplication.java` o `CacheConfig.java`
+- [x] Crear `service/CacheRefreshService.java` — `@Scheduled(cron = "${cache.refresh.cron:0 0 */6 * * *}")` que refresca catálogos estáticos via `@CacheEvict` + llamada a clientes HTTP; maneja excepciones sin propagar; notifica en fallo (log ERROR)
+- [x] Registrar en logs el estado final de cada ejecución (SUCCESS / FAILED) con detalles
 
 #### Implementación (HU-108 — Invalidación bajo demanda)
 
-- [ ] Crear `service/CacheService.java` (interfaz) — métodos: `getStats()`, `evict(String cacheName)`, `evictAll()`
-- [ ] Crear `service/CacheServiceImpl.java` — implementación usando `CacheManager`; lanzar `CacheNotFoundException` si el nombre no existe; registrar auditoría en cada evicción
-- [ ] Crear `exception/CacheNotFoundException.java` — extiende `RuntimeException`
-- [ ] Crear `controller/CacheController.java` — endpoints: `GET /api/v1/cache/stats`, `DELETE /api/v1/cache/{cacheName}`, `DELETE /api/v1/cache`
-- [ ] Registrar `CacheNotFoundException` en `GlobalExceptionHandler` — mapear a 404 con `{ "message": "...", "code": "CACHE_NOT_FOUND" }`
+- [x] Crear `service/CacheService.java` (interfaz) — métodos: `getStats()`, `evict(String cacheName)`, `evictAll()`
+- [x] Crear `service/CacheServiceImpl.java` — implementación usando `CacheManager`; lanzar `CacheNotFoundException` si el nombre no existe; registrar auditoría en cada evicción
+- [x] Crear `exception/CacheNotFoundException.java` — extiende `RuntimeException`
+- [x] Crear `controller/CacheController.java` — endpoints: `GET /api/v1/cache/stats`, `DELETE /api/v1/cache/{cacheName}`, `DELETE /api/v1/cache`
+- [x] Registrar `CacheNotFoundException` en `GlobalExceptionHandler` — mapear a 404 con `{ "message": "...", "code": "CACHE_NOT_FOUND" }`
 
 #### Implementación (HU-109 — Monitoreo)
 
-- [ ] Verificar/agregar `spring-boot-starter-actuator` en `pom.xml` si no está presente
-- [ ] Habilitar `recordStats()` en cada `Caffeine.newBuilder()` dentro de `CacheConfig`
-- [ ] Implementar `CacheService.getStats()` que retorna `List<CacheStatsResponse>` con `name`, `estimatedSize`, `hitCount`, `missCount`, `ttlSeconds`
-- [ ] Crear `model/dto/CacheStatsResponse.java` — DTO con los campos de métricas
+- [x] Verificar/agregar `spring-boot-starter-actuator` en `pom.xml` si no está presente
+- [x] Habilitar `recordStats()` en cada `Caffeine.newBuilder()` dentro de `CacheConfig`
+- [x] Implementar `CacheService.getStats()` que retorna `List<CacheStatsResponse>` con `name`, `estimatedSize`, `hitCount`, `missCount`, `ttlSeconds`
+- [x] Crear `model/dto/CacheStatsResponse.java` — DTO con los campos de métricas
 
 #### Tests Backend
 
-- [ ] `test_getSubscribers_secondCall_doesNotInvokeCatalogsClient` — cache hit, sin llamada HTTP
-- [ ] `test_getAgents_secondCall_doesNotInvokeClient`
-- [ ] `test_getBusinessLines_secondCall_doesNotInvokeClient`
-- [ ] `test_getRiskClassifications_secondCall_doesNotInvokeClient`
-- [ ] `test_getGuarantees_secondCall_doesNotInvokeClient`
-- [ ] `test_getTariffCat_sameZona_secondCall_doesNotInvokeClient`
-- [ ] `test_getTariffCat_differentZona_callsClientEachTime` — claves distintas no comparten entrada
-- [ ] `test_getTariffsFire_secondCall_doesNotInvokeClient`
-- [ ] `test_getTariffsElectronicEquipment_secondCall_doesNotInvokeClient`
-- [ ] `test_getByZipCode_sameZip_secondCall_doesNotInvokeClient`
-- [ ] `test_getRulesForDataType_sameDataType_secondCall_doesNotInvokeRepository`
-- [ ] `test_cacheRefreshService_scheduledTask_evictsAndReloadsSubscribers` — `CacheRefreshServiceTest`
-- [ ] `test_cacheRefreshService_externalServiceFails_doesNotPropagate` — `CacheRefreshServiceTest`
-- [ ] `test_cacheService_getStats_returnsAllCacheNames` — `CacheServiceImplTest`
-- [ ] `test_cacheService_evict_knownCache_clearsEntries` — `CacheServiceImplTest`
-- [ ] `test_cacheService_evict_unknownCache_throwsCacheNotFoundException` — `CacheServiceImplTest`
-- [ ] `test_cacheService_evictAll_clearsAllCaches` — `CacheServiceImplTest`
-- [ ] `test_cacheController_getStats_returns200` — `CacheControllerTest`
-- [ ] `test_cacheController_evictByName_returns204` — `CacheControllerTest`
-- [ ] `test_cacheController_evictByName_notFound_returns404` — `CacheControllerTest`
-- [ ] `test_cacheController_evictAll_returns204` — `CacheControllerTest`
-- [ ] `test_cacheController_noJwt_returns401` — `CacheControllerTest`
+- [x] `test_getSubscribers_secondCall_doesNotInvokeCatalogsClient` — cache hit, sin llamada HTTP (`CatalogsServiceImplCacheTest`)
+- [x] `test_getAgents_secondCall_doesNotInvokeClient` (`CatalogsServiceImplCacheTest`)
+- [x] `test_getBusinessLines_secondCall_doesNotInvokeClient` (`CatalogsServiceImplCacheTest`)
+- [x] `test_getRiskClassifications_secondCall_doesNotInvokeClient` (`CatalogsServiceImplCacheTest`)
+- [x] `test_getGuarantees_secondCall_doesNotInvokeClient` (`CatalogsServiceImplCacheTest`)
+- [x] `test_getTariffCat_sameZona_secondCall_doesNotInvokeClient` (`TariffsServiceImplCacheTest`)
+- [x] `test_getTariffCat_differentZona_callsClientEachTime` — claves distintas no comparten entrada (`TariffsServiceImplCacheTest`)
+- [x] `test_getTariffsFire_secondCall_doesNotInvokeClient` (`TariffsServiceImplCacheTest`)
+- [x] `test_getTariffsElectronicEquipment_secondCall_doesNotInvokeClient` (`TariffsServiceImplCacheTest`)
+- [x] `test_getByZipCode_sameZip_secondCall_doesNotInvokeClient` (`ZipCodeServiceImplCacheTest`)
+- [x] `test_getRulesForDataType_sameDataType_secondCall_doesNotInvokeRepository` (`DataValidationEngineCacheTest`)
+- [x] `test_cacheRefreshService_scheduledTask_evictsAndReloadsSubscribers` — `CacheRefreshServiceTest`
+- [x] `test_cacheRefreshService_externalServiceFails_doesNotPropagate` — `CacheRefreshServiceTest`
+- [x] `test_cacheService_getStats_returnsAllCacheNames` — `CacheServiceImplTest`
+- [x] `test_cacheService_evict_knownCache_clearsEntries` — `CacheServiceImplTest`
+- [x] `test_cacheService_evict_unknownCache_throwsCacheNotFoundException` — `CacheServiceImplTest`
+- [x] `test_cacheService_evictAll_clearsAllCaches` — `CacheServiceImplTest`
+- [x] `test_cacheController_getStats_returns200` — `CacheControllerTest`
+- [x] `test_cacheController_evictByName_returns204` — `CacheControllerTest`
+- [x] `test_cacheController_evictByName_notFound_returns404` — `CacheControllerTest`
+- [x] `test_cacheController_evictAll_returns204` — `CacheControllerTest`
+- [ ] `test_cacheController_noJwt_returns401` — **BLOQUEADO**: `SecurityConfig` configura `anyRequest().permitAll()` para todos los endpoints; requiere actualizar `SecurityFilterChain` para exigir JWT en `/api/v1/cache/**` antes de poder implementar este test
 
 ### Frontend
 
@@ -554,7 +554,7 @@ No aplica — feature exclusivamente backend.
 
 - [ ] Ejecutar skill `/gherkin-case-generator` → criterios CRITERIO-105.1 a 109.4
 - [ ] Ejecutar skill `/risk-identifier` → clasificar riesgo de stale data, cache stampede, scheduler failure
-- [ ] Verificar que todos los tests de caché pasan con `mvn test`
+- [x] Verificar que todos los tests de caché pasan con `mvn test` — 164 tests, 0 failures, BUILD SUCCESS (2026-04-28)
 - [ ] Verificar cobertura JaCoCo ≥ 80% global tras los cambios
 - [ ] Probar manualmente: segunda llamada a `GET /api/v1/catalogs/subscribers` no llama a plataforma-core-ohs (verificar en logs)
 - [ ] Probar manualmente: `DELETE /api/v1/cache/catalogs-subscribers` + siguiente GET recarga desde origen

@@ -26,6 +26,9 @@ class TariffsServiceImplTest {
     @Mock
     private TariffsClient tariffsClient;
 
+    @Mock
+    private DataValidationService dataValidationService;
+
     @InjectMocks
     private TariffsServiceImpl service;
 

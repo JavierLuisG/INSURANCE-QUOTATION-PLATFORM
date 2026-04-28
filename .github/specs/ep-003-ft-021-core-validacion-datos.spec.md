@@ -1,9 +1,9 @@
 ---
 id: SPEC-007
-status: IN_PROGRESS
+status: IMPLEMENTED
 feature: ep-003-ft-021-core-validacion-datos
 created: 2026-04-27
-updated: 2026-04-27
+updated: 2026-04-28
 author: spec-generator
 version: "1.0"
 related-specs:
@@ -828,7 +828,7 @@ public class CatalogsServiceImpl implements CatalogsService {
 
 - [x] Crear modelo `DataInconsistency` con anotación `@Document` en `model/entity/`
 - [x] Crear modelo `ValidationRule` con anotación `@Document` en `model/entity/`
-- [ ] Extender DTOs existentes (`SubscriberDto`, `TariffCatDto`, `ZipCodeDto`, etc.) con campo `dataStatus`
+- [x] Extender DTOs existentes (`SubscriberDto`, `TariffCatDto`, `ZipCodeDto`, etc.) con campo `dataStatus`
 - [x] Crear DTOs de Request/Response (`ValidationRequest`, `ValidationResult`, `ValidationError`, `DataInconsistencyResponse`) en `model/dto/`
 - [x] Implementar `DataInconsistencyRepository` — métodos CRUD y búsqueda por tipo/status/fecha
 - [x] Implementar `ValidationRuleRepository` — métodos de búsqueda y filtrado
@@ -837,12 +837,12 @@ public class CatalogsServiceImpl implements CatalogsService {
 - [x] Implementar `DataValidationController` — endpoints REST para validación, consulta de inconsistencias y gestión de reglas
 - [x] Crear `ValidationRulesConfig` — carga de reglas iniciales desde archivo o base de datos
 - [x] Crear excepciones custom en `exception/` (ValidationException, InvalidRuleException, InconsistencyRecordException)
-- [ ] Integrar validación en `CatalogsServiceImpl` — después de obtener suscriptores, agentes, giros
-- [ ] Integrar validación en `TariffsServiceImpl` — después de obtener tarifas CAT, Fire, Electronic Equipment
-- [ ] Integrar validación en `ZipCodeServiceImpl` — después de obtener códigos postales
+- [x] Integrar validación en `CatalogsServiceImpl` — después de obtener suscriptores, agentes, giros
+- [x] Integrar validación en `TariffsServiceImpl` — después de obtener tarifas CAT, Fire, Electronic Equipment
+- [x] Integrar validación en `ZipCodeServiceImpl` — después de obtener códigos postales
 - [x] Configurar índices en MongoDB para colecciones `data-inconsistencies` y `validation-rules`
 - [x] Configurar TTL en `data-inconsistencies` (90 días)
-- [ ] Configurar caché Caffeine para `ValidationRule` con TTL 1 hora
+- [x] Configurar caché Caffeine para `ValidationRule` con TTL 1 hora
 - [x] Registrar endpoint `/api/v1/data-validation/**` en punto de entrada de la app
 
 #### Implementación — HU-102: Corrección Automática

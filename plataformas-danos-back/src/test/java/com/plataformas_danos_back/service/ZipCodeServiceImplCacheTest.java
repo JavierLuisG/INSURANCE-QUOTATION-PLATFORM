@@ -2,6 +2,9 @@ package com.plataformas_danos_back.service;
 
 import com.plataformas_danos_back.client.ZipCodeClient;
 import com.plataformas_danos_back.model.dto.ZipCodeDto;
+import com.plataformas_danos_back.repository.CorrectionRuleRepository;
+import com.plataformas_danos_back.repository.DataInconsistencyRepository;
+import com.plataformas_danos_back.repository.ValidationRuleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +13,11 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.util.List;
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,6 +28,15 @@ class ZipCodeServiceImplCacheTest {
     @MockitoBean
     private ZipCodeClient zipCodeClient;
 
+    @MockitoBean
+    private ValidationRuleRepository validationRuleRepository;
+
+    @MockitoBean
+    private CorrectionRuleRepository correctionRuleRepository;
+
+    @MockitoBean
+    private DataInconsistencyRepository dataInconsistencyRepository;
+
     @Autowired
     private ZipCodeService zipCodeService;
 
@@ -27,7 +44,10 @@ class ZipCodeServiceImplCacheTest {
     private CacheManager cacheManager;
 
     @BeforeEach
-    void clearCaches() {
+    void setUp() {
+        when(validationRuleRepository.findByDataTypeAndEnabled(any(), anyBoolean())).thenReturn(List.of());
+        when(correctionRuleRepository.findByDataTypeAndFieldNameAndEnabled(any(), any(), anyBoolean()))
+                .thenReturn(Optional.empty());
         Cache cache = cacheManager.getCache("zip-codes");
         if (cache != null) cache.clear();
     }

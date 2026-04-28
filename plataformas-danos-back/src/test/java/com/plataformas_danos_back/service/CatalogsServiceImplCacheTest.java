@@ -1,6 +1,9 @@
 package com.plataformas_danos_back.service;
 
 import com.plataformas_danos_back.client.CatalogsClient;
+import com.plataformas_danos_back.repository.CorrectionRuleRepository;
+import com.plataformas_danos_back.repository.DataInconsistencyRepository;
+import com.plataformas_danos_back.repository.ValidationRuleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +13,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,6 +28,15 @@ class CatalogsServiceImplCacheTest {
     @MockitoBean
     private CatalogsClient catalogsClient;
 
+    @MockitoBean
+    private ValidationRuleRepository validationRuleRepository;
+
+    @MockitoBean
+    private CorrectionRuleRepository correctionRuleRepository;
+
+    @MockitoBean
+    private DataInconsistencyRepository dataInconsistencyRepository;
+
     @Autowired
     private CatalogsService catalogsService;
 
@@ -29,7 +44,10 @@ class CatalogsServiceImplCacheTest {
     private CacheManager cacheManager;
 
     @BeforeEach
-    void clearCaches() {
+    void setUp() {
+        when(validationRuleRepository.findByDataTypeAndEnabled(any(), anyBoolean())).thenReturn(List.of());
+        when(correctionRuleRepository.findByDataTypeAndFieldNameAndEnabled(any(), any(), anyBoolean()))
+                .thenReturn(Optional.empty());
         Stream.of("catalogs-subscribers", "catalogs-agents", "catalogs-business-lines",
                         "catalogs-risk-classifications", "catalogs-guarantees")
                 .map(cacheManager::getCache)

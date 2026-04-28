@@ -872,38 +872,38 @@ public class CatalogsServiceImpl implements CatalogsService {
 
 #### Tests Backend
 
-- [ ] `test_validateSubscriber_validData_returnsValidated` — HU-100: suscriptor válido
-- [ ] `test_validateSubscriber_nullId_returnsInconsistent` — HU-100: id nulo
-- [ ] `test_validateSubscriber_emptyName_returnsInconsistent` — HU-100: nombre vacío
-- [ ] `test_validateTariffCat_validFactors_returnsValidated` — HU-100: tarifa válida
-- [ ] `test_validateTariffCat_negativeFactorTEV_returnsInconsistent` — HU-100: factor negativo
-- [ ] `test_validateTariffCat_zeroFactor_returnsInconsistent` — HU-100: factor = 0
-- [ ] `test_validateZipCode_validFormat_returnsValidated` — HU-100: código postal válido
-- [ ] `test_validateZipCode_invalidFormat_returnsInconsistent` — HU-100: formato incorrecto
-- [ ] `test_validateZipCode_nonNumeric_returnsInconsistent` — HU-100: caracteres no numéricos
-- [ ] `test_validateBatch_mixedRecords_returns207MultiStatus` — HU-100: lote parcial
-- [ ] `test_registerInconsistency_validData_persistsInMongoDB` — HU-101: persistencia
-- [ ] `test_getInconsistencies_byDataType_returnsFiltered` — HU-101: búsqueda por tipo
-- [ ] `test_getInconsistencies_byStatus_returnsFiltered` — HU-101: búsqueda por severidad
-- [ ] `test_dataValidationEngine_applyRule_NOT_NULL_detects` — HU-100: engine NOT_NULL
-- [ ] `test_dataValidationEngine_applyRule_POSITIVE_NUMBER_detects` — HU-100: engine positividad
-- [ ] `test_dataValidationEngine_applyRule_REGEX_detects` — HU-100: engine regex
-- [ ] `test_dataCorrectionService_trimSpaces_corrects` — HU-102: corrección TRIM
-- [ ] `test_dataCorrectionService_defaultValue_assignsDefault` — HU-102: DEFAULT_VALUE
-- [ ] `test_dataCorrectionService_preservesOriginalValue` — HU-102: auditoría valor original
-- [ ] `test_dataCorrectionService_noCorrectionRule_leavesInconsistent` — HU-102: sin regla aplicable
-- [ ] `test_notificationService_critical_emitsErrorLog` — HU-103: alerta inconsistencia crítica
-- [ ] `test_notificationService_batchThreshold_emitsHighLevelAlert` — HU-103: umbral de lote
-- [ ] `test_notificationService_failure_doesNotPropagateException` — HU-103: fallo silencioso
-- [ ] `test_catalogsService_getSubscribers_validatesAndFilters` — integración catalogs
-- [ ] `test_tariffsService_getTariffsCat_validatesAndFilters` — integración tarifas
-- [ ] `test_zipCodeService_getZipCodes_validatesAndFilters` — integración códigos postales
-- [ ] `test_controller_postValidate_returns200_success` — endpoint POST exitoso
-- [ ] `test_controller_postValidate_returns207_multiStatus` — endpoint POST con fallos parciales
-- [ ] `test_controller_getInconsistencies_returns200` — endpoint GET inconsistencias
-- [ ] `test_controller_getRules_returns200` — endpoint GET reglas
-- [ ] `test_controller_postRule_adminOnly_requires_authorization` — autorización admin
-- [ ] `test_validationRuleCache_expires_after_ttl` — invalidación caché
+- [x] `test_validateSubscriber_validData_returnsValidated` — HU-100: suscriptor válido
+- [x] `test_validateSubscriber_nullId_returnsInconsistent` — HU-100: id nulo
+- [x] `test_validateSubscriber_emptyName_returnsInconsistent` — HU-100: nombre vacío
+- [x] `test_validateTariffCat_validFactors_returnsValidated` — HU-100: tarifa válida
+- [x] `test_validateTariffCat_negativeFactorTEV_returnsInconsistent` — HU-100: factor negativo
+- [x] `test_validateTariffCat_zeroFactor_returnsInconsistent` — HU-100: factor = 0
+- [x] `test_validateZipCode_validFormat_returnsValidated` — HU-100: código postal válido
+- [x] `test_validateZipCode_invalidFormat_returnsInconsistent` — HU-100: formato incorrecto
+- [x] `test_validateZipCode_nonNumeric_returnsInconsistent` — HU-100: caracteres no numéricos
+- [x] `test_validateBatch_mixedRecords_returns207MultiStatus` — HU-100: lote parcial
+- [x] `test_registerInconsistency_validData_persistsInMongoDB` — HU-101: persistencia
+- [x] `test_getInconsistencies_byDataType_returnsFiltered` — HU-101: búsqueda por tipo
+- [x] `test_getInconsistencies_byStatus_returnsFiltered` — HU-101: búsqueda por severidad
+- [x] `test_dataValidationEngine_applyRule_NOT_NULL_detects` — HU-100: engine NOT_NULL
+- [x] `test_dataValidationEngine_applyRule_POSITIVE_NUMBER_detects` — HU-100: engine positividad
+- [x] `test_dataValidationEngine_applyRule_REGEX_detects` — HU-100: engine regex
+- [x] `test_dataCorrectionService_trimSpaces_corrects` — HU-102: corrección TRIM
+- [x] `test_dataCorrectionService_defaultValue_assignsDefault` — HU-102: DEFAULT_VALUE
+- [x] `test_dataCorrectionService_preservesOriginalValue` — HU-102: auditoría valor original
+- [x] `test_dataCorrectionService_noCorrectionRule_leavesInconsistent` — HU-102: sin regla aplicable
+- [x] `test_notificationService_critical_emitsErrorLog` — HU-103: alerta inconsistencia crítica
+- [x] `test_notificationService_batchThreshold_emitsHighLevelAlert` — HU-103: umbral de lote
+- [x] `test_notificationService_failure_doesNotPropagateException` — HU-103: fallo silencioso
+- [ ] `test_catalogsService_getSubscribers_validatesAndFilters` — integración catalogs (pendiente: integración no implementada)
+- [ ] `test_tariffsService_getTariffsCat_validatesAndFilters` — integración tarifas (pendiente: integración no implementada)
+- [ ] `test_zipCodeService_getZipCodes_validatesAndFilters` — integración códigos postales (pendiente: integración no implementada)
+- [x] `test_controller_postValidate_returns200_success` — endpoint POST exitoso
+- [x] `test_controller_postValidate_returns207_multiStatus` — endpoint POST con fallos parciales
+- [x] `test_controller_getInconsistencies_returns200` — endpoint GET inconsistencias
+- [x] `test_controller_getRules_returns200` — endpoint GET reglas
+- [ ] `test_controller_postRule_adminOnly_requires_authorization` — autorización admin (endpoint no implementado aún)
+- [ ] `test_validationRuleCache_expires_after_ttl` — invalidación caché (pendiente: cache no configurado)
 - [ ] Cobertura global ≥ 80%, módulo validación ≥ 90%
 
 ### Frontend

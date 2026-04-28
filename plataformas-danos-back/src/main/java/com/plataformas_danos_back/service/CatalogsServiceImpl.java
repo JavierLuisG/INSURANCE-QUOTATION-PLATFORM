@@ -10,6 +10,7 @@ import com.plataformas_danos_back.model.dto.SubscriberDto;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,18 +23,21 @@ public class CatalogsServiceImpl implements CatalogsService {
     private final CatalogsClient catalogsClient;
 
     @Override
+    @Cacheable(value = "catalogs-subscribers", key = "'all'")
     @Retry(name = "plataforma-core-ohs", fallbackMethod = "subscribersFallback")
     public List<SubscriberDto> getSubscribers() {
         return filterValidSubscribers(catalogsClient.getSubscribers());
     }
 
     @Override
+    @Cacheable(value = "catalogs-agents", key = "'all'")
     @Retry(name = "plataforma-core-ohs", fallbackMethod = "agentsFallback")
     public List<AgentDto> getAgents() {
         return filterValidAgents(catalogsClient.getAgents());
     }
 
     @Override
+    @Cacheable(value = "catalogs-business-lines", key = "'all'")
     @Retry(name = "plataforma-core-ohs", fallbackMethod = "businessLinesFallback")
     public List<BusinessLineDto> getBusinessLines() {
         return filterValidBusinessLines(catalogsClient.getBusinessLines());
@@ -55,12 +59,14 @@ public class CatalogsServiceImpl implements CatalogsService {
     }
 
     @Override
+    @Cacheable(value = "catalogs-risk-classifications", key = "'all'")
     @Retry(name = "plataforma-core-ohs", fallbackMethod = "riskClassificationsFallback")
     public List<RiskClassificationDto> getRiskClassifications() {
         return filterValidRiskClassifications(catalogsClient.getRiskClassifications());
     }
 
     @Override
+    @Cacheable(value = "catalogs-guarantees", key = "'all'")
     @Retry(name = "plataforma-core-ohs", fallbackMethod = "guaranteesFallback")
     public List<GuaranteeDto> getGuarantees() {
         return filterValidGuarantees(catalogsClient.getGuarantees());

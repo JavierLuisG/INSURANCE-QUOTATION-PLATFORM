@@ -5,6 +5,7 @@ import com.plataformas_danos_back.model.entity.ValidationRule;
 import com.plataformas_danos_back.repository.ValidationRuleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class DataValidationEngineImpl implements DataValidationEngine {
     private final ValidationRuleRepository validationRuleRepository;
 
     @Override
+    @Cacheable(value = "validation-rules", key = "#dataType")
     public List<ValidationRule> getRulesForDataType(String dataType) {
         return validationRuleRepository.findByDataTypeAndEnabled(dataType, true);
     }

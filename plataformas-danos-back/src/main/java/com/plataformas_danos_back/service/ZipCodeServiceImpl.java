@@ -8,6 +8,7 @@ import com.plataformas_danos_back.model.dto.ZipCodeDto;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -26,6 +27,7 @@ public class ZipCodeServiceImpl implements ZipCodeService {
     private final ZipCodeClient zipCodeClient;
 
     @Override
+    @Cacheable(value = "zip-codes", key = "#zipCode")
     @Retry(name = "plataforma-core-ohs", fallbackMethod = "zipCodeFallback")
     public ZipCodeDto getByZipCode(String zipCode) {
         if (zipCode == null || !ZIP_FORMAT.matcher(zipCode).matches()) {

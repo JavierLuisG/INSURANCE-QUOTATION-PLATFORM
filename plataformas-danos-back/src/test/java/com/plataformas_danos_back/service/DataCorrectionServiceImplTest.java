@@ -2,11 +2,13 @@ package com.plataformas_danos_back.service;
 
 import com.plataformas_danos_back.model.entity.CorrectionRule;
 import com.plataformas_danos_back.repository.CorrectionRuleRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
 
 import java.util.Optional;
 
@@ -20,8 +22,16 @@ class DataCorrectionServiceImplTest {
     @Mock
     private CorrectionRuleRepository correctionRuleRepository;
 
+    @Mock
+    private ApplicationContext applicationContext;
+
     @InjectMocks
     private DataCorrectionServiceImpl service;
+
+    @BeforeEach
+    void stubSelfProxy() {
+        when(applicationContext.getBean(DataCorrectionService.class)).thenReturn(service);
+    }
 
     // ── applyCorrection — sin regla ───────────────────────────────────────
 

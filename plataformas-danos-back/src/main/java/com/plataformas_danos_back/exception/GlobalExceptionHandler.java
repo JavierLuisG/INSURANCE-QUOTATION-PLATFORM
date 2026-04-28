@@ -13,6 +13,12 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(CacheNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleCacheNotFound(CacheNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", ex.getMessage(), "code", "CACHE_NOT_FOUND"));
+    }
+
     @ExceptionHandler(CatalogServiceUnavailableException.class)
     public ResponseEntity<Map<String, String>> handleCatalogUnavailable(CatalogServiceUnavailableException ex) {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)

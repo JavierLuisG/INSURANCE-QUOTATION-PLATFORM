@@ -9,6 +9,7 @@ import com.plataformas_danos_back.model.dto.TariffFireDto;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -23,12 +24,14 @@ public class TariffsServiceImpl implements TariffsService {
     private final TariffsClient tariffsClient;
 
     @Override
+    @Cacheable(value = "tariffs-fire", key = "'all'")
     @Retry(name = "plataforma-core-ohs", fallbackMethod = "tariffFireFallback")
     public List<TariffFireDto> getTariffsFire() {
         return filterValidTariffsFire(tariffsClient.getTariffsFire());
     }
 
     @Override
+    @Cacheable(value = "tariffs-cat", key = "#zona")
     @Retry(name = "plataforma-core-ohs", fallbackMethod = "tariffCatFallback")
     public TariffCatDto getTariffCat(String zona) {
         try {
@@ -42,6 +45,7 @@ public class TariffsServiceImpl implements TariffsService {
     }
 
     @Override
+    @Cacheable(value = "tariffs-electronic-equipment", key = "'all'")
     @Retry(name = "plataforma-core-ohs", fallbackMethod = "tariffElectronicEquipmentFallback")
     public List<TariffElectronicEquipmentDto> getTariffsElectronicEquipment() {
         return filterValidTariffsElectronicEquipment(tariffsClient.getTariffsElectronicEquipment());

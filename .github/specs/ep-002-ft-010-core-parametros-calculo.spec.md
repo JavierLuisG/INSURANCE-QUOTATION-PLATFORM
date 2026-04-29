@@ -746,17 +746,17 @@ Registrar el módulo en la configuración de Spring Boot:
 
 #### Tests Unitarios
 
-- [ ] `test_tarifaIncendioService_obtenerTarifasVigentes_success` — happy path HU-044
-- [ ] `test_tarifaIncendioService_obtenerTarifasVigentes_retornaVacio_sineNingunaTarifaVigente` — edge case
-- [ ] `test_ingestorTarifasService_ingestTarifasIncendio_exitoso_almacenaYNotifica` — HU-044 happy path con caché
-- [ ] `test_ingestorTarifasService_ingestTarifasIncendio_plataformaNoDisponible_reintentaYNotifica` — HU-044 error path
-- [ ] `test_ingestorTarifasService_ingestTarifasCAT_validaZonas_rechazaTarifasConZonasInvalidas` — HU-045 edge case BR-004
+- [x] `test_tarifaIncendioService_obtenerTarifasVigentes_success` — happy path HU-044
+- [x] `test_tarifaIncendioService_obtenerTarifasVigentes_retornaVacio_sineNingunaTarifaVigente` — edge case
+- [x] `test_ingestorTarifasService_ingestTarifasIncendio_exitoso_almacenaYNotifica` — HU-044 happy path con caché
+- [x] `test_ingestorTarifasService_ingestTarifasIncendio_plataformaNoDisponible_reintentaYNotifica` — HU-044 error path
+- [x] `test_ingestorTarifasService_ingestTarifasCAT_validaZonas_rechazaTarifasConZonasInvalidas` — HU-045 edge case BR-004
 - [ ] `test_validadorVigencias_valida_fechasInconsistentes_rechaza` — BR-003
-- [ ] `test_tarifaFHMService_obtenerVigente_retornaValorPorDefecto_siFHMNuloOInvalido` — HU-046 error path BR-005
-- [ ] `test_catalogoService_consultarCP_devuelveZonaYNivel_siCPExiste` — HU-047 happy path
-- [ ] `test_catalogoService_consultarCP_devuelveDefault_siCPNoExiste` — HU-047 edge case BR-002
-- [ ] `test_parametrosFachada_consultarParametros_devuelveDatos_sinLatenciaSignificativa` — HU-048 happy path
-- [ ] `test_parametrosFachada_consultarParametros_lanzaError_siParametrosNoDisponibles` — HU-048 error path
+- [x] `test_tarifaFHMService_obtenerVigente_retornaValorPorDefecto_siFHMNuloOInvalido` — HU-046 error path BR-005
+- [x] `test_catalogoService_consultarCP_devuelveZonaYNivel_siCPExiste` — HU-047 happy path
+- [x] `test_catalogoService_consultarCP_devuelveDefault_siCPNoExiste` — HU-047 edge case BR-002
+- [x] `test_parametrosFachada_consultarParametros_devuelveDatos_sinLatenciaSignificativa` — HU-048 happy path
+- [x] `test_parametrosFachada_consultarParametros_lanzaError_siParametrosNoDisponibles` — HU-048 error path
 - [ ] `test_parametrosCacheService_refresca_parametrosActualizados_despuesDeIngestExitosa` — HU-048 edge case
 
 #### Tests de Integración (Testcontainers + MongoDB real)
@@ -771,14 +771,14 @@ Registrar el módulo en la configuración de Spring Boot:
 
 #### Tests de Controlador (MockMvc)
 
-- [ ] `test_parametroController_postCargarTarifasIncendio_returns202_withValidRequest` — HU-044
+- [x] `test_parametroController_postCargarTarifasIncendio_returns202_withValidRequest` — HU-044
 - [ ] `test_parametroController_postCargarTarifasIncendio_returns401_noAuth` — autenticación
-- [ ] `test_parametroController_postCargarTarifasIncendio_returns409_ingestEnProgreso` — concurrencia
-- [ ] `test_parametroController_getTarifasIncendio_returns200_withCachedData` — caché
-- [ ] `test_parametroController_getTarifasIncendio_returns503_parametrosNoDisponibles`
-- [ ] `test_parametroController_getConsultarCP_returns200_conZonaYNivel` — HU-047
-- [ ] `test_parametroController_getConsultarCP_returns404_oCPNoEncontrado_segunPolitica`
-- [ ] `test_parametroController_getStatus_returns200_conEstadoGlobalParametros` — HU-048
+- [x] `test_parametroController_postCargarTarifasIncendio_returns409_ingestEnProgreso` — concurrencia
+- [x] `test_parametroController_getTarifasIncendio_returns200_withCachedData` — caché
+- [x] `test_parametroController_getTarifasIncendio_returns503_parametrosNoDisponibles`
+- [x] `test_parametroController_getConsultarCP_returns200_conZonaYNivel` — HU-047
+- [x] `test_parametroController_getConsultarCP_returns404_oCPNoEncontrado_segunPolitica`
+- [x] `test_parametroController_getStatus_returns200_conEstadoGlobalParametros` — HU-048
 
 ### Frontend
 

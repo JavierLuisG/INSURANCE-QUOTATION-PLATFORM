@@ -1,8 +1,8 @@
 package com.plataformas_danos_back.service;
 
 import com.plataformas_danos_back.client.TariffsClient;
-import com.plataformas_danos_back.exception.CatalogServiceUnavailableException;
 import com.plataformas_danos_back.exception.TariffNotFoundException;
+import com.plataformas_danos_back.exception.TariffServiceUnavailableException;
 import com.plataformas_danos_back.model.dto.TariffCatDto;
 import com.plataformas_danos_back.model.dto.TariffElectronicEquipmentDto;
 import com.plataformas_danos_back.model.dto.TariffFireDto;
@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,14 +62,14 @@ class TariffsServiceImplTest {
     }
 
     @Test
-    void tariffFireFallback_whenCalled_throwsCatalogServiceUnavailableException() {
+    void tariffFireFallback_whenCalled_throwsTariffServiceUnavailableException() {
         // GIVEN
         var cause = new RuntimeException("Connection refused");
 
-        // WHEN / THEN
+        // WHEN / THEN — tariff fallback throws TariffServiceUnavailableException (not CatalogServiceUnavailableException)
         assertThatThrownBy(() -> service.tariffFireFallback(cause))
-                .isInstanceOf(CatalogServiceUnavailableException.class)
-                .hasMessage("Servicio de catálogos no disponible");
+                .isInstanceOf(TariffServiceUnavailableException.class)
+                .hasMessageContaining("tarifas no disponible");
     }
 
     @Test
@@ -134,14 +135,14 @@ class TariffsServiceImplTest {
     }
 
     @Test
-    void tariffCatFallback_whenCalled_throwsCatalogServiceUnavailableException() {
+    void tariffCatFallback_whenCalled_throwsTariffServiceUnavailableException() {
         // GIVEN
         var cause = new RuntimeException("Timeout");
 
         // WHEN / THEN
         assertThatThrownBy(() -> service.tariffCatFallback("ZONA_A", cause))
-                .isInstanceOf(CatalogServiceUnavailableException.class)
-                .hasMessage("Servicio de catálogos no disponible");
+                .isInstanceOf(TariffServiceUnavailableException.class)
+                .hasMessageContaining("tarifas no disponible");
     }
 
     @Test
@@ -188,14 +189,14 @@ class TariffsServiceImplTest {
     }
 
     @Test
-    void tariffElectronicEquipmentFallback_whenCalled_throwsCatalogServiceUnavailableException() {
+    void tariffElectronicEquipmentFallback_whenCalled_throwsTariffServiceUnavailableException() {
         // GIVEN
         var cause = new RuntimeException("Service down");
 
         // WHEN / THEN
         assertThatThrownBy(() -> service.tariffElectronicEquipmentFallback(cause))
-                .isInstanceOf(CatalogServiceUnavailableException.class)
-                .hasMessage("Servicio de catálogos no disponible");
+                .isInstanceOf(TariffServiceUnavailableException.class)
+                .hasMessageContaining("tarifas no disponible");
     }
 
     @Test
@@ -227,5 +228,99 @@ class TariffsServiceImplTest {
         assertThat(dto.getClase()).isEqualTo("A");
         assertThat(dto.getNivelZona()).isEqualTo("ALTO");
         assertThat(dto.getFactor()).isEqualTo(0.0025);
+    }
+
+    // ── SPEC-009 mandatory cases ─────────────────────────────────────────────
+
+    // TC-12: getTariffsFire_happyPath_returnsTariffList
+    @Test
+    void getTariffsFire_happyPath_returnsTariffList() {
+        // GIVEN
+        var tariff = new TariffFireDto("ZONA_A", "Concreto", 0.0012, 1.15);
+        when(tariffsClient.getTariffsFire()).thenReturn(List.of(tariff));
+
+        // WHEN
+        var result = service.getTariffsFire();
+
+        // THEN
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getZonaRiesgo()).isEqualTo("ZONA_A");
+        verify(tariffsClient).getTariffsFire();
+    }
+
+    // TC-13: getTariffCat_validZone_returnsTariffCatDto
+    @Test
+    void getTariffCat_validZone_returnsTariffCatDto() {
+        // GIVEN
+        var catDto = new TariffCatDto("ZONA_B", 0.0020, 0.0010);
+        when(tariffsClient.getTariffCat("ZONA_B")).thenReturn(catDto);
+
+        // WHEN
+        var result = service.getTariffCat("ZONA_B");
+
+        // THEN
+        assertThat(result).isNotNull();
+        assertThat(result.getZona()).isEqualTo("ZONA_B");
+        assertThat(result.getFactorTEV()).isEqualTo(0.0020);
+        assertThat(result.getFactorFHM()).isEqualTo(0.0010);
+        verify(tariffsClient).getTariffCat("ZONA_B");
+    }
+
+    // TC-14: getTariffCat_notFound_throwsTariffNotFoundException_noRetry
+    @Test
+    void getTariffCat_notFound_throwsTariffNotFoundException_noRetry() {
+        // GIVEN — 404 must throw TariffNotFoundException, NOT TariffServiceUnavailableException
+        when(tariffsClient.getTariffCat("ZONA_INEXISTENTE"))
+                .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+        // WHEN / THEN — client called exactly once (no retry for 4xx)
+        assertThatThrownBy(() -> service.getTariffCat("ZONA_INEXISTENTE"))
+                .isInstanceOf(TariffNotFoundException.class)
+                .isNotInstanceOf(TariffServiceUnavailableException.class)
+                .hasMessage("Tarifa CAT no encontrada para la zona indicada");
+        verify(tariffsClient).getTariffCat("ZONA_INEXISTENTE");
+    }
+
+    // TC-15: getTariffsElectronicEquipment_happyPath_returnsList
+    @Test
+    void getTariffsElectronicEquipment_happyPath_returnsList() {
+        // GIVEN
+        var ee1 = new TariffElectronicEquipmentDto("A", "ALTO", 0.0025);
+        var ee2 = new TariffElectronicEquipmentDto("B", "MEDIO", 0.0018);
+        when(tariffsClient.getTariffsElectronicEquipment()).thenReturn(List.of(ee1, ee2));
+
+        // WHEN
+        var result = service.getTariffsElectronicEquipment();
+
+        // THEN
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getClase()).isEqualTo("A");
+        assertThat(result.get(1).getClase()).isEqualTo("B");
+        verify(tariffsClient).getTariffsElectronicEquipment();
+    }
+
+    // TC-18: tariffsService_serviceUnavailableAfterRetries_throwsTariffServiceUnavailableException
+    @Test
+    void tariffsService_serviceUnavailableAfterRetries_throwsTariffServiceUnavailableException() {
+        // GIVEN — simulate retries exhausted; invoke fallback directly
+        var cause = new RuntimeException("Timeout after max retries");
+
+        // WHEN / THEN
+        assertThatThrownBy(() -> service.tariffFireFallback(cause))
+                .isInstanceOf(TariffServiceUnavailableException.class)
+                .hasMessageContaining("tarifas no disponible");
+    }
+
+    // TC-19 (tariffs slice): httpClientError4xx_notRetried_throwsImmediately
+    @Test
+    void getTariffCat_httpClientError400_notRetried_throwsImmediately() {
+        // GIVEN — 400 other than 404 propagates directly without wrapping
+        when(tariffsClient.getTariffCat("ZONA_A"))
+                .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+        // WHEN / THEN — client called exactly once
+        assertThatThrownBy(() -> service.getTariffCat("ZONA_A"))
+                .isInstanceOf(HttpClientErrorException.class);
+        verify(tariffsClient).getTariffCat("ZONA_A");
     }
 }

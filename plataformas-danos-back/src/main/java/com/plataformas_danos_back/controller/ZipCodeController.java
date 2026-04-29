@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/postal-codes")
+@RequestMapping("/api/v1/zip-codes")
 public class ZipCodeController {
 
     private final ZipCodeService zipCodeService;
 
-    @GetMapping("/{codigoPostal}")
-    public ResponseEntity<ZipCodeDto> getByZipCode(@PathVariable String codigoPostal) {
-        return ResponseEntity.ok(zipCodeService.getByZipCode(codigoPostal));
+    @GetMapping("/{zipCode}")
+    public ResponseEntity<ZipCodeDto> getByZipCode(@PathVariable String zipCode) {
+        return ResponseEntity.ok(zipCodeService.getByZipCode(zipCode));
     }
 }

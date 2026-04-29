@@ -3,8 +3,8 @@ package com.plataformas_danos_back.service;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import com.plataformas_danos_back.client.ZipCodeClient;
-import com.plataformas_danos_back.exception.CatalogServiceUnavailableException;
 import com.plataformas_danos_back.exception.InvalidZipCodeFormatException;
+import com.plataformas_danos_back.exception.ZipCodeServiceUnavailableException;
 import com.plataformas_danos_back.exception.ZipCodeNotFoundException;
 import com.plataformas_danos_back.model.dto.ValidationResult;
 import com.plataformas_danos_back.model.dto.ZipCodeDto;
@@ -56,9 +56,9 @@ public class ZipCodeServiceImpl implements ZipCodeService {
     }
 
     public ZipCodeDto zipCodeFallback(String zipCode, Exception ex) {
-        log.error("CRITICAL: Catalog service unavailable after retries — zip-codes. CP={}. Error: {}",
+        log.error("CRITICAL: ZipCode service unavailable after retries. CP={}. Error: {}",
                 zipCode, ex.getMessage());
-        throw new CatalogServiceUnavailableException("Servicio de catálogos no disponible", ex);
+        throw new ZipCodeServiceUnavailableException("Servicio de validación de CP no disponible", ex);
     }
 
     private ZipCodeDto applyDefaults(ZipCodeDto dto, String zipCode) {

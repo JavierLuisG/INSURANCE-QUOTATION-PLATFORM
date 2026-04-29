@@ -1,6 +1,6 @@
 ---
 id: SPEC-009
-status: APPROVED
+status: IN_PROGRESS
 feature: ep-001-ft-007-core-integracion-servicios
 created: 2026-04-28
 updated: 2026-04-28
@@ -724,14 +724,14 @@ cache:
 
 #### Implementación
 
-- [ ] Verificar que `CatalogsController` expone GET /api/v1/catalogs/subscribers, /agents, /business-lines, /risk-classifications, /guarantees (cubiertos en SPEC-003 y SPEC-005)
-- [ ] Verificar que `ZipCodeController` expone GET /api/v1/zip-codes/{zipCode} con validación de formato (cubierto en SPEC-004)
-- [ ] Verificar que `TariffsController` expone GET /api/v1/tariffs/fire, /tariffs/cat/{zona}, /tariffs/electronic-equipment (cubierto en SPEC-006)
-- [ ] Verificar configuración Resilience4j en `application.yml` — Circuit Breaker + Retry con los valores de la RN-3 y RN-4
-- [ ] Verificar configuración Caffeine en `application.yml` — TTLs de la RN-1
-- [ ] Verificar que `GlobalExceptionHandler` mapea `CatalogServiceUnavailableException` → HTTP 503, `ZipCodeNotFoundException` → HTTP 404, `InvalidZipCodeFormatException` → HTTP 400, `TariffNotFoundException` → HTTP 404
-- [ ] Verificar que fallback en `CatalogsServiceImpl` y `ZipCodeServiceImpl` lanza excepción controlada (no retorna null)
-- [ ] Verificar que `TariffsServiceImpl` maneja HTTP 404 de plataforma-core-ohs como `TariffNotFoundException` sin reintentos
+- [x] Verificar que `CatalogsController` expone GET /api/v1/catalogs/subscribers, /agents, /business-lines, /risk-classifications, /guarantees (cubiertos en SPEC-003 y SPEC-005)
+- [x] Verificar que `ZipCodeController` expone GET /api/v1/zip-codes/{zipCode} con validación de formato (cubierto en SPEC-004) — corregido de `/api/v1/postal-codes`
+- [x] Verificar que `TariffsController` expone GET /api/v1/tariffs/fire, /tariffs/cat/{zona}, /tariffs/electronic-equipment (cubierto en SPEC-006) — corregido a path variable
+- [x] Verificar configuración Resilience4j en `application.yml` — Circuit Breaker + Retry con los valores de la RN-3 y RN-4
+- [x] Verificar configuración Caffeine en `application.yml` — TTLs de la RN-1
+- [x] Verificar que `GlobalExceptionHandler` mapea `CatalogServiceUnavailableException` → HTTP 503, `ZipCodeNotFoundException` → HTTP 404 (code ZIP_CODE_NOT_FOUND), `InvalidZipCodeFormatException` → HTTP 400 (code INVALID_ZIP_CODE_FORMAT), `TariffNotFoundException` → HTTP 404, `ZipCodeServiceUnavailableException` → HTTP 503 (code ZIP_CODE_SERVICE_UNAVAILABLE), `TariffServiceUnavailableException` → HTTP 503 (code TARIFF_SERVICE_UNAVAILABLE)
+- [x] Verificar que fallback en `CatalogsServiceImpl` y `ZipCodeServiceImpl` lanza excepción controlada (no retorna null)
+- [x] Verificar que `TariffsServiceImpl` maneja HTTP 404 de plataforma-core-ohs como `TariffNotFoundException` sin reintentos
 
 #### Tests Backend
 

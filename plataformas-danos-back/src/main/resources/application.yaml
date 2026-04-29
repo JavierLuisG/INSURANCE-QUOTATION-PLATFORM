@@ -46,6 +46,10 @@ cache:
     zip-codes: ${CACHE_TTL_ZIP_CODES:3600}
     validation-rules: ${CACHE_TTL_VALIDATION_RULES:3600}
     correction-rules: ${CACHE_TTL_CORRECTION_RULES:3600}
+    parameters-tarifas-incendio: ${CACHE_TTL_PARAMS_TARIFAS_INCENDIO:86400}
+    parameters-tarifas-cat: ${CACHE_TTL_PARAMS_TARIFAS_CAT:86400}
+    parameters-tarifas-fhm: ${CACHE_TTL_PARAMS_TARIFAS_FHM:86400}
+    parameters-cp-zonas: ${CACHE_TTL_PARAMS_CP_ZONAS:86400}
   refresh:
     cron: ${CACHE_REFRESH_CRON:0 0 */6 * * *}
 

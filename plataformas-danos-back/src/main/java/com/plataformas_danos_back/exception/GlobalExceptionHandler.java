@@ -82,6 +82,18 @@ public class GlobalExceptionHandler {
                 .body(Map.of("message", ex.getMessage(), "code", "INCONSISTENCY_RECORD_ERROR"));
     }
 
+    @ExceptionHandler(ParametroNoDisponibleException.class)
+    public ResponseEntity<Map<String, String>> handleParametroNoDisponible(ParametroNoDisponibleException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("message", ex.getMessage(), "code", "PARAMETRO_NO_DISPONIBLE"));
+    }
+
+    @ExceptionHandler(IngestEnProgresoException.class)
+    public ResponseEntity<Map<String, String>> handleIngestEnProgreso(IngestEnProgresoException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("message", ex.getMessage(), "code", "INGEST_EN_PROGRESO"));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult().getFieldErrors().stream()

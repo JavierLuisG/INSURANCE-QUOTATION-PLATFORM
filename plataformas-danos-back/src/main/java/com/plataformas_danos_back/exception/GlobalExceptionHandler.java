@@ -28,7 +28,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ZipCodeNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleZipCodeNotFound(ZipCodeNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Map.of("message", ex.getMessage(), "code", "ZIP_NOT_FOUND"));
+                .body(Map.of("message", ex.getMessage(), "code", "ZIP_CODE_NOT_FOUND"));
+    }
+
+    @ExceptionHandler(ZipCodeServiceUnavailableException.class)
+    public ResponseEntity<Map<String, String>> handleZipCodeServiceUnavailable(ZipCodeServiceUnavailableException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("message", ex.getMessage(), "code", "ZIP_CODE_SERVICE_UNAVAILABLE"));
     }
 
     @ExceptionHandler(TariffNotFoundException.class)
@@ -37,10 +43,16 @@ public class GlobalExceptionHandler {
                 .body(Map.of("message", ex.getMessage(), "code", "TARIFF_NOT_FOUND"));
     }
 
+    @ExceptionHandler(TariffServiceUnavailableException.class)
+    public ResponseEntity<Map<String, String>> handleTariffServiceUnavailable(TariffServiceUnavailableException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("message", ex.getMessage(), "code", "TARIFF_SERVICE_UNAVAILABLE"));
+    }
+
     @ExceptionHandler(InvalidZipCodeFormatException.class)
     public ResponseEntity<Map<String, String>> handleInvalidZipCodeFormat(InvalidZipCodeFormatException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("message", ex.getMessage(), "code", "INVALID_ZIP_FORMAT"));
+                .body(Map.of("message", ex.getMessage(), "code", "INVALID_ZIP_CODE_FORMAT"));
     }
 
     @ExceptionHandler(HttpClientErrorException.class)

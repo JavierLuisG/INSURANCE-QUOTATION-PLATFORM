@@ -3,8 +3,8 @@ package com.plataformas_danos_back.service;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import com.plataformas_danos_back.client.TariffsClient;
-import com.plataformas_danos_back.exception.CatalogServiceUnavailableException;
 import com.plataformas_danos_back.exception.TariffNotFoundException;
+import com.plataformas_danos_back.exception.TariffServiceUnavailableException;
 import com.plataformas_danos_back.model.dto.TariffCatDto;
 import com.plataformas_danos_back.model.dto.TariffElectronicEquipmentDto;
 import com.plataformas_danos_back.model.dto.TariffFireDto;
@@ -68,17 +68,17 @@ public class TariffsServiceImpl implements TariffsService {
 
     public List<TariffFireDto> tariffFireFallback(Exception ex) {
         log.error("CRITICAL: Tariffs service unavailable after retries — fire. Error: {}", ex.getMessage());
-        throw new CatalogServiceUnavailableException("Servicio de catálogos no disponible", ex);
+        throw new TariffServiceUnavailableException("Servicio de tarifas no disponible", ex);
     }
 
     public TariffCatDto tariffCatFallback(String zona, Exception ex) {
         log.error("CRITICAL: Tariffs service unavailable after retries — cat. zona={}. Error: {}", zona, ex.getMessage());
-        throw new CatalogServiceUnavailableException("Servicio de catálogos no disponible", ex);
+        throw new TariffServiceUnavailableException("Servicio de tarifas no disponible", ex);
     }
 
     public List<TariffElectronicEquipmentDto> tariffElectronicEquipmentFallback(Exception ex) {
         log.error("CRITICAL: Tariffs service unavailable after retries — electronic-equipment. Error: {}", ex.getMessage());
-        throw new CatalogServiceUnavailableException("Servicio de catálogos no disponible", ex);
+        throw new TariffServiceUnavailableException("Servicio de tarifas no disponible", ex);
     }
 
     private <T> List<T> applyValidation(List<T> records, String dataType, Function<T, String> idExtractor) {

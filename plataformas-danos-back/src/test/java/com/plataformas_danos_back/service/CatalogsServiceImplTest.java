@@ -19,6 +19,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -340,5 +341,140 @@ class CatalogsServiceImplTest {
         assertThat(dto.getNombre()).isEqualTo("Robo con Violencia");
         assertThat(dto.getClaveIncendio()).isEqualTo("RV");
         assertThat(dto.getTarifable()).isTrue();
+    }
+
+    // ── SPEC-009 mandatory cases ─────────────────────────────────────────────
+
+    // TC-01: getSubscribers_happyPath_returnsCachedResponse
+    @Test
+    void getSubscribers_happyPath_returnsCachedResponse() {
+        // GIVEN
+        var subscriber = new SubscriberDto("SUB-001", "Empresa ABC S.A. de C.V.", "ABC", true);
+        when(catalogsClient.getSubscribers()).thenReturn(List.of(subscriber));
+
+        // WHEN
+        var result = service.getSubscribers();
+
+        // THEN
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo("SUB-001");
+        verify(catalogsClient).getSubscribers();
+    }
+
+    // TC-02: getSubscribers_serviceUnavailable_throws503
+    @Test
+    void getSubscribers_serviceUnavailable_throws503() {
+        // GIVEN — client throws RuntimeException simulating network failure
+        var cause = new RuntimeException("Connection refused");
+
+        // WHEN / THEN — fallback propagates CatalogServiceUnavailableException
+        assertThatThrownBy(() -> service.subscribersFallback(cause))
+                .isInstanceOf(CatalogServiceUnavailableException.class)
+                .hasMessageContaining("catálogos no disponible");
+    }
+
+    // TC-03: getAgents_happyPath_returnsAgentList
+    @Test
+    void getAgents_happyPath_returnsAgentList() {
+        // GIVEN
+        var agent = new AgentDto("AGT-001", "Juan Pérez García", "JPG", true);
+        when(catalogsClient.getAgents()).thenReturn(List.of(agent));
+
+        // WHEN
+        var result = service.getAgents();
+
+        // THEN
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo("AGT-001");
+        verify(catalogsClient).getAgents();
+    }
+
+    // TC-04: getBusinessLines_happyPath_returnsBusinessLineList
+    @Test
+    void getBusinessLines_happyPath_returnsBusinessLineList() {
+        // GIVEN
+        var bl = new BusinessLineDto("BL-001", "Comercio al por menor", "CM", true);
+        when(catalogsClient.getBusinessLines()).thenReturn(List.of(bl));
+
+        // WHEN
+        var result = service.getBusinessLines();
+
+        // THEN
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo("BL-001");
+        verify(catalogsClient).getBusinessLines();
+    }
+
+    // TC-05: getRiskClassifications_happyPath_returnsRiskClassificationList
+    @Test
+    void getRiskClassifications_happyPath_returnsRiskClassificationList() {
+        // GIVEN
+        var rc = new RiskClassificationDto("RC-001", "Riesgo Bajo", "Probabilidad baja");
+        when(catalogsClient.getRiskClassifications()).thenReturn(List.of(rc));
+
+        // WHEN
+        var result = service.getRiskClassifications();
+
+        // THEN
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo("RC-001");
+        verify(catalogsClient).getRiskClassifications();
+    }
+
+    // TC-06: getGuarantees_happyPath_returnsGuaranteeList
+    @Test
+    void getGuarantees_happyPath_returnsGuaranteeList() {
+        // GIVEN
+        var guarantee = new GuaranteeDto("GUA-001", "Robo con Violencia", "RV", true);
+        when(catalogsClient.getGuarantees()).thenReturn(List.of(guarantee));
+
+        // WHEN
+        var result = service.getGuarantees();
+
+        // THEN
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo("GUA-001");
+        verify(catalogsClient).getGuarantees();
+    }
+
+    // TC-07: getSubscribers_recordMissingId_dropsRecordAndLogsWarning
+    @Test
+    void getSubscribers_recordMissingId_dropsRecordAndLogsWarning() {
+        // GIVEN — one valid record and one with null id
+        var valid = new SubscriberDto("SUB-001", "Empresa ABC", "ABC", true);
+        var noId = new SubscriberDto(null, "Sin Identificador", "X", true);
+        when(catalogsClient.getSubscribers()).thenReturn(List.of(valid, noId));
+
+        // WHEN
+        var result = service.getSubscribers();
+
+        // THEN — record without id is dropped; valid record is returned
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo("SUB-001");
+    }
+
+    // TC-16: catalogsService_serviceUnavailableAfterRetries_throwsCatalogServiceUnavailableException
+    @Test
+    void catalogsService_serviceUnavailableAfterRetries_throwsCatalogServiceUnavailableException() {
+        // GIVEN — simulate retries exhausted by invoking fallback directly
+        var cause = new RuntimeException("Timeout after retries");
+
+        // WHEN / THEN — fallback must throw CatalogServiceUnavailableException (not wrap silently)
+        assertThatThrownBy(() -> service.subscribersFallback(cause))
+                .isInstanceOf(CatalogServiceUnavailableException.class)
+                .hasMessageContaining("catálogos no disponible");
+    }
+
+    // TC-19 (catalogs slice): httpClientError4xx_notRetried_throwsImmediately
+    @Test
+    void getSubscribers_httpClientError4xx_notRetried_throwsImmediately() {
+        // GIVEN — 4xx must not be wrapped in CatalogServiceUnavailableException
+        when(catalogsClient.getSubscribers())
+                .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+        // WHEN / THEN — exception propagates as-is; client called exactly once
+        assertThatThrownBy(() -> service.getSubscribers())
+                .isInstanceOf(HttpClientErrorException.class);
+        verify(catalogsClient).getSubscribers();
     }
 }

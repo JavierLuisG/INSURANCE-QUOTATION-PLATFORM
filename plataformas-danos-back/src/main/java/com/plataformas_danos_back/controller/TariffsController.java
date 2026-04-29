@@ -7,8 +7,8 @@ import com.plataformas_danos_back.service.TariffsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -25,8 +25,8 @@ public class TariffsController {
         return ResponseEntity.ok(tariffsService.getTariffsFire());
     }
 
-    @GetMapping("/cat")
-    public ResponseEntity<TariffCatDto> getTariffCat(@RequestParam(required = true) String zona) {
+    @GetMapping("/cat/{zona}")
+    public ResponseEntity<TariffCatDto> getTariffCat(@PathVariable String zona) {
         return ResponseEntity.ok(tariffsService.getTariffCat(zona));
     }
 

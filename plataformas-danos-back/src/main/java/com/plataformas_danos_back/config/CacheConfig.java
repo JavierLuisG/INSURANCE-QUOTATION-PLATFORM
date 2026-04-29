@@ -28,7 +28,11 @@ public class CacheConfig {
             Map.entry("tariffs-cat", 100),
             Map.entry("zip-codes", 500),
             Map.entry("validation-rules", 50),
-            Map.entry("correction-rules", 200)
+            Map.entry("correction-rules", 200),
+            Map.entry("parameters-tarifas-incendio", 1000),
+            Map.entry("parameters-tarifas-cat", 500),
+            Map.entry("parameters-tarifas-fhm", 10),
+            Map.entry("parameters-cp-zonas", 100000)
     );
 
     private final CacheProperties cacheProperties;

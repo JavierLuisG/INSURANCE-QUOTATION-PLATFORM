@@ -1,6 +1,6 @@
 ---
 id: SPEC-010
-status: APPROVED
+status: IN_PROGRESS
 feature: ep-002-ft-010-core-parametros-calculo
 created: 2026-04-28
 updated: 2026-04-28
@@ -686,41 +686,36 @@ Registrar el módulo en la configuración de Spring Boot:
 
 #### Implementación — Modelos y Persistencia
 
-- [ ] Crear entidad `TarifaIncendio.java` en `domain/model/` con anotación `@Document(collection = "tarifas_incendio")`
-- [ ] Crear entidad `TarifaCAT.java` con `@Document(collection = "tarifas_cat")`
-- [ ] Crear entidad `TarifaFHM.java` con `@Document(collection = "tarifas_fhm")`
-- [ ] Crear entidad `CatalogoCPZonas.java` con `@Document(collection = "catalogo_cp_zonas")`
-- [ ] Crear `TarifaIncendioRepository` extends `MongoRepository<TarifaIncendio, String>` con métodos: `findByZonaGeograficaAndFechaVigencia()`, `findAllVigentes(LocalDate)`
-- [ ] Crear `TarifaCATRepository` extends `MongoRepository<TarifaCAT, String>` con métodos: `findByZonaCATAndFechaVigencia()`, `findByZonaCAT(String)`
-- [ ] Crear `TarifaFHMRepository` extends `MongoRepository<TarifaFHM, String>` con método: `findVigentFHM(LocalDate)`
-- [ ] Crear `CatalogoCPZonasRepository` extends `MongoRepository<CatalogoCPZonas, String>` con métodos: `findByCodigoPostal(String)`, `findByZonaCAT(String)`
-- [ ] Crear índices en MongoDB: compound index `(zonaGeografica, tipoInmueble, fechaVigenciaInicio)` en `tarifas_incendio`, similar para CAT
-- [ ] Crear índice único en `codigoPostal` en colección `catalogo_cp_zonas`
+- [x] Crear entidad `TarifaIncendio.java` en `model/entity/` con anotación `@Document(collection = "tarifas_incendio")`
+- [x] Crear entidad `TarifaCAT.java` con `@Document(collection = "tarifas_cat")`
+- [x] Crear entidad `TarifaFHM.java` con `@Document(collection = "tarifas_fhm")`
+- [x] Crear entidad `CatalogoCPZonas.java` con `@Document(collection = "catalogo_cp_zonas")`
+- [x] Crear `TarifaIncendioRepository` extends `MongoRepository<TarifaIncendio, String>` con métodos: `findByZonaGeograficaAndTipoInmueble()`, `findByFechaVigenciaFinAfterOrFechaVigenciaFinIsNull(LocalDate)`
+- [x] Crear `TarifaCATRepository` extends `MongoRepository<TarifaCAT, String>` con métodos: `findByZonaCAT(String)`, `findByFechaVigenciaFinAfterOrFechaVigenciaFinIsNull(LocalDate)`
+- [x] Crear `TarifaFHMRepository` extends `MongoRepository<TarifaFHM, String>` con método: `findFirstByOrderByCreatedAtDesc()`
+- [x] Crear `CatalogoCPZonasRepository` extends `MongoRepository<CatalogoCPZonas, String>` con métodos: `findByCodigoPostal(String)`, `findByZonaCAT(String)`
+- [x] Crear índices en MongoDB: compound index `(zonaGeografica, tipoInmueble, fechaVigenciaInicio)` en `tarifas_incendio`, `(zonaCAT, fechaVigenciaInicio)` en `tarifas_cat`
+- [x] Crear índice único en `codigoPostal` en colección `catalogo_cp_zonas`
 
 #### Implementación — Puertos (Interfaces)
 
-- [ ] Crear `TarifaIncendioRepository.java` (interfaz) en `domain/ports/out/`
-- [ ] Crear `TarifaCATRepository.java` (interfaz)
-- [ ] Crear `TarifaFHMRepository.java` (interfaz)
-- [ ] Crear `CatalogoCPZonasRepository.java` (interfaz)
-- [ ] Crear `PlataformaCoreOhsPort.java` — interfaz para comunicación con servicio externo (métodos: `obtenerTarifasIncendio()`, `obtenerTarifasCAT()`, `obtenerTarifasFHM()`, `obtenerCatalogoCPZonas()`)
-- [ ] Crear `NotificacionAdministradorPort.java` — interfaz para notificaciones (método: `notificarError(String titulo, String detalles)`)
-- [ ] Crear use cases: `IngestTarifasIncendioUseCase.java`, `IngestTarifasCATUseCase.java`, `IngestTarifasFHMUseCase.java`, `IngestCatalogoCPZonasUseCase.java`, `ConsultarParametrosUseCase.java`
+- [x] Se implementó como capa de servicios (arquitectura en capas del proyecto, no hexagonal) — `IngestorParametrosService.java` + `ParametroCalculoService.java` cumplen el rol de los use cases/ports
+- [x] La comunicación con Plataforma-core-ohs se delega a `TariffsService` y `ZipCodeService` existentes (ya tienen Resilience4j + Retry configurado)
+- [ ] Crear `NotificacionAdministradorPort.java` — interfaz para notificaciones (método: `notificarError(String titulo, String detalles)`) — diferido a siguiente iteración
 
 #### Implementación — Servicios y Lógica de Negocio
 
-- [ ] Crear `ParametroCalculoService.java` (interfaz) con métodos: `obtenerTarifasIncendioVigentes()`, `obtenerTarifasCATVigentes()`, `obtenerTarifaFHMVigente()`, `obtenerZonaYNivelPorCP(String)`, `refrescarParametros(String tipoParametro)`
-- [ ] Crear `ParametroCalculoServiceImpl.java` con implementación de servicios, incluyendo lógica de caché (Caffeine, `@Cacheable`)
-- [ ] Crear `IngestorTarifasService.java` — orquesta la ingestión: llamadas a Plataforma-core-ohs con Resilience4j (retry + circuit breaker), validación, almacenamiento, notificaciones
-- [ ] Crear `CacheParametrosService.java` — gestiona invalidación y refresco de caché tras ingestión exitosa (usar `@CacheEvict`)
-- [ ] Crear `ValidadorVigenciasParametros.java` — valida que `fecha_inicio ≤ fecha_fin`
-- [ ] Crear `ValidadorMapeoZonas.java` — valida que zona CAT existe en catálogo
-- [ ] Implementar `PlataformaCoreOhsAdapter.java` — adaptador hexagonal que consume API de Plataforma-core-ohs con Resilience4j
-- [ ] Implementar manejo de modo simulación: si `origen="SIMULACION"`, cargar datos de fixtures JSON o constantes Java
+- [x] Crear `ParametroCalculoService.java` (interfaz) con métodos: `obtenerTarifasIncendioVigentes()`, `obtenerTarifasCATVigentes()`, `obtenerTarifaFHMVigente()`, `obtenerZonaPorCP(String)`
+- [x] Crear `ParametroCalculoServiceImpl.java` con implementación, caché `@Cacheable` en los 4 métodos de consulta (TTL 24h)
+- [x] Crear `IngestorParametrosService.java` + `IngestorParametrosServiceImpl.java` — orquesta ingestión con AtomicBoolean anti-concurrencia, `@CacheEvict` post-ingestión, modo SIMULACION
+- [x] Validación de vigencias (`fechaVigenciaInicio ≤ fechaVigenciaFin`) implementada inline en IngestorParametrosServiceImpl
+- [x] Validación de mapeo de zonas CAT contra catálogo CP-Zonas implementada en IngestorParametrosServiceImpl
+- [x] Modo simulación: si `origenForzado="SIMULACION"`, carga datos hardcodeados representativos
+- [x] Log CRITICAL en fallos de ingestión
 
 #### Implementación — Controladores REST
 
-- [ ] Crear `ParametroCalculoController.java` con endpoints:
+- [x] Crear `ParametroCalculoController.java` con endpoints:
   - `POST /api/v1/parameters/tarifas-incendio/load` — HU-044
   - `POST /api/v1/parameters/tarifas-cat/load` — HU-045
   - `POST /api/v1/parameters/tarifas-fhm/load` — HU-046
@@ -730,24 +725,22 @@ Registrar el módulo en la configuración de Spring Boot:
   - `GET /api/v1/parameters/tarifas-fhm`
   - `GET /api/v1/parameters/catalogo-cp-zonas/{codigoPostal}`
   - `GET /api/v1/parameters/status` — HU-048
-- [ ] Implementar autenticación JWT en controlador (@PreAuthorize para endpoints administrativos)
-- [ ] Implementar manejo de errores y respuestas HTTP correctas (202, 400, 401, 409, 503)
-- [ ] Registrar logging detallado de todas las operaciones
+- [x] Manejo de errores y respuestas HTTP correctas (202, 400, 401, 404, 409, 503) via GlobalExceptionHandler
+- [x] Logging de operaciones con @Slf4j
 
 #### Implementación — Configuración y Resiliencia
 
-- [ ] Crear `ParametrosCacheConfig.java` — configurar Caffeine cache: `CacheManager`, `CacheBuilder`, TTL = 24 horas
-- [ ] Crear `ResilienceConfig.java` — configurar Resilience4j: `@CircuitBreaker`, `@Retry` (3 intentos, backoff exponencial 100ms, multiplicador 2)
-- [ ] Configurar propiedades en `application.yml`: `plataforma-core-ohs.url`, `plataforma-core-ohs.timeout`, `resiliencia.circuit-breaker.failure-threshold`, `cache.ttl`
-- [ ] Crear `NotificacionesAdapter.java` (implementación stub de `NotificacionAdministradorPort`) — por ahora, registrar en logs; futuro: integración con email/alertas
+- [x] Actualizado `CacheConfig.java` con 4 nuevas entradas: `parameters-tarifas-incendio` (1000), `parameters-tarifas-cat` (500), `parameters-tarifas-fhm` (10), `parameters-cp-zonas` (100000)
+- [x] Configurados TTLs en `application.yaml` (86400s = 24h) para los 4 caches nuevos
+- [x] Resilience4j ya configurado globalmente bajo instancia `plataforma-core-ohs` — reutilizado por servicios existentes que ingestor delega
 
 #### Implementación — DTOs
 
-- [ ] Crear request DTOs: `CargarTarifasRequest.java` (con campo opcional `origenForzado`)
-- [ ] Crear response DTOs: `TarifaIncendioResponse.java`, `TarifaCATResponse.java`, `TarifaFHMResponse.java`, `CatalogoCPZonasResponse.java`
-- [ ] Crear `IngestStatusResponse.java` (estado de ingestión en progreso)
-- [ ] Crear `ParametrosStatusResponse.java` (estado global de disponibilidad de parámetros)
-- [ ] Aplicar validaciones Bean Validation (`@NotNull`, `@Min`, etc.) en DTOs
+- [x] Crear request DTOs: `CargarTarifasRequest.java` (con campo opcional `origenForzado`)
+- [x] Crear response DTOs: `TarifaIncendioResponse.java`, `TarifaCATResponse.java`, `TarifaFHMResponse.java`, `CatalogoCPZonasResponse.java`
+- [x] Crear `IngestStatusResponse.java` (estado de ingestión en progreso)
+- [x] Crear `ParametrosStatusResponse.java` (estado global de disponibilidad de parámetros)
+- [x] Excepciones nuevas: `ParametroNoDisponibleException` (503) + `IngestEnProgresoException` (409) con handlers en `GlobalExceptionHandler`
 
 ### Backend — Tests
 

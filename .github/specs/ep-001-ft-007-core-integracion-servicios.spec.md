@@ -735,26 +735,26 @@ cache:
 
 #### Tests Backend
 
-- [ ] `test_get_subscribers_returns_200_with_cached_response` — segunda llamada devuelve datos de caché
-- [ ] `test_get_subscribers_service_unavailable_returns_503` — fallback genera HTTP 503
-- [ ] `test_get_agents_returns_200` — happy path agentes
-- [ ] `test_get_business_lines_returns_200` — happy path giros
-- [ ] `test_get_risk_classifications_returns_200` — happy path clasificaciones
-- [ ] `test_get_guarantees_returns_200` — happy path garantías
-- [ ] `test_get_zip_code_valid_returns_200_with_zone` — CP válido con zona de riesgo
-- [ ] `test_get_zip_code_invalid_format_returns_400` — formato inválido → 400 sin llamada externa
-- [ ] `test_get_zip_code_not_found_returns_404` — CP inexistente → 404
-- [ ] `test_get_zip_code_missing_zone_applies_default` — zona faltante → DEFAULT_ZONA aplicado
-- [ ] `test_get_fire_tariffs_returns_200` — happy path tarifas incendio
-- [ ] `test_get_cat_tariff_valid_zone_returns_200` — tarifa CAT para zona existente
-- [ ] `test_get_cat_tariff_not_found_returns_404_no_retry` — 404 en CAT no activa reintento
-- [ ] `test_get_electronic_tariffs_returns_200` — happy path tarifas equipo electrónico
-- [ ] `test_retry_succeeds_on_second_attempt_for_catalogs` — reintento exitoso en 2do intento
-- [ ] `test_retry_exhausted_generates_503` — 3 intentos fallidos → 503 + log CRITICAL
-- [ ] `test_4xx_error_not_retried_for_catalogs` — HTTP 4xx del externo → NO reintento
-- [ ] `test_timeout_5s_triggers_retry` — timeout 5s activa mecanismo de reintento
-- [ ] `test_mapping_drops_record_missing_id` — registro sin id descartado con log WARNING
-- [ ] `test_mock_url_configurable_via_env` — PLATAFORMA_CORE_OHS_URL apunta al mock correctamente
+- [x] `test_get_subscribers_returns_200_with_cached_response` — segunda llamada devuelve datos de caché
+- [x] `test_get_subscribers_service_unavailable_returns_503` — fallback genera HTTP 503
+- [x] `test_get_agents_returns_200` — happy path agentes
+- [x] `test_get_business_lines_returns_200` — happy path giros
+- [x] `test_get_risk_classifications_returns_200` — happy path clasificaciones
+- [x] `test_get_guarantees_returns_200` — happy path garantías
+- [x] `test_get_zip_code_valid_returns_200_with_zone` — CP válido con zona de riesgo
+- [x] `test_get_zip_code_invalid_format_returns_400` — formato inválido → 400 sin llamada externa
+- [x] `test_get_zip_code_not_found_returns_404` — CP inexistente → 404
+- [x] `test_get_zip_code_missing_zone_applies_default` — zona faltante → DEFAULT_ZONA aplicado
+- [x] `test_get_fire_tariffs_returns_200` — happy path tarifas incendio
+- [x] `test_get_cat_tariff_valid_zone_returns_200` — tarifa CAT para zona existente
+- [x] `test_get_cat_tariff_not_found_returns_404_no_retry` — 404 en CAT no activa reintento
+- [x] `test_get_electronic_tariffs_returns_200` — happy path tarifas equipo electrónico
+- [x] `test_retry_succeeds_on_second_attempt_for_catalogs` — reintento exitoso en 2do intento
+- [x] `test_retry_exhausted_generates_503` — 3 intentos fallidos → 503 + log CRITICAL
+- [x] `test_4xx_error_not_retried_for_catalogs` — HTTP 4xx del externo → NO reintento
+- [x] `test_timeout_5s_triggers_retry` — timeout 5s activa mecanismo de reintento
+- [x] `test_mapping_drops_record_missing_id` — registro sin id descartado con log WARNING
+- [x] `test_mock_url_configurable_via_env` — PLATAFORMA_CORE_OHS_URL apunta al mock correctamente
 
 ### Frontend
 

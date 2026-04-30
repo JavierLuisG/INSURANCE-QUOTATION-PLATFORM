@@ -1,0 +1,89 @@
+services:
+
+  # ── MongoDB ────────────────────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7
+    container_name: insurance-mongodb
+    restart: unless-stopped
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGO_INITDB_DATABASE: plataformas_danos
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Plataforma Core OHS (mock API) ─────────────────────────────────────────
+  plataforma-core-ohs:
+    build:
+      context: ./plataforma-core-ohs
+    container_name: insurance-core-ohs
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      MONGODB_URI: mongodb://admin:admin@mongodb:27017/plataforma-core-ohs-mock?authSource=admin
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ── Plataformas Daños Backend (Spring Boot) ────────────────────────────────
+  plataformas-danos-back:
+    build:
+      context: ./plataformas-danos-back
+    container_name: insurance-back
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: 8080
+      MONGODB_HOST: mongodb
+      MONGODB_PORT: 27017
+      MONGODB_DATABASE: plataformas_danos
+      MONGODB_USERNAME: admin
+      MONGODB_PASSWORD: admin
+      MONGODB_AUTH_DATABASE: admin
+      JWT_SECRET: ${JWT_SECRET:-changeme-use-env-var-in-production}
+      PLATAFORMA_CORE_OHS_URL: http://plataforma-core-ohs:3001
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      plataforma-core-ohs:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  # ── Cotizador Daños Web (Next.js) ──────────────────────────────────────────
+  cotizador-danos-web:
+    build:
+      context: ./cotizador-danos-web
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8080
+    container_name: insurance-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+    depends_on:
+      plataformas-danos-back:
+        condition: service_healthy
+
+volumes:
+  mongo_data:

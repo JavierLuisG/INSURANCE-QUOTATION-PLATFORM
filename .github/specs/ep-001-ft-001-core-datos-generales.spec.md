@@ -1,6 +1,6 @@
 ---
 id: SPEC-011
-status: APPROVED
+status: IN_PROGRESS
 feature: ep-001-ft-001-core-datos-generales
 created: 2026-04-29
 updated: 2026-04-29
@@ -537,20 +537,20 @@ CRITERIO-5.4: Fecha inicio igual a fecha fin (vigencia de un día)
 ### Backend
 
 #### Implementación
-- [ ] Crear entidad `Cotizacion.java` en `model/entity/` con `@Document(collection = "cotizaciones")`, todos los campos del modelo, `@Id`, `@Version`, `@Indexed(unique=true)` en folio, `createdAt`/`updatedAt` como `Instant`
-- [ ] Crear `CotizacionRequest.java` (DTO de actualización, campos opcionales, incluye `version`)
-- [ ] Crear `CotizacionResponse.java` (DTO de respuesta, excluye `_id` de MongoDB)
-- [ ] Implementar `CotizacionRepository.java` extendiendo `MongoRepository<Cotizacion, String>` con `Optional<Cotizacion> findByFolio(String folio)`
-- [ ] Implementar `RfcValidator.java` como `@Component` con regex SAT para personas físicas y morales
-- [ ] Implementar `CotizacionService.java` (interfaz) con métodos: `iniciar()`, `obtenerPorFolio(folio)`, `actualizar(folio, request)`
-- [ ] Implementar `CotizacionServiceImpl.java`:
+- [x] Crear entidad `Cotizacion.java` en `model/entity/` con `@Document(collection = "cotizaciones")`, todos los campos del modelo, `@Id`, `@Version`, `@Indexed(unique=true)` en folio, `createdAt`/`updatedAt` como `Instant`
+- [x] Crear `CotizacionRequest.java` (DTO de actualización, campos opcionales, incluye `version`)
+- [x] Crear `CotizacionResponse.java` (DTO de respuesta, excluye `_id` de MongoDB)
+- [x] Implementar `CotizacionRepository.java` extendiendo `MongoRepository<Cotizacion, String>` con `Optional<Cotizacion> findByFolio(String folio)`
+- [x] Implementar `RfcValidator.java` como `@Component` con regex SAT para personas físicas y morales
+- [x] Implementar `CotizacionService.java` (interfaz) con métodos: `iniciar()`, `obtenerPorFolio(folio)`, `actualizar(folio, request)`
+- [x] Implementar `CotizacionServiceImpl.java`:
   - `iniciar()`: llama cliente de Folios con Resilience4j, persiste con `estadoValidacion=INCOMPLETA`
   - `obtenerPorFolio(folio)`: busca en repo, lanza `NotFoundException` si no existe
   - `actualizar(folio, request)`: valida RFC, rango de fechas, IDs de catálogos, aplica versionado optimista
-- [ ] Configurar cliente HTTP para `Plataforma-core-ohs` (Servicio de Folios) con Circuit Breaker `foliosCircuitBreaker` y Retry `foliosRetry` en `application.yml`
-- [ ] Implementar `CotizacionController.java` con endpoints: `POST /api/v1/cotizaciones`, `GET /api/v1/cotizaciones/{folio}`, `PUT /api/v1/cotizaciones/{folio}`
-- [ ] Configurar Spring Security para RBAC: mapear roles JWT a los endpoints de cotizaciones
-- [ ] Registrar módulo de cotizaciones en el contexto de Spring Boot
+- [x] Configurar cliente HTTP para `Plataforma-core-ohs` (Servicio de Folios) con Circuit Breaker `foliosCircuitBreaker` y Retry `foliosRetry` en `application.yml`
+- [x] Implementar `CotizacionController.java` con endpoints: `POST /api/v1/cotizaciones`, `GET /api/v1/cotizaciones/{folio}`, `PUT /api/v1/cotizaciones/{folio}`
+- [x] Configurar Spring Security para RBAC: mapear roles JWT a los endpoints de cotizaciones
+- [x] Registrar módulo de cotizaciones en el contexto de Spring Boot
 
 #### Tests Backend
 - [ ] `CotizacionServiceImplTest` — `iniciar_cuandoServicioFoliosDisponible_creaDocumentoConFolioYEstadoIncompleta`
@@ -577,21 +577,21 @@ CRITERIO-5.4: Fecha inicio igual a fecha fin (vigencia de un día)
 ### Frontend
 
 #### Implementación
-- [ ] Crear `lib/schemas/cotizacion.schema.ts` con Zod: validar RFC (regex SAT), fechas ISO 8601, rango vigencia, campos obligatorios de catálogo
-- [ ] Crear `lib/schemas/datosGenerales.schema.ts` para validación parcial del formulario
-- [ ] Crear `lib/services/cotizacionService.ts` — funciones `iniciarCotizacion`, `getCotizacion`, `actualizarCotizacion` con Axios + token Bearer
-- [ ] Crear `lib/services/catalogoService.ts` — función `getCatalogos(tipo, token)` con manejo de error y estado de carga
-- [ ] Crear `store/cotizacionStore.ts` — Zustand store con campos: `cotizacion`, `loading`, `error`, acciones: `setLoading`, `setCotizacion`, `setError`, `reset`
-- [ ] Crear `hooks/useCotizacion.ts` — orquesta llamadas al service, actualiza store, expone `iniciar()`, `cargar(folio)`, `actualizar(folio, data)`
-- [ ] Crear `hooks/useCatalogos.ts` — carga asíncrona de tiposSeguros, monedas, canalesVenta con estado de loading/error individual
-- [ ] Implementar `components/Cotizador/FolioSearchBar.tsx` — campo texto + botón "Cargar", validación de formato de folio con Zod
-- [ ] Implementar `components/Cotizador/CotizadorHeader.tsx` — muestra folio (read-only) y badge de `estadoValidacion`
-- [ ] Implementar `components/Cotizador/AseguradoFields.tsx` — campos nombre y RFC con validación inline en tiempo real
-- [ ] Implementar `components/Cotizador/ParametrosSelector.tsx` — tres dropdowns con spinner de carga y mensaje de error por catálogo
-- [ ] Implementar `components/Cotizador/VigenciaFields.tsx` — dos DatePickers con validación de rango cruzado
-- [ ] Implementar `components/Cotizador/DatosGeneralesForm.tsx` — integra todos los subcampos, React Hook Form + Zod resolver, botón "Guardar" con estado de loading
-- [ ] Implementar `app/cotizaciones/nueva/page.tsx` — llama `iniciarCotizacion()` al cargar, renderiza `CotizadorHeader` y `DatosGeneralesForm`
-- [ ] Implementar `app/cotizaciones/[folio]/page.tsx` — llama `cargar(folio)` al cargar, renderiza `FolioSearchBar`, `CotizadorHeader` y `DatosGeneralesForm`
+- [x] Crear `lib/schemas/cotizacion.schema.ts` con Zod: validar RFC (regex SAT), fechas ISO 8601, rango vigencia, campos obligatorios de catálogo
+- [x] Crear `lib/schemas/datosGenerales.schema.ts` para validación parcial del formulario
+- [x] Crear `lib/services/cotizacionService.ts` — funciones `iniciarCotizacion`, `getCotizacion`, `actualizarCotizacion` con Axios + token Bearer
+- [x] Crear `lib/services/catalogoService.ts` — función `getCatalogos(tipo, token)` con manejo de error y estado de carga
+- [x] Crear `store/cotizacionStore.ts` — Zustand store con campos: `cotizacion`, `loading`, `error`, acciones: `setLoading`, `setCotizacion`, `setError`, `reset`
+- [x] Crear `hooks/useCotizacion.ts` — orquesta llamadas al service, actualiza store, expone `iniciar()`, `cargar(folio)`, `actualizar(folio, data)`
+- [x] Crear `hooks/useCatalogos.ts` — carga asíncrona de tiposSeguros, monedas, canalesVenta con estado de loading/error individual
+- [x] Implementar `components/Cotizador/FolioSearchBar.tsx` — campo texto + botón "Cargar", validación de formato de folio con Zod
+- [x] Implementar `components/Cotizador/CotizadorHeader.tsx` — muestra folio (read-only) y badge de `estadoValidacion`
+- [x] Implementar `components/Cotizador/AseguradoFields.tsx` — campos nombre y RFC con validación inline en tiempo real
+- [x] Implementar `components/Cotizador/ParametrosSelector.tsx` — tres dropdowns con spinner de carga y mensaje de error por catálogo
+- [x] Implementar `components/Cotizador/VigenciaFields.tsx` — dos DatePickers con validación de rango cruzado
+- [x] Implementar `components/Cotizador/DatosGeneralesForm.tsx` — integra todos los subcampos, React Hook Form + Zod resolver, botón "Guardar" con estado de loading
+- [x] Implementar `app/cotizaciones/nueva/page.tsx` — llama `iniciarCotizacion()` al cargar, renderiza `CotizadorHeader` y `DatosGeneralesForm`
+- [x] Implementar `app/cotizaciones/[folio]/page.tsx` — llama `cargar(folio)` al cargar, renderiza `FolioSearchBar`, `CotizadorHeader` y `DatosGeneralesForm`
 - [ ] Proteger rutas con middleware de autenticación JWT y verificación de roles
 
 #### Tests Frontend

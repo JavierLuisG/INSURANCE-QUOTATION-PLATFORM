@@ -2,6 +2,8 @@ package com.plataformas_danos_back.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -101,5 +103,35 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining(", "));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("message", message, "code", "INVALID_REQUEST"));
+    }
+
+    @ExceptionHandler(CotizacionNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleCotizacionNotFound(CotizacionNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", ex.getMessage(), "code", "COTIZACION_NOT_FOUND"));
+    }
+
+    @ExceptionHandler(CotizacionConflictException.class)
+    public ResponseEntity<Map<String, String>> handleCotizacionConflict(CotizacionConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("message", ex.getMessage(), "code", "COTIZACION_VERSION_CONFLICT"));
+    }
+
+    @ExceptionHandler(FolioServiceUnavailableException.class)
+    public ResponseEntity<Map<String, String>> handleFolioServiceUnavailable(FolioServiceUnavailableException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("message", ex.getMessage(), "code", "FOLIO_SERVICE_UNAVAILABLE"));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleAccessDenied(AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("message", "Acceso denegado: No tiene permisos para esta acción", "code", "ACCESS_DENIED"));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Map<String, String>> handleAuthentication(AuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", "Token ausente o expirado", "code", "UNAUTHORIZED"));
     }
 }

@@ -60,9 +60,23 @@ resilience4j:
         sliding-window-size: 10
         failure-rate-threshold: 50
         wait-duration-in-open-state: 10s
+      foliosCircuitBreaker:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        register-health-indicator: true
   retry:
     instances:
       plataforma-core-ohs:
+        max-attempts: 3
+        wait-duration: 1000ms
+        exponential-backoff-multiplier: 2.0
+        retry-exceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - org.springframework.web.client.ResourceAccessException
+        ignore-exceptions:
+          - org.springframework.web.client.HttpClientErrorException
+      foliosRetry:
         max-attempts: 3
         wait-duration: 1000ms
         exponential-backoff-multiplier: 2.0

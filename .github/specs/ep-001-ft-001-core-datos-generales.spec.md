@@ -553,24 +553,24 @@ CRITERIO-5.4: Fecha inicio igual a fecha fin (vigencia de un día)
 - [x] Registrar módulo de cotizaciones en el contexto de Spring Boot
 
 #### Tests Backend
-- [ ] `CotizacionServiceImplTest` — `iniciar_cuandoServicioFoliosDisponible_creaDocumentoConFolioYEstadoIncompleta`
-- [ ] `CotizacionServiceImplTest` — `iniciar_cuandoServicioFoliosFalla_lanzaServiceUnavailableException`
-- [ ] `CotizacionServiceImplTest` — `actualizar_cuandoRfcInvalido_lanzaValidationException`
-- [ ] `CotizacionServiceImplTest` — `actualizar_cuandoFechaFinAnteriorAInicio_lanzaValidationException`
-- [ ] `CotizacionServiceImplTest` — `obtenerPorFolio_cuandoFolioNoExiste_lanzaNotFoundException`
-- [ ] `CotizacionServiceImplTest` — `actualizar_cuandoConflictoDeVersion_lanzaOptimisticLockException`
-- [ ] `RfcValidatorTest` — `validar_rfcPersonaFisicaValido_retornaTrue`
-- [ ] `RfcValidatorTest` — `validar_rfcPersonaMoralValido_retornaTrue`
-- [ ] `RfcValidatorTest` — `validar_rfcMalFormado_retornaFalse`
-- [ ] `CotizacionRepositoryTest` (Testcontainers MongoDB) — `findByFolio_cuandoExiste_retornaDocumento`
-- [ ] `CotizacionControllerTest` — `POST_/api/v1/cotizaciones_retorna201_conFolioAsignado`
-- [ ] `CotizacionControllerTest` — `POST_/api/v1/cotizaciones_sinToken_retorna401`
-- [ ] `CotizacionControllerTest` — `GET_/api/v1/cotizaciones/{folio}_folioExistente_retorna200`
-- [ ] `CotizacionControllerTest` — `GET_/api/v1/cotizaciones/{folio}_folioInexistente_retorna404`
-- [ ] `CotizacionControllerTest` — `PUT_/api/v1/cotizaciones/{folio}_datosValidos_retorna200`
-- [ ] `CotizacionControllerTest` — `PUT_/api/v1/cotizaciones/{folio}_rfcInvalido_retorna400`
-- [ ] `CotizacionControllerTest` — `PUT_/api/v1/cotizaciones/{folio}_conflictoVersion_retorna409`
-- [ ] `CotizacionControllerTest` — `PUT_/api/v1/cotizaciones/{folio}_sinRolEdicion_retorna403`
+- [x] `CotizacionServiceImplTest` — `iniciar_cuandoServicioFoliosDisponible_creaDocumentoConFolioYEstadoIncompleta`
+- [x] `CotizacionServiceImplTest` — `iniciar_cuandoServicioFoliosFalla_lanzaServiceUnavailableException`
+- [x] `CotizacionServiceImplTest` — `actualizar_cuandoRfcInvalido_lanzaValidationException`
+- [x] `CotizacionServiceImplTest` — `actualizar_cuandoFechaFinAnteriorAInicio_lanzaValidationException`
+- [x] `CotizacionServiceImplTest` — `obtenerPorFolio_cuandoFolioNoExiste_lanzaNotFoundException`
+- [x] `CotizacionServiceImplTest` — `actualizar_cuandoConflictoDeVersion_lanzaOptimisticLockException`
+- [x] `RfcValidatorTest` — `validar_rfcPersonaFisicaValido_retornaTrue`
+- [x] `RfcValidatorTest` — `validar_rfcPersonaMoralValido_retornaTrue`
+- [x] `RfcValidatorTest` — `validar_rfcMalFormado_retornaFalse`
+- [x] `CotizacionRepositoryTest` (Testcontainers MongoDB) — `findByFolio_cuandoExiste_retornaDocumento`
+- [x] `CotizacionControllerTest` — `POST_/api/v1/cotizaciones_retorna201_conFolioAsignado`
+- [x] `CotizacionControllerTest` — `POST_/api/v1/cotizaciones_sinToken_retorna401`
+- [x] `CotizacionControllerTest` — `GET_/api/v1/cotizaciones/{folio}_folioExistente_retorna200`
+- [x] `CotizacionControllerTest` — `GET_/api/v1/cotizaciones/{folio}_folioInexistente_retorna404`
+- [x] `CotizacionControllerTest` — `PUT_/api/v1/cotizaciones/{folio}_datosValidos_retorna200`
+- [x] `CotizacionControllerTest` — `PUT_/api/v1/cotizaciones/{folio}_rfcInvalido_retorna400`
+- [x] `CotizacionControllerTest` — `PUT_/api/v1/cotizaciones/{folio}_conflictoVersion_retorna409`
+- [x] `CotizacionControllerTest` — `PUT_/api/v1/cotizaciones/{folio}_sinRolEdicion_retorna403`
 
 ---
 
@@ -595,26 +595,26 @@ CRITERIO-5.4: Fecha inicio igual a fecha fin (vigencia de un día)
 - [ ] Proteger rutas con middleware de autenticación JWT y verificación de roles
 
 #### Tests Frontend
-- [ ] `FolioSearchBar llama onLoad con folio válido al presionar Cargar`
-- [ ] `FolioSearchBar muestra error de formato para folio mal formado`
-- [ ] `CotizadorHeader muestra el folio y el estado de la cotización correctamente`
-- [ ] `CotizadorHeader campo folio está deshabilitado`
-- [ ] `AseguradoFields acepta RFC válido sin mostrar error`
-- [ ] `AseguradoFields muestra error inline para RFC inválido`
-- [ ] `AseguradoFields limita nombre a 255 caracteres`
-- [ ] `ParametrosSelector muestra spinner mientras carga catálogos`
-- [ ] `ParametrosSelector muestra opciones del catálogo al cargar correctamente`
-- [ ] `ParametrosSelector muestra error cuando el servicio de catálogos falla`
-- [ ] `VigenciaFields muestra error cuando fechaFin es anterior a fechaInicio`
-- [ ] `VigenciaFields acepta fechas iguales (vigencia de un día)`
-- [ ] `DatosGeneralesForm envía datos correctos al servicio al hacer clic en Guardar`
-- [ ] `DatosGeneralesForm no envía si hay errores de validación`
-- [ ] `useCotizacion iniciar devuelve cotización con folio asignado`
-- [ ] `useCotizacion cargar actualiza el store con los datos de la cotización`
-- [ ] `useCotizacion cargar establece error para folio inexistente`
-- [ ] `useCotizacion actualizar maneja conflicto de versión (409) correctamente`
-- [ ] `useCatalogos carga los tres catálogos al montar`
-- [ ] `useCatalogos maneja error de catálogo individualmente`
+- [x] `FolioSearchBar llama onLoad con folio válido al presionar Cargar`
+- [x] `FolioSearchBar muestra error de formato para folio mal formado`
+- [x] `CotizadorHeader muestra el folio y el estado de la cotización correctamente`
+- [x] `CotizadorHeader campo folio está deshabilitado`
+- [x] `AseguradoFields acepta RFC válido sin mostrar error`
+- [x] `AseguradoFields muestra error inline para RFC inválido`
+- [x] `AseguradoFields limita nombre a 255 caracteres`
+- [x] `ParametrosSelector muestra spinner mientras carga catálogos`
+- [x] `ParametrosSelector muestra opciones del catálogo al cargar correctamente`
+- [x] `ParametrosSelector muestra error cuando el servicio de catálogos falla`
+- [x] `VigenciaFields muestra error cuando fechaFin es anterior a fechaInicio`
+- [x] `VigenciaFields acepta fechas iguales (vigencia de un día)`
+- [x] `DatosGeneralesForm envía datos correctos al servicio al hacer clic en Guardar`
+- [x] `DatosGeneralesForm no envía si hay errores de validación`
+- [x] `useCotizacion iniciar devuelve cotización con folio asignado`
+- [x] `useCotizacion cargar actualiza el store con los datos de la cotización`
+- [x] `useCotizacion cargar establece error para folio inexistente`
+- [x] `useCotizacion actualizar maneja conflicto de versión (409) correctamente`
+- [x] `useCatalogos carga los tres catálogos al montar`
+- [x] `useCatalogos maneja error de catálogo individualmente`
 
 ---
 

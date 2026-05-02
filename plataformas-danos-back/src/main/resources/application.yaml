@@ -28,6 +28,7 @@ cors:
 jwt:
   secret: ${JWT_SECRET:changeme-use-env-var-in-production}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  expiration: ${JWT_EXPIRATION:86400}
 
 plataforma-core-ohs:
   url: ${PLATAFORMA_CORE_OHS_URL:http://localhost:3001}

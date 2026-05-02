@@ -1,0 +1,15 @@
+package com.plataformas_danos_back.model.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+@Builder
+public class LoginResponse {
+
+    private String token;
+
+    private long expiresIn;
+}

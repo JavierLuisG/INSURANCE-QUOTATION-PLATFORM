@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
 
+import com.plataformas_danos_back.exception.UserAlreadyExistsException;
+import com.plataformas_danos_back.exception.InvalidCredentialsException;
+import com.plataformas_danos_back.exception.InvalidRoleException;
+
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -133,5 +137,23 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleAuthentication(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("message", "Token ausente o expirado", "code", "UNAUTHORIZED"));
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleUserAlreadyExists(UserAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("message", ex.getMessage(), "code", "USER_ALREADY_EXISTS"));
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidCredentials(InvalidCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", ex.getMessage(), "code", "INVALID_CREDENTIALS"));
+    }
+
+    @ExceptionHandler(InvalidRoleException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidRole(InvalidRoleException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("message", ex.getMessage(), "code", "INVALID_ROLE"));
     }
 }

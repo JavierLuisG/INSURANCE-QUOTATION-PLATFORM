@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useCotizacionStore } from '@/store/cotizacionStore';
+import { useAuthStore } from '@/store/authStore';
 import {
   iniciarCotizacion,
   getCotizacion,
@@ -92,10 +93,7 @@ export function useCotizacion() {
 // ---------------------------------------------------------------------------
 
 function getToken(): string {
-  if (typeof window !== 'undefined') {
-    return sessionStorage.getItem('token') ?? '';
-  }
-  return '';
+  return useAuthStore.getState().token ?? '';
 }
 
 function resolveErrorMessage(err: unknown, fallback: string): string {

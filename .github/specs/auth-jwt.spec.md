@@ -425,18 +425,18 @@ Firma: HMAC-SHA256 con clave de jwt.secret (desde application.properties / env v
 - [ ] Crear `AuthEntryPointHandler` para respuestas 401 estructuradas (`{ message, code }`)
 
 #### Tests Backend
-- [ ] `AuthServiceTest_register_success` — happy path registro
-- [ ] `AuthServiceTest_register_duplicate_email_throws_conflict` — email duplicado → 409
-- [ ] `AuthServiceTest_register_invalid_role_throws_bad_request` — rol inválido → 400
-- [ ] `AuthServiceTest_login_success_returns_token` — credenciales válidas → token JWT
-- [ ] `AuthServiceTest_login_wrong_password_throws_unauthorized` — contraseña incorrecta → 401
-- [ ] `AuthServiceTest_login_user_not_found_throws_unauthorized` — email no encontrado → 401
-- [ ] `JwtServiceTest_generateToken_contains_expected_claims` — valida sub, roles, exp
-- [ ] `JwtServiceTest_token_is_valid_for_24_hours` — exp = iat + 86400
-- [ ] `AuthControllerTest_post_register_returns_201` — endpoint registro
-- [ ] `AuthControllerTest_post_register_returns_409_duplicate` — email duplicado
-- [ ] `AuthControllerTest_post_login_returns_200_with_token` — endpoint login exitoso
-- [ ] `AuthControllerTest_post_login_returns_401_invalid_credentials` — credenciales inválidas
+- [x] `AuthServiceTest_register_success` — happy path registro
+- [x] `AuthServiceTest_register_duplicate_email_throws_conflict` — email duplicado → 409
+- [x] `AuthServiceTest_register_invalid_role_throws_bad_request` — rol inválido → 400
+- [x] `AuthServiceTest_login_success_returns_token` — credenciales válidas → token JWT
+- [x] `AuthServiceTest_login_wrong_password_throws_unauthorized` — contraseña incorrecta → 401
+- [x] `AuthServiceTest_login_user_not_found_throws_unauthorized` — email no encontrado → 401
+- [x] `JwtServiceTest_generateToken_contains_expected_claims` — valida sub, roles, exp
+- [x] `JwtServiceTest_token_is_valid_for_24_hours` — exp = iat + 86400
+- [x] `AuthControllerTest_post_register_returns_201` — endpoint registro
+- [x] `AuthControllerTest_post_register_returns_409_duplicate` — email duplicado
+- [x] `AuthControllerTest_post_login_returns_200_with_token` — endpoint login exitoso
+- [x] `AuthControllerTest_post_login_returns_401_invalid_credentials` — credenciales inválidas
 - [ ] `AuthControllerTest_protected_endpoint_returns_401_no_token` — endpoint protegido sin token
 
 ### Frontend
@@ -454,14 +454,14 @@ Firma: HMAC-SHA256 con clave de jwt.secret (desde application.properties / env v
 - [x] Crear `src/middleware.ts` — proteger rutas `/cotizaciones/**` redirigiendo a `/login` sin token
 
 #### Tests Frontend
-- [ ] `LoginForm renders email and password inputs`
-- [ ] `LoginForm shows validation error for empty fields`
-- [ ] `LoginForm calls loginUser service on valid submit`
-- [ ] `RegisterForm shows role selector with valid options`
-- [ ] `RegisterForm shows password complexity error`
-- [ ] `useAuth login stores token in authStore on success`
-- [ ] `useAuth login returns error on invalid credentials`
-- [ ] `useAuth logout clears authStore`
+- [x] `LoginForm renders email and password inputs`
+- [x] `LoginForm shows validation error for empty fields`
+- [x] `LoginForm calls loginUser service on valid submit`
+- [x] `RegisterForm shows role selector with valid options`
+- [x] `RegisterForm shows password complexity error`
+- [x] `useAuth login stores token in authStore on success`
+- [x] `useAuth login returns error on invalid credentials`
+- [x] `useAuth logout clears authStore`
 - [ ] `authStore setAuth updates token, role and email`
 - [ ] `authStore clearAuth resets to null values`
 - [ ] `authService loginUser calls POST /api/v1/auth/login`

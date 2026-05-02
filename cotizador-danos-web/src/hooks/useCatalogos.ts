@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuthStore } from '@/store/authStore';
 import { getCatalogos } from '@/lib/services/catalogoService';
 import type { CatalogoItem } from '@/lib/schemas/cotizacion.schema';
 
@@ -30,9 +31,7 @@ export function useCatalogos(): CatalogosState {
       setLoading(true);
       setError(null);
 
-      const token = typeof window !== 'undefined'
-        ? (sessionStorage.getItem('token') ?? '')
-        : '';
+      const token = useAuthStore.getState().token ?? '';
 
       const [tiposResult, monedasResult, canalesResult] = await Promise.allSettled([
         getCatalogos('tipoSeguro', token),
